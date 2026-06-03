@@ -2124,11 +2124,6 @@ document.getElementById('buy-doublejump').addEventListener('click', () => game.b
 document.getElementById('buy-float').addEventListener('click', () => game.buyUpgrade('float'));
 document.getElementById('buy-heart').addEventListener('click', () => game.buyHeart());
 
-// Respawn manual trigger
-document.getElementById('btn-respawn').addEventListener('click', () => {
-  respawnAtCheckpoint();
-});
-
 // Sound Toggle click
 document.getElementById('audio-control').addEventListener('click', () => {
   const isMuted = audio.toggleMute();
