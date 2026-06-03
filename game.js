@@ -938,7 +938,11 @@ const camera = {
   update(playerY, dt) {
     // Keep player in the middle of canvas view vertically
     const idealY = playerY - V_HEIGHT * 0.65;
-    this.targetY = idealY;
+    
+    // Only scroll camera target upwards (more negative)
+    if (idealY < this.targetY) {
+      this.targetY = idealY;
+    }
 
     // Camera cannot scroll down past the ground (camera.y cannot be greater than 0)
     if (this.targetY > 0) this.targetY = 0;
@@ -1262,6 +1266,7 @@ function respawnAtCheckpoint() {
   player.jumpCount = 0;
   player.highestY = game.lastCheckpointY; // Reset highestY to checkpoint height
   camera.y = player.y - V_HEIGHT * 0.65; // snap camera close
+  camera.targetY = camera.y;
 
   audio.playFall();
 
@@ -1942,9 +1947,9 @@ function gameLoop(timestamp) {
 
       // 6. Check if player fell below starting area and update altitude height
       // If player falls below -120 (start ground platform top is -100), check they wrap or fall to bottom
-      if (player.y > 100) {
-        // Fell off bottom! Loop them back to ground base or checkpoint
-        const fallMeters = (player.y - player.highestY) / 14.5;
+      if (player.y > camera.y + V_HEIGHT || player.y > 100) {
+        // Fell off bottom/viewport! Calculate fall meters to the checkpoint they will respawn at
+        const fallMeters = (game.lastCheckpointY - player.highestY) / 14.5;
         if (fallMeters >= 50) {
           triggerFallDamage(fallMeters);
         }
