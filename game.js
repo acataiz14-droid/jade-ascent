@@ -862,214 +862,13 @@ const player = {
     // Centered pivot for drawing
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
-    
-    ctx.translate(cx, cy);
-    ctx.scale(this.squashX, this.squashY);
-    
-    // Tilt character based on velocity & run cycle
-    let rot = this.vx * 0.02;
-    if (this.runCycle > 0) {
-      rot += Math.sin(this.runCycle) * 0.08;
-    }
-    ctx.rotate(rot);
-
-    // Dynamic Character Cosmetics
-    let limbColor = '#1c1e22';
-    let bodyColor = '#ffffff';
-    let sashColor = '#c8102e';
-    let buckleColor = '#ffd700';
-    let headbandColor = '#c8102e';
-    let earColor = '#1c1e22';
-    let eyePatchColor = '#1c1e22';
-
-    const char = game.selectedCharacter;
-    if (char === 1) { // วายุ (Wind Seeker) - Jade Green Leaf theme
-      limbColor = '#133520';
-      bodyColor = '#f0fdf4';
-      sashColor = '#12d58a';
-      buckleColor = '#ffffff';
-      headbandColor = '#12d58a';
-      earColor = '#133520';
-      eyePatchColor = '#133520';
-    } else if (char === 2) { // โชคดี (Fortune Sage) - Imperial Gold Scholar theme
-      limbColor = '#2b2203';
-      bodyColor = '#fffbeb';
-      sashColor = '#eab308';
-      buckleColor = '#ffffff';
-      headbandColor = '#eab308';
-      earColor = '#2b2203';
-      eyePatchColor = '#2b2203';
-    } else if (char === 3) { // อายุยืน (Longevity Master) - Elder Sage Peach Pink theme
-      limbColor = '#4b5563'; // Grey instead of black for aged master
-      bodyColor = '#fff1f2';
-      sashColor = '#fda4af';
-      buckleColor = '#eab308';
-      headbandColor = '#fda4af';
-      earColor = '#4b5563';
-      eyePatchColor = '#4b5563';
-    } else if (char === 4) { // กายแกร่ง (Iron Body) - Steel Slate/Iron Armor theme
-      limbColor = '#374151';
-      bodyColor = '#e5e7eb';
-      sashColor = '#4b5563';
-      buckleColor = '#9ca3af';
-      headbandColor = '#4b5563';
-      earColor = '#374151';
-      eyePatchColor = '#374151';
-    } else if (char === 5) { // เมฆา (Cloud Master) - Cloud Sky Blue theme
-      limbColor = '#0f172a';
-      bodyColor = '#f0f9ff';
-      sashColor = '#06b6d4';
-      buckleColor = '#ffffff';
-      headbandColor = '#06b6d4';
-      earColor = '#0f172a';
-      eyePatchColor = '#0f172a';
-    }
-
     const size = this.width / 2;
     
-    // Face direction scaling
-    if (this.facingLeft) {
-      ctx.scale(-1, 1);
-    }
-
-    // 1. Limbs (behind body)
-    ctx.fillStyle = limbColor;
-    // Back Arm
-    ctx.beginPath();
-    ctx.arc(-size + 6, size - 14, 7, 0, Math.PI * 2);
-    ctx.fill();
-    // Back Foot
-    ctx.beginPath();
-    ctx.arc(-size + 8, size - 3, 8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 2. Main body/belly
-    ctx.fillStyle = bodyColor;
-    ctx.beginPath();
-    ctx.arc(0, 0, size, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = limbColor;
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-
-    // Extra details on body based on character
-    if (char === 1) {
-      // Leaf decoration on body
-      ctx.fillStyle = '#12d58a';
-      ctx.beginPath();
-      ctx.ellipse(-size * 0.3, size * 0.3, 4, 6, Math.PI/4, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (char === 2) {
-      // Coin/Gold symbol on body
-      ctx.fillStyle = '#eab308';
-      ctx.beginPath();
-      ctx.arc(0, 0, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = bodyColor;
-      ctx.fillRect(-1.5, -1.5, 3, 3);
-    } else if (char === 3) {
-      // Rosy peach cheeks
-      ctx.fillStyle = 'rgba(251, 113, 133, 0.4)';
-      ctx.beginPath();
-      ctx.arc(-size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
-      ctx.arc(size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
-      ctx.fill();
-    } else if (char === 4) {
-      // Armor chestplate stripe
-      ctx.strokeStyle = '#9ca3af';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(-size * 0.7, 0);
-      ctx.lineTo(size * 0.7, 0);
-      ctx.stroke();
-    } else if (char === 5) {
-      // Cloud swirl on belly
-      ctx.fillStyle = '#bae6fd';
-      ctx.beginPath();
-      ctx.arc(-size * 0.2, size * 0.3, 4, 0, Math.PI * 2);
-      ctx.arc(0, size * 0.3, 5, 0, Math.PI * 2);
-      ctx.arc(size * 0.2, size * 0.3, 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // 3. Monk Sash (belt)
-    ctx.fillStyle = sashColor;
-    ctx.fillRect(-size + 1, size - 13, size * 2 - 2, 7);
-    ctx.fillStyle = buckleColor; 
-    ctx.fillRect(-4, size - 13, 8, 7);
-
-    // 4. Chest / shoulders ring
-    ctx.fillStyle = limbColor;
-    ctx.beginPath();
-    ctx.arc(0, -size + 14, size * 0.95, Math.PI, 2 * Math.PI);
-    ctx.fill();
-
-    // 5. Panda Head
-    ctx.fillStyle = bodyColor;
-    ctx.beginPath();
-    ctx.arc(0, -size + 10, size * 0.85, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = limbColor;
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-
-    // 6. Ears
-    ctx.fillStyle = earColor;
-    // Left ear
-    ctx.beginPath();
-    ctx.arc(-size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
-    ctx.fill();
-    // Right ear
-    ctx.beginPath();
-    ctx.arc(size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 7. Eye Patches
-    ctx.fillStyle = eyePatchColor;
-    // Left eye patch
-    ctx.beginPath();
-    ctx.arc(-size * 0.3, -size + 10, 5, 0, Math.PI * 2);
-    ctx.fill();
-    // Right eye patch
-    ctx.beginPath();
-    ctx.arc(size * 0.3, -size + 10, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 8. White inner eyes
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(-size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
-    ctx.arc(size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 9. Nose
-    ctx.fillStyle = limbColor;
-    ctx.beginPath();
-    ctx.ellipse(0, -size + 14, 3, 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 10. Front limbs (in front of body)
-    ctx.fillStyle = limbColor;
-    // Front Foot
-    ctx.beginPath();
-    ctx.arc(size - 8, size - 3, 8, 0, Math.PI * 2);
-    ctx.fill();
-    // Front Arm
-    ctx.beginPath();
-    ctx.arc(size - 6, size - 14, 7, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 11. Headband (with tail flowing behind)
-    ctx.fillStyle = headbandColor;
-    ctx.fillRect(-size * 0.8, -size - 4, size * 1.6, 6);
-    // Flowing tails
-    ctx.beginPath();
-    ctx.moveTo(-size * 0.7, -size - 1);
-    ctx.lineTo(-size * 0.7 - 12, -size + 5);
-    ctx.lineTo(-size * 0.7, -size + 3);
-    ctx.closePath();
-    ctx.fill();
-
+    ctx.translate(cx, cy);
+    
+    // Draw the main character model using shared drawCharacterModel
+    drawCharacterModel(ctx, game.selectedCharacter, size, this.facingLeft, this.runCycle, this.vx, this.squashX, this.squashY);
+    
     // 12. Draw Jump Cooldown / Ready Ring
     if (game.selectedCharacter === 1) {
       const maxCd = this.getTripleJumpCooldownMax();
@@ -2131,6 +1930,589 @@ document.getElementById('audio-control').addEventListener('click', () => {
 });
 
 // Dynamic drawing of characters on selection screen canvases
+
+// Shared character drawing helper to render different animal/kid graphics
+function drawCharacterModel(ctx, charId, size, facingLeft, runCycle, vx, squashX = 1, squashY = 1) {
+  ctx.save();
+  ctx.scale(squashX, squashY);
+  
+  // Tilt based on velocity & running animation
+  let rot = vx * 0.02;
+  if (runCycle > 0) {
+    rot += Math.sin(runCycle) * 0.08;
+  }
+  ctx.rotate(rot);
+
+  // Flip horizontally if facing left
+  if (facingLeft) {
+    ctx.scale(-1, 1);
+  }
+
+  if (charId === 1) { // 1. ตั๊กแตน (Grasshopper) - Green Leaf theme
+    const bodyColor = '#22c55e'; // Green
+    const limbColor = '#15803d'; // Dark green
+    const eyeColor = '#0f172a';  // Dark slate eyes
+    const wingColor = 'rgba(187, 247, 208, 0.6)'; // Translucent wing green
+    
+    // Draw Wings (behind body)
+    ctx.fillStyle = wingColor;
+    ctx.beginPath();
+    ctx.ellipse(-size * 0.8, -size * 0.2, size * 0.4, size * 1.1, Math.PI / 8, 0, Math.PI * 2);
+    ctx.ellipse(-size * 0.6, -size * 0.1, size * 0.3, size * 0.9, Math.PI / 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#86efac';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Draw Back Foot/Arm
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(-size + 6, size - 14, 6, 0, Math.PI * 2);
+    ctx.arc(-size + 8, size - 3, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw Body
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Leaf badge decoration on body
+    ctx.fillStyle = '#12d58a';
+    ctx.beginPath();
+    ctx.ellipse(-size * 0.3, size * 0.3, 4, 6, Math.PI/4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sash (belt)
+    ctx.fillStyle = '#12d58a';
+    ctx.fillRect(-size + 1, size - 13, size * 2 - 2, 7);
+    ctx.fillStyle = '#ffffff'; 
+    ctx.fillRect(-4, size - 13, 8, 7);
+
+    // Neck ring
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 14, size * 0.95, Math.PI, 2 * Math.PI);
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 10, size * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Antennae (หนวดตั๊กแตน)
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(-size * 0.4, -size - 2, 12, Math.PI, Math.PI * 1.55);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(size * 0.4, -size - 2, 12, Math.PI * 1.45, Math.PI * 2);
+    ctx.stroke();
+
+    // Giant bug eyes
+    ctx.fillStyle = eyeColor;
+    ctx.beginPath();
+    ctx.ellipse(-size * 0.35, -size + 9, 6, 8, -Math.PI / 10, 0, Math.PI * 2);
+    ctx.ellipse(size * 0.35, -size + 9, 6, 8, Math.PI / 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye highlight
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-size * 0.28, -size + 7, 2, 0, Math.PI * 2);
+    ctx.arc(size * 0.28, -size + 7, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Front limbs
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(size - 8, size - 3, 7, 0, Math.PI * 2);
+    ctx.arc(size - 6, size - 14, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Headband
+    ctx.fillStyle = '#12d58a';
+    ctx.fillRect(-size * 0.8, -size - 4, size * 1.6, 6);
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.7, -size - 1);
+    ctx.lineTo(-size * 0.7 - 12, -size + 5);
+    ctx.lineTo(-size * 0.7, -size + 3);
+    ctx.closePath();
+    ctx.fill();
+
+  } else if (charId === 2) { // 2. เด็กเนิร์ด (Nerd Kid) - Scholar Glasses theme
+    const skinColor = '#fed7aa'; // Light Peach skin
+    const hairColor = '#451a03'; // Brown hair
+    const clothesColor = '#1d4ed8'; // Royal Blue shirt
+    const limbColor = '#1c1e22';
+    
+    // Draw Back Foot/Arm
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(-size + 6, size - 14, 7, 0, Math.PI * 2);
+    ctx.arc(-size + 8, size - 3, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw Body (Shirt)
+    ctx.fillStyle = clothesColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Gold Coin icon on shirt
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-1.5, -1.5, 3, 3);
+
+    // Sash
+    ctx.fillStyle = '#eab308';
+    ctx.fillRect(-size + 1, size - 13, size * 2 - 2, 7);
+    ctx.fillStyle = '#ffffff'; 
+    ctx.fillRect(-4, size - 13, 8, 7);
+
+    // Neck
+    ctx.fillStyle = skinColor;
+    ctx.fillRect(-size * 0.3, -size + 8, size * 0.6, 8);
+
+    // Head (Face)
+    ctx.fillStyle = skinColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 10, size * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Hair (หน้าม้าและผมด้านข้าง)
+    ctx.fillStyle = hairColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 6, size * 0.85, Math.PI, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillRect(-size * 0.8, -size - 2, size * 1.6, 7);
+
+    // Big Nerd Glasses
+    ctx.strokeStyle = '#1e293b'; // Black frame
+    ctx.lineWidth = 3;
+    ctx.fillStyle = '#ffffff';
+    
+    // Left Lens
+    ctx.beginPath();
+    ctx.arc(-size * 0.35, -size + 11, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Right Lens
+    ctx.beginPath();
+    ctx.arc(size * 0.35, -size + 11, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Glasses bridge connection
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.1, -size + 11);
+    ctx.lineTo(size * 0.1, -size + 11);
+    ctx.stroke();
+
+    // Small eyes inside glasses
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(-size * 0.35, -size + 11, 2, 0, Math.PI * 2);
+    ctx.arc(size * 0.35, -size + 11, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rosy cheeks
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+    ctx.beginPath();
+    ctx.arc(-size * 0.55, -size + 17, 3, 0, Math.PI * 2);
+    ctx.arc(size * 0.55, -size + 17, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Front limbs
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(size - 8, size - 3, 8, 0, Math.PI * 2);
+    ctx.arc(size - 6, size - 14, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Headband
+    ctx.fillStyle = '#eab308';
+    ctx.fillRect(-size * 0.8, -size - 6, size * 1.6, 6);
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.7, -size - 3);
+    ctx.lineTo(-size * 0.7 - 12, -size + 3);
+    ctx.lineTo(-size * 0.7, -size + 1);
+    ctx.closePath();
+    ctx.fill();
+
+  } else if (charId === 3) { // 3. เต่า (Turtle) - Brown Shell & Green body
+    const shellColor = '#78350f'; // Brown shell
+    const shellPatternColor = '#b45309'; // Lighter brown patterns
+    const skinColor = '#84cc16'; // Lime/Olive Green
+    const limbColor = '#4d7c0f'; // Dark green
+    
+    // Draw Turtle Shell (Behind body)
+    ctx.fillStyle = shellColor;
+    ctx.beginPath();
+    ctx.arc(-size * 0.3, 0, size * 1.05, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Draw Shell patterns (Hexagon crosslines)
+    ctx.strokeStyle = shellPatternColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(-size * 0.3, 0, size * 0.7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.3, -size * 0.7);
+    ctx.lineTo(-size * 0.3, size * 0.7);
+    ctx.moveTo(-size * 1.0, 0);
+    ctx.lineTo(size * 0.4, 0);
+    ctx.stroke();
+
+    // Draw Back Foot/Arm
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(-size + 6, size - 14, 8, 0, Math.PI * 2);
+    ctx.arc(-size + 8, size - 3, 9, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw Body (Green chest)
+    ctx.fillStyle = skinColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, size * 0.9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Rosy cheeks
+    ctx.fillStyle = 'rgba(251, 113, 133, 0.4)';
+    ctx.beginPath();
+    ctx.arc(-size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
+    ctx.arc(size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
+    ctx.fill();
+
+    // Sash
+    ctx.fillStyle = '#fda4af';
+    ctx.fillRect(-size + 3, size - 13, size * 1.8, 7);
+    ctx.fillStyle = '#eab308'; 
+    ctx.fillRect(-4, size - 13, 8, 7);
+
+    // Neck
+    ctx.fillStyle = skinColor;
+    ctx.fillRect(-size * 0.25, -size + 6, size * 0.5, 8);
+
+    // Head
+    ctx.fillStyle = skinColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 10, size * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Eyes
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(-size * 0.25, -size + 10, 3, 0, Math.PI * 2);
+    ctx.arc(size * 0.25, -size + 10, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White reflections
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-size * 0.23, -size + 9, 1, 0, Math.PI * 2);
+    ctx.arc(size * 0.27, -size + 9, 1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Small happy mouth
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, -size + 14, 3, 0, Math.PI);
+    ctx.stroke();
+
+    // Front limbs
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(size - 8, size - 3, 9, 0, Math.PI * 2);
+    ctx.arc(size - 6, size - 14, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Headband (Pink)
+    ctx.fillStyle = '#fda4af';
+    ctx.fillRect(-size * 0.75, -size - 4, size * 1.5, 6);
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.65, -size - 1);
+    ctx.lineTo(-size * 0.65 - 12, -size + 5);
+    ctx.lineTo(-size * 0.65, -size + 3);
+    ctx.closePath();
+    ctx.fill();
+
+  } else if (charId === 4) { // 4. แพนด้าตัวเดิม (Panda Original)
+    const bodyColor = '#ffffff';
+    const limbColor = '#1f2937'; // Slate Black
+    const sashColor = '#dc2626'; // Crimson
+    const buckleColor = '#eab308'; // Gold
+    const headbandColor = '#dc2626';
+    
+    // Draw limbs (behind)
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(-size + 6, size - 14, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-size + 8, size - 3, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Main body
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Armor chestplate stripe
+    ctx.strokeStyle = '#9ca3af';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.7, 0);
+    ctx.lineTo(size * 0.7, 0);
+    ctx.stroke();
+
+    // Sash
+    ctx.fillStyle = sashColor;
+    ctx.fillRect(-size + 1, size - 13, size * 2 - 2, 7);
+    ctx.fillStyle = buckleColor; 
+    ctx.fillRect(-4, size - 13, 8, 7);
+
+    // Chest / shoulders ring
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 14, size * 0.95, Math.PI, 2 * Math.PI);
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 10, size * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Ears
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(-size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye Patches
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(-size * 0.3, -size + 10, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(size * 0.3, -size + 10, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Inner eyes
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
+    ctx.arc(size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Nose
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.ellipse(0, -size + 14, 3, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Front limbs
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(size - 8, size - 3, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(size - 6, size - 14, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Headband
+    ctx.fillStyle = headbandColor;
+    ctx.fillRect(-size * 0.8, -size - 4, size * 1.6, 6);
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.7, -size - 1);
+    ctx.lineTo(-size * 0.7 - 12, -size + 5);
+    ctx.lineTo(-size * 0.7, -size + 3);
+    ctx.closePath();
+    ctx.fill();
+
+  } else if (charId === 5) { // 5. ลิง (Monkey) - Golden Brown & Cloud details
+    const bodyColor = '#d97706'; // Golden Brown monkey body
+    const faceColor = '#ffedd5'; // Light peach/cream face
+    const limbColor = '#78350f'; // Dark Brown limbs
+    const sashColor = '#06b6d4'; // Cyan
+    const headbandColor = '#06b6d4';
+    
+    // Draw Monkey Tail
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(-size * 1.0, size * 0.2, 10, Math.PI * 0.5, Math.PI * 1.8);
+    ctx.stroke();
+
+    // Draw limbs (behind)
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(-size + 6, size - 14, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-size + 8, size - 3, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Main body
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Belly patch
+    ctx.fillStyle = faceColor;
+    ctx.beginPath();
+    ctx.arc(0, size * 0.3, size * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cloud swirl on belly
+    ctx.fillStyle = '#bae6fd';
+    ctx.beginPath();
+    ctx.arc(-size * 0.2, size * 0.3, 4, 0, Math.PI * 2);
+    ctx.arc(0, size * 0.3, 5, 0, Math.PI * 2);
+    ctx.arc(size * 0.2, size * 0.3, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sash
+    ctx.fillStyle = sashColor;
+    ctx.fillRect(-size + 1, size - 13, size * 2 - 2, 7);
+    ctx.fillStyle = '#ffffff'; 
+    ctx.fillRect(-4, size - 13, 8, 7);
+
+    // Neck ring
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 14, size * 0.95, Math.PI, 2 * Math.PI);
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 10, size * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Monkey Face Mask (peach heart shape)
+    ctx.fillStyle = faceColor;
+    ctx.beginPath();
+    ctx.arc(-size * 0.2, -size + 8, size * 0.35, 0, Math.PI * 2);
+    ctx.arc(size * 0.2, -size + 8, size * 0.35, 0, Math.PI * 2);
+    ctx.arc(0, -size + 13, size * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Large ears at the sides of the head
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(-size * 0.8, -size + 10, 8, 0, Math.PI * 2);
+    ctx.arc(size * 0.8, -size + 10, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    
+    // Inner ear
+    ctx.fillStyle = faceColor;
+    ctx.beginPath();
+    ctx.arc(-size * 0.8, -size + 10, 5, 0, Math.PI * 2);
+    ctx.arc(size * 0.8, -size + 10, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Monkey Eyes
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(-size * 0.22, -size + 9, 3, 0, Math.PI * 2);
+    ctx.arc(size * 0.22, -size + 9, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Reflections
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-size * 0.2, -size + 8, 1, 0, Math.PI * 2);
+    ctx.arc(size * 0.24, -size + 8, 1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Nose & mouth
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(0, -size + 13, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, -size + 15, 3, 0.1 * Math.PI, 0.9 * Math.PI);
+    ctx.stroke();
+
+    // Front limbs
+    ctx.fillStyle = limbColor;
+    ctx.beginPath();
+    ctx.arc(size - 8, size - 3, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(size - 6, size - 14, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Headband
+    ctx.fillStyle = headbandColor;
+    ctx.fillRect(-size * 0.8, -size - 4, size * 1.6, 6);
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.7, -size - 1);
+    ctx.lineTo(-size * 0.7 - 12, -size + 5);
+    ctx.lineTo(-size * 0.7, -size + 3);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+
 function drawCharacterOnCanvas(canvasId, charId) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
@@ -2144,186 +2526,9 @@ function drawCharacterOnCanvas(canvasId, charId) {
   
   ctx.translate(cx, cy);
   
-  // Set up colors based on character ID
-  let limbColor = '#1c1e22';
-  let bodyColor = '#ffffff';
-  let sashColor = '#c8102e';
-  let buckleColor = '#ffd700';
-  let headbandColor = '#c8102e';
-  let earColor = '#1c1e22';
-  let eyePatchColor = '#1c1e22';
-
-  if (charId === 1) { // วายุ (Wind Seeker)
-    limbColor = '#133520';
-    bodyColor = '#f0fdf4';
-    sashColor = '#12d58a';
-    buckleColor = '#ffffff';
-    headbandColor = '#12d58a';
-    earColor = '#133520';
-    eyePatchColor = '#133520';
-  } else if (charId === 2) { // โชคดี (Fortune Sage)
-    limbColor = '#2b2203';
-    bodyColor = '#fffbeb';
-    sashColor = '#eab308';
-    buckleColor = '#ffffff';
-    headbandColor = '#eab308';
-    earColor = '#2b2203';
-    eyePatchColor = '#2b2203';
-  } else if (charId === 3) { // อายุยืน (Longevity Master)
-    limbColor = '#4b5563';
-    bodyColor = '#fff1f2';
-    sashColor = '#fda4af';
-    buckleColor = '#eab308';
-    headbandColor = '#fda4af';
-    earColor = '#4b5563';
-    eyePatchColor = '#4b5563';
-  } else if (charId === 4) { // กายแกร่ง (Iron Body)
-    limbColor = '#374151';
-    bodyColor = '#e5e7eb';
-    sashColor = '#4b5563';
-    buckleColor = '#9ca3af';
-    headbandColor = '#4b5563';
-    earColor = '#374151';
-    eyePatchColor = '#374151';
-  } else if (charId === 5) { // เมฆา (Cloud Master)
-    limbColor = '#0f172a';
-    bodyColor = '#f0f9ff';
-    sashColor = '#06b6d4';
-    buckleColor = '#ffffff';
-    headbandColor = '#06b6d4';
-    earColor = '#0f172a';
-    eyePatchColor = '#0f172a';
-  }
-
-  // Draw limbs (behind)
-  ctx.fillStyle = limbColor;
-  ctx.beginPath();
-  ctx.arc(-size + 6, size - 14, 7, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(-size + 8, size - 3, 8, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Main body
-  ctx.fillStyle = bodyColor;
-  ctx.beginPath();
-  ctx.arc(0, 0, size, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = limbColor;
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  // Body details
-  if (charId === 1) {
-    // Leaf decoration on body
-    ctx.fillStyle = '#12d58a';
-    ctx.beginPath();
-    ctx.ellipse(-size * 0.3, size * 0.3, 4, 6, Math.PI/4, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (charId === 2) {
-    // Coin/Gold symbol on body
-    ctx.fillStyle = '#eab308';
-    ctx.beginPath();
-    ctx.arc(0, 0, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = bodyColor;
-    ctx.fillRect(-1.5, -1.5, 3, 3);
-  } else if (charId === 3) {
-    // Rosy peach cheeks
-    ctx.fillStyle = 'rgba(251, 113, 133, 0.4)';
-    ctx.beginPath();
-    ctx.arc(-size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
-    ctx.arc(size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
-    ctx.fill();
-  } else if (charId === 4) {
-    // Armor chestplate stripe
-    ctx.strokeStyle = '#9ca3af';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-size * 0.7, 0);
-    ctx.lineTo(size * 0.7, 0);
-    ctx.stroke();
-  } else if (charId === 5) {
-    // Cloud swirl on belly
-    ctx.fillStyle = '#bae6fd';
-    ctx.beginPath();
-    ctx.arc(-size * 0.2, size * 0.3, 4, 0, Math.PI * 2);
-    ctx.arc(0, size * 0.3, 5, 0, Math.PI * 2);
-    ctx.arc(size * 0.2, size * 0.3, 3, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Sash
-  ctx.fillStyle = sashColor;
-  ctx.fillRect(-size + 1, size - 13, size * 2 - 2, 7);
-  ctx.fillStyle = buckleColor; 
-  ctx.fillRect(-4, size - 13, 8, 7);
-
-  // Chest / shoulders ring
-  ctx.fillStyle = limbColor;
-  ctx.beginPath();
-  ctx.arc(0, -size + 14, size * 0.95, Math.PI, 2 * Math.PI);
-  ctx.fill();
-
-  // Head
-  ctx.fillStyle = bodyColor;
-  ctx.beginPath();
-  ctx.arc(0, -size + 10, size * 0.85, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = limbColor;
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  // Ears
-  ctx.fillStyle = earColor;
-  ctx.beginPath();
-  ctx.arc(-size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Eye Patches
-  ctx.fillStyle = eyePatchColor;
-  ctx.beginPath();
-  ctx.arc(-size * 0.3, -size + 10, 5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(size * 0.3, -size + 10, 5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Inner eyes
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.arc(-size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
-  ctx.arc(size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Nose
-  ctx.fillStyle = limbColor;
-  ctx.beginPath();
-  ctx.ellipse(0, -size + 14, 3, 2, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Front limbs
-  ctx.fillStyle = limbColor;
-  ctx.beginPath();
-  ctx.arc(size - 8, size - 3, 8, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(size - 6, size - 14, 7, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Headband
-  ctx.fillStyle = headbandColor;
-  ctx.fillRect(-size * 0.8, -size - 4, size * 1.6, 6);
-  ctx.beginPath();
-  ctx.moveTo(-size * 0.7, -size - 1);
-  ctx.lineTo(-size * 0.7 - 12, -size + 5);
-  ctx.lineTo(-size * 0.7, -size + 3);
-  ctx.closePath();
-  ctx.fill();
-
+  // Call the shared model drawing helper (no velocity/squash for preview)
+  drawCharacterModel(ctx, charId, size, false, 0, 0, 1, 1);
+  
   ctx.restore();
 }
 
