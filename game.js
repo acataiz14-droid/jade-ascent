@@ -756,10 +756,13 @@ const player = {
         );
       }
     } else if (this.jumpCount < this.maxJumps) {
-      if (this.doubleJumpCooldownTimer <= 0) {
+      // Character 1 (วายุ) bypasses double jump cooldown
+      if (this.doubleJumpCooldownTimer <= 0 || game.selectedCharacter === 1) {
         this.vy = this.getJumpVel() * 0.95; // Slightly lower double jump
         this.jumpCount++;
-        this.doubleJumpCooldownTimer = this.getDoubleJumpCooldownMax();
+        if (game.selectedCharacter !== 1) {
+          this.doubleJumpCooldownTimer = this.getDoubleJumpCooldownMax();
+        }
         this.squashX = 0.8;
         this.squashY = 1.25;
         audio.playJump();
