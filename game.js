@@ -1675,6 +1675,25 @@ function updateHUD() {
   }
   document.getElementById('health-val').innerText = heartsStr;
 
+  // Update Triple Jump Cooldown HUD for Character 1 (วายุ)
+  const cooldownCard = document.getElementById('hud-cooldown-card');
+  if (cooldownCard) {
+    if (game.selectedCharacter === 1) {
+      cooldownCard.classList.remove('hidden');
+      if (player.tripleJumpCooldownTimer > 0) {
+        document.getElementById('cooldown-val').innerText = `${player.tripleJumpCooldownTimer.toFixed(1)}s`;
+        cooldownCard.classList.add('cooldown-active');
+        cooldownCard.classList.remove('cooldown-ready');
+      } else {
+        document.getElementById('cooldown-val').innerText = 'READY';
+        cooldownCard.classList.add('cooldown-ready');
+        cooldownCard.classList.remove('cooldown-active');
+      }
+    } else {
+      cooldownCard.classList.add('hidden');
+    }
+  }
+
   // Altitude goes from 0m to targetMeters based on level vertical climb
   const targetMeters = LEVELS_CONFIG[game.currentLevel].heightMeters;
   let realHeight = Math.floor(Math.abs(player.y) / 14.5);

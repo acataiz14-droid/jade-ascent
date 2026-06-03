@@ -982,6 +982,25 @@ kbd {
   border-color: var(--gold);
 }
 
+/* --- HUD COOLDOWN COUNTER --- */
+.cooldown-counter.cooldown-ready {
+  border-color: rgba(18, 213, 138, 0.4);
+  box-shadow: 0 0 10px rgba(18, 213, 138, 0.2);
+}
+
+.cooldown-counter.cooldown-active {
+  border-color: rgba(255, 215, 0, 0.25);
+}
+
+.cooldown-ready #cooldown-val {
+  color: var(--jade-light) !important;
+  text-shadow: 0 0 8px var(--jade-glow);
+}
+
+.cooldown-active #cooldown-val {
+  color: var(--gold) !important;
+}
+
 .damage-flash {
   animation: screenRedFlash 0.3s ease-out;
 }
