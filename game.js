@@ -1189,8 +1189,7 @@ function handleCollisions(dt) {
           otherCp.active = false;
         }
         cp.active = true;
-        game.lastCheckpointX = cp.x + cp.width / 2 - player.width / 2;
-        game.lastCheckpointY = cp.y + cp.height - player.height - 5;
+        // Do not update checkpoint coordinates mid-level anymore so player restarts stage on respawn
         audio.playGong();
 
         // Gong flash particles
@@ -1254,21 +1253,39 @@ function triggerFallDamage(meters) {
   }
 }
 
-// Respawn at Checkpoint
+// Respawn / Restart current stage from beginning
 function respawnAtCheckpoint() {
   if (game.state !== 'PLAYING') return;
 
+  // Reset stage checkpoint coordinates to the starting platform
+  game.lastCheckpointX = V_WIDTH / 2 - 20;
+  game.lastCheckpointY = -140;
+
+  // Reset player state to starting platform and full health (5 hearts)
   player.x = game.lastCheckpointX;
   player.y = game.lastCheckpointY;
   player.vx = 0;
   player.vy = 0;
   player.grounded = true;
   player.jumpCount = 0;
-  player.highestY = game.lastCheckpointY; // Reset highestY to checkpoint height
-  camera.y = player.y - V_HEIGHT * 0.65; // snap camera close
+  player.highestY = game.lastCheckpointY;
+
+  // Reset question milestones and state for the current stage
+  game.lastQuestionClearedHeight = 0;
+  game.currentQuestionMilestone = 0;
+  game.isQuestionActive = false;
+
+  // Regenerate level platforms, shards, and gongs
+  generateLevel();
+
+  // Snap camera
+  camera.y = player.y - V_HEIGHT * 0.65;
   camera.targetY = camera.y;
 
   audio.playFall();
+
+  // Update HUD values
+  updateHUD();
 
   // Teleport particle pop
   for (let i = 0; i < 20; i++) {
