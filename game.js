@@ -545,6 +545,18 @@ class GameState {
     updateShopUI();
     return true;
   }
+
+  buyHeart() {
+    const cost = 15;
+    if (this.jadeCount < cost || player.health >= player.maxHealth) return false;
+    
+    this.jadeCount -= cost;
+    player.health++;
+    
+    updateHUD();
+    updateShopUI();
+    return true;
+  }
 }
 
 const game = new GameState();
@@ -1989,6 +2001,26 @@ function updateShopUI() {
       }
     }
   });
+
+  // Update Buy Heart button state
+  const heartBtn = document.getElementById('buy-heart');
+  if (heartBtn) {
+    const cost = 15;
+    const costValSpan = heartBtn.querySelector('.cost-val');
+    if (player.health >= player.maxHealth) {
+      costValSpan.innerText = 'FULL';
+      heartBtn.querySelector('.cost-currency').style.display = 'none';
+      heartBtn.classList.add('disabled');
+    } else {
+      costValSpan.innerText = cost;
+      heartBtn.querySelector('.cost-currency').style.display = 'inline';
+      if (game.jadeCount >= cost) {
+        heartBtn.classList.remove('disabled');
+      } else {
+        heartBtn.classList.add('disabled');
+      }
+    }
+  }
 }
 
 // Input Handlers
@@ -2090,6 +2122,7 @@ document.getElementById('buy-jump').addEventListener('click', () => game.buyUpgr
 document.getElementById('buy-speed').addEventListener('click', () => game.buyUpgrade('speed'));
 document.getElementById('buy-doublejump').addEventListener('click', () => game.buyUpgrade('doublejump'));
 document.getElementById('buy-float').addEventListener('click', () => game.buyUpgrade('float'));
+document.getElementById('buy-heart').addEventListener('click', () => game.buyHeart());
 
 // Respawn manual trigger
 document.getElementById('btn-respawn').addEventListener('click', () => {
