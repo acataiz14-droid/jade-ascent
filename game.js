@@ -526,7 +526,11 @@ class GameState {
   getCost(type) {
     const config = this.upgradeCosts[type];
     const lvl = this.upgrades[type];
-    if (lvl >= config.max) return 'MAX';
+    let max = config.max;
+    if (type === 'jump' && this.selectedCharacter === 1) {
+      max = 3;
+    }
+    if (lvl >= max) return 'MAX';
     return Math.floor(config.base * Math.pow(config.mult, lvl));
   }
 
@@ -1636,7 +1640,12 @@ function checkQuestionAnswer(selectedIndex, clickedBtn) {
   if (selectedIndex === currentQuestionObj.a) {
     // Correct Answer
     clickedBtn.classList.add('correct');
-    const jadeReward = (game.selectedCharacter === 2) ? 10 : 5;
+    let jadeReward = 5;
+    if (game.selectedCharacter === 2) {
+      jadeReward = 10;
+    } else if (game.selectedCharacter === 1) {
+      jadeReward = 3;
+    }
     feedbackEl.innerText = `ถูกต้อง! 🎉 ได้รับ +${jadeReward} หยกเขียว`;
     feedbackEl.className = "feedback-text feedback-correct";
     
@@ -1743,12 +1752,19 @@ function updateShopUI() {
   
   categories.forEach(cat => {
     const lvlSpan = document.getElementById(`lvl-${cat}`);
+    const maxSpan = document.getElementById(`max-${cat}`);
     const costBtn = document.getElementById(`buy-${cat}`);
     
     if (lvlSpan && costBtn) {
       const lvl = game.upgrades[cat];
-      const max = game.upgradeCosts[cat].max;
+      let max = game.upgradeCosts[cat].max;
+      if (cat === 'jump' && game.selectedCharacter === 1) {
+        max = 3;
+      }
       
+      if (maxSpan) {
+        maxSpan.innerText = max;
+      }
       lvlSpan.innerText = lvl;
       
       const cost = game.getCost(cat);
