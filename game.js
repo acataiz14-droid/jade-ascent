@@ -326,13 +326,24 @@ class Checkpoint {
       ctx.fillRect(this.x + this.width - 26, this.y + 25, 14, this.height - 25);
       ctx.strokeRect(this.x + this.width - 26, this.y + 25, 14, this.height - 25);
       
-      // Pillar stone bases
-      ctx.fillStyle = '#e0e0e0';
-      ctx.strokeStyle = '#8b7355';
-      ctx.fillRect(this.x + 8, this.y + this.height - 8, 22, 8);
-      ctx.strokeRect(this.x + 8, this.y + this.height - 8, 22, 8);
-      ctx.fillRect(this.x + this.width - 30, this.y + this.height - 8, 22, 8);
-      ctx.strokeRect(this.x + this.width - 30, this.y + this.height - 8, 22, 8);
+      // Rainbow Base Plate (ฐานสีรุ้งเรืองแสงใต้เสาซุ้มประตูเส้นชัย)
+      const rainbowGrad = ctx.createLinearGradient(this.x, 0, this.x + this.width, 0);
+      rainbowGrad.addColorStop(0, '#ff0000');   // Red
+      rainbowGrad.addColorStop(0.17, '#ff7f00'); // Orange
+      rainbowGrad.addColorStop(0.33, '#ffff00'); // Yellow
+      rainbowGrad.addColorStop(0.5, '#00ff00');  // Green
+      rainbowGrad.addColorStop(0.67, '#0000ff'); // Blue
+      rainbowGrad.addColorStop(0.83, '#4b0082'); // Indigo
+      rainbowGrad.addColorStop(1, '#9400d3');    // Violet
+      
+      ctx.fillStyle = rainbowGrad;
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      ctx.rect(this.x - 8, this.y + this.height - 12, this.width + 16, 12);
+      ctx.fill();
+      ctx.stroke();
 
       // 2. Transom Beam (Crimson crossbeam)
       ctx.fillStyle = '#c8102e';
@@ -947,8 +958,7 @@ class SeededRandom {
 function generateLevel() {
   const levelData = LEVELS_CONFIG[game.currentLevel];
   PEAK_HEIGHT = levelData.heightMeters * 14.5;
-  const finishHeight = PEAK_HEIGHT * 0.9;
-  TOTAL_HEIGHT = finishHeight + 500;
+  TOTAL_HEIGHT = PEAK_HEIGHT + 500;
 
   game.platforms = [];
   game.shards = [];
@@ -964,24 +974,24 @@ function generateLevel() {
   let currentY = -220;
   const platformHeight = 22;
 
-  // Track height zones (generate platforms up to 90% of level height)
-  while (Math.abs(currentY) < finishHeight - 400) {
+  // Track height zones (generate platforms all the way to the peak at 100% height)
+  while (Math.abs(currentY) < PEAK_HEIGHT - 300) {
     const relativeHeight = Math.abs(currentY);
-    const zone = relativeHeight < finishHeight * 0.33 ? 1 
-               : relativeHeight < finishHeight * 0.66 ? 2 
+    const zone = relativeHeight < PEAK_HEIGHT * 0.33 ? 1 
+               : relativeHeight < PEAK_HEIGHT * 0.66 ? 2 
                : 3;
 
     // Platform widths shrink as we climb (harder)
-    let pWidth = 140 - (relativeHeight / finishHeight) * 65;
+    let pWidth = 140 - (relativeHeight / PEAK_HEIGHT) * 65;
     if (pWidth < 65) pWidth = 65;
 
     // Gap ranges increase as we climb
     let minGapX = 50;
-    let maxGapX = 220 + (relativeHeight / finishHeight) * 120;
+    let maxGapX = 220 + (relativeHeight / PEAK_HEIGHT) * 120;
     if (maxGapX > 380) maxGapX = 380;
 
     let minGapY = 70;
-    let maxGapY = 110 + (relativeHeight / finishHeight) * 60;
+    let maxGapY = 110 + (relativeHeight / PEAK_HEIGHT) * 60;
     if (maxGapY > 175) maxGapY = 175;
 
     // Determine platform type based on zone
@@ -1034,13 +1044,21 @@ function generateLevel() {
     currentY -= stepY;
   }
 
-  // 3. Summit Celestial Palace Platform (Final Peak at 90% of level height)
+  // 3. Special Finish Line Platform and Gate at 90% of level height (with Rainbow base)
+  const finishHeight = PEAK_HEIGHT * 0.9;
+  const finishPlatform = new Platform(V_WIDTH / 2 - 80, -finishHeight, 160, 22, 'normal');
+  game.platforms.push(finishPlatform);
+
+  // Magnificent Celestial Gate (Finish Line)
+  game.checkpoints.push(new Checkpoint(V_WIDTH / 2 - 60, -finishHeight - 110, true));
+
+  // 4. Summit Celestial Palace Platform (Final Peak at 100% height)
   const summitWidth = V_WIDTH - 200;
-  const summitPlatform = new Platform(100, -finishHeight, summitWidth, 60, 'normal');
+  const summitPlatform = new Platform(100, -PEAK_HEIGHT, summitWidth, 60, 'normal');
   game.platforms.push(summitPlatform);
 
-  // Magnificent Celestial Gate (Finish Line) on the peak
-  game.checkpoints.push(new Checkpoint(V_WIDTH / 2 - 60, -finishHeight - 110, true));
+  // Standard checkpoint gong at the very summit
+  game.checkpoints.push(new Checkpoint(V_WIDTH / 2 - 30, -PEAK_HEIGHT - 70, false));
 }
 
 // Check collision between AABB boxes
@@ -1273,8 +1291,7 @@ function startNextLevel() {
   // Update PEAK_HEIGHT & TOTAL_HEIGHT for the new level
   const levelData = LEVELS_CONFIG[game.currentLevel];
   PEAK_HEIGHT = levelData.heightMeters * 14.5;
-  const finishHeight = PEAK_HEIGHT * 0.9;
-  TOTAL_HEIGHT = finishHeight + 500;
+  TOTAL_HEIGHT = PEAK_HEIGHT + 500;
   
   // Reset checkpoint coords to start pad of the new level
   game.lastCheckpointX = V_WIDTH / 2 - 20;
