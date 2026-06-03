@@ -520,6 +520,7 @@ class GameState {
     this.currentQuestionMilestone = 0;  // The milestone currently being attempted
     this.askedQuestionIds = new Set();  // Set of asked question IDs to prevent repetition
     this.isQuestionActive = false;
+    this.selectedCharacter = 1; // 1 to 5
   }
 
   getCost(type) {
@@ -575,11 +576,13 @@ const player = {
     this.vx = 0;
     this.vy = 0;
     this.grounded = false;
-    this.health = 5;
-    this.maxHealth = 5;
+    // Character 3 (อายุยืน) starts with 10 max health, others have 5
+    this.maxHealth = (game.selectedCharacter === 3) ? 10 : 5;
+    this.health = this.maxHealth;
     this.highestY = -140;
     this.jumpCount = 0;
-    this.maxJumps = 2;
+    // Character 1 (วายุ) gets 3 jumps, others have 2
+    this.maxJumps = (game.selectedCharacter === 1) ? 3 : 2;
     this.doubleJumpCooldownTimer = 0;
     this.squashX = 1;
     this.squashY = 1;
@@ -1131,8 +1134,8 @@ function handleCollisions(dt) {
           }
         }
         
-        // Crumbly Cloud triggers timer
-        if (platform.type === 'crumbly') {
+        // Crumbly Cloud triggers timer (unless player is Character 5, Cloud Master)
+        if (platform.type === 'crumbly' && game.selectedCharacter !== 5) {
           if (platform.crumbleTimer === 0) {
             platform.crumbleTimer = 0.001; // trigger
           }
@@ -1208,6 +1211,9 @@ function handleCollisions(dt) {
 
 // Trigger Fall Damage when player falls >= 50m
 function triggerFallDamage(meters) {
+  // Character 4 (กายแกร่ง) is immune to fall damage
+  if (game.selectedCharacter === 4) return;
+
   player.health--;
   audio.playDamage();
   updateHUD();
@@ -1537,10 +1543,11 @@ function checkQuestionAnswer(selectedIndex, clickedBtn) {
   if (selectedIndex === currentQuestionObj.a) {
     // Correct Answer
     clickedBtn.classList.add('correct');
-    feedbackEl.innerText = "ถูกต้อง! 🎉 ได้รับ +5 หยกเขียว";
+    const jadeReward = (game.selectedCharacter === 2) ? 10 : 5;
+    feedbackEl.innerText = `ถูกต้อง! 🎉 ได้รับ +${jadeReward} หยกเขียว`;
     feedbackEl.className = "feedback-text feedback-correct";
     
-    game.jadeCount += 5;
+    game.jadeCount += jadeReward;
     audio.playCollect();
     updateHUD();
     
@@ -1782,10 +1789,29 @@ document.getElementById('audio-control').addEventListener('click', () => {
 });
 
 // Init buttons
-document.getElementById('btn-start').addEventListener('click', startGame);
+document.getElementById('btn-start').addEventListener('click', () => {
+  document.getElementById('main-menu').classList.add('hidden');
+  document.getElementById('char-select-screen').classList.remove('hidden');
+});
+
+// Character Selection Setup
+document.querySelectorAll('.btn-select-char').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const charId = parseInt(btn.getAttribute('data-char'));
+    game.selectedCharacter = charId;
+    
+    document.getElementById('char-select-screen').classList.add('hidden');
+    startGame();
+  });
+});
+
 document.getElementById('btn-restart').addEventListener('click', restartGame);
 document.getElementById('btn-next-level').addEventListener('click', startNextLevel);
-document.getElementById('btn-game-over-restart').addEventListener('click', startGame);
+
+document.getElementById('btn-game-over-restart').addEventListener('click', () => {
+  document.getElementById('game-over-screen').classList.add('hidden');
+  document.getElementById('char-select-screen').classList.remove('hidden');
+});
 
 
 // --- PARALLAX BACKGROUND RENDER ---
