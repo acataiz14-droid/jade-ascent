@@ -393,7 +393,8 @@ class GameState {
     this.lastCheckpointY = -140; // Default: start pad top
     
     this.shopOpen = false;
-    this.questionPassed30m = false;
+    this.lastQuestionClearedHeight = 0; // The highest 50m milestone cleared
+    this.currentQuestionMilestone = 0;  // The milestone currently being attempted
     this.isQuestionActive = false;
   }
 
@@ -1094,8 +1095,9 @@ function startGame() {
   game.lastCheckpointX = V_WIDTH / 2 - 20;
   game.lastCheckpointY = -140;
 
-  // Reset 30m question flags
-  game.questionPassed30m = false;
+  // Reset question flags
+  game.lastQuestionClearedHeight = 0;
+  game.currentQuestionMilestone = 0;
   game.isQuestionActive = false;
   document.getElementById('question-modal').classList.add('hidden');
 
@@ -1183,9 +1185,16 @@ const CHINESE_QUESTIONS = [
 
 let currentQuestionObj = null;
 
-function triggerQuestion30m() {
+function triggerQuestion(milestone) {
   game.isQuestionActive = true;
+  game.currentQuestionMilestone = milestone;
   document.getElementById('question-modal').classList.remove('hidden');
+  
+  // Set subtitle/description with the current milestone
+  const questionSubtitle = document.querySelector('#question-card .question-subtitle');
+  if (questionSubtitle) {
+    questionSubtitle.innerText = `ตอบคำถามที่ระดับความสูง ${milestone} เมตร เพื่อผ่านขึ้นสู่ดินแดนถัดไป!`;
+  }
   
   // Pick random question
   const randIdx = Math.floor(Math.random() * CHINESE_QUESTIONS.length);
@@ -1227,7 +1236,7 @@ function checkQuestionAnswer(selectedIndex, clickedBtn) {
     
     // Resume and close modal after 1.5 seconds
     setTimeout(() => {
-      game.questionPassed30m = true;
+      game.lastQuestionClearedHeight = game.currentQuestionMilestone;
       game.isQuestionActive = false;
       document.getElementById('question-modal').classList.add('hidden');
     }, 1500);
@@ -1259,7 +1268,7 @@ function checkQuestionAnswer(selectedIndex, clickedBtn) {
         respawnAtCheckpoint();
       } else {
         // Pick another question and display
-        triggerQuestion30m();
+        triggerQuestion(game.currentQuestionMilestone);
       }
     }, 1800);
   }
@@ -1631,9 +1640,10 @@ function gameLoop(timestamp) {
       
       updateHUD();
 
-      // Trigger 30m Chinese Question Gate
-      if (game.altitude >= 30 && !game.questionPassed30m) {
-        triggerQuestion30m();
+      // Trigger Chinese Question Gate every 50m
+      const targetMilestone = game.lastQuestionClearedHeight + 50;
+      if (game.altitude >= targetMilestone) {
+        triggerQuestion(targetMilestone);
       }
     }
 
