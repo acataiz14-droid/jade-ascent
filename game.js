@@ -1991,10 +1991,214 @@ document.getElementById('audio-control').addEventListener('click', () => {
   document.querySelector('.audio-icon').innerText = isMuted ? '🔇' : '🔊';
 });
 
+// Dynamic drawing of characters on selection screen canvases
+function drawCharacterOnCanvas(canvasId, charId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  ctx.save();
+  const size = 25; // fixed size for character preview
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2 + 10; // offset down a bit for headband space
+  
+  ctx.translate(cx, cy);
+  
+  // Set up colors based on character ID
+  let limbColor = '#1c1e22';
+  let bodyColor = '#ffffff';
+  let sashColor = '#c8102e';
+  let buckleColor = '#ffd700';
+  let headbandColor = '#c8102e';
+  let earColor = '#1c1e22';
+  let eyePatchColor = '#1c1e22';
+
+  if (charId === 1) { // วายุ (Wind Seeker)
+    limbColor = '#133520';
+    bodyColor = '#f0fdf4';
+    sashColor = '#12d58a';
+    buckleColor = '#ffffff';
+    headbandColor = '#12d58a';
+    earColor = '#133520';
+    eyePatchColor = '#133520';
+  } else if (charId === 2) { // โชคดี (Fortune Sage)
+    limbColor = '#2b2203';
+    bodyColor = '#fffbeb';
+    sashColor = '#eab308';
+    buckleColor = '#ffffff';
+    headbandColor = '#eab308';
+    earColor = '#2b2203';
+    eyePatchColor = '#2b2203';
+  } else if (charId === 3) { // อายุยืน (Longevity Master)
+    limbColor = '#4b5563';
+    bodyColor = '#fff1f2';
+    sashColor = '#fda4af';
+    buckleColor = '#eab308';
+    headbandColor = '#fda4af';
+    earColor = '#4b5563';
+    eyePatchColor = '#4b5563';
+  } else if (charId === 4) { // กายแกร่ง (Iron Body)
+    limbColor = '#374151';
+    bodyColor = '#e5e7eb';
+    sashColor = '#4b5563';
+    buckleColor = '#9ca3af';
+    headbandColor = '#4b5563';
+    earColor = '#374151';
+    eyePatchColor = '#374151';
+  } else if (charId === 5) { // เมฆา (Cloud Master)
+    limbColor = '#0f172a';
+    bodyColor = '#f0f9ff';
+    sashColor = '#06b6d4';
+    buckleColor = '#ffffff';
+    headbandColor = '#06b6d4';
+    earColor = '#0f172a';
+    eyePatchColor = '#0f172a';
+  }
+
+  // Draw limbs (behind)
+  ctx.fillStyle = limbColor;
+  ctx.beginPath();
+  ctx.arc(-size + 6, size - 14, 7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-size + 8, size - 3, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Main body
+  ctx.fillStyle = bodyColor;
+  ctx.beginPath();
+  ctx.arc(0, 0, size, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = limbColor;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Body details
+  if (charId === 1) {
+    // Leaf decoration on body
+    ctx.fillStyle = '#12d58a';
+    ctx.beginPath();
+    ctx.ellipse(-size * 0.3, size * 0.3, 4, 6, Math.PI/4, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (charId === 2) {
+    // Coin/Gold symbol on body
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(-1.5, -1.5, 3, 3);
+  } else if (charId === 3) {
+    // Rosy peach cheeks
+    ctx.fillStyle = 'rgba(251, 113, 133, 0.4)';
+    ctx.beginPath();
+    ctx.arc(-size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
+    ctx.arc(size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
+    ctx.fill();
+  } else if (charId === 4) {
+    // Armor chestplate stripe
+    ctx.strokeStyle = '#9ca3af';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.7, 0);
+    ctx.lineTo(size * 0.7, 0);
+    ctx.stroke();
+  } else if (charId === 5) {
+    // Cloud swirl on belly
+    ctx.fillStyle = '#bae6fd';
+    ctx.beginPath();
+    ctx.arc(-size * 0.2, size * 0.3, 4, 0, Math.PI * 2);
+    ctx.arc(0, size * 0.3, 5, 0, Math.PI * 2);
+    ctx.arc(size * 0.2, size * 0.3, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Sash
+  ctx.fillStyle = sashColor;
+  ctx.fillRect(-size + 1, size - 13, size * 2 - 2, 7);
+  ctx.fillStyle = buckleColor; 
+  ctx.fillRect(-4, size - 13, 8, 7);
+
+  // Chest / shoulders ring
+  ctx.fillStyle = limbColor;
+  ctx.beginPath();
+  ctx.arc(0, -size + 14, size * 0.95, Math.PI, 2 * Math.PI);
+  ctx.fill();
+
+  // Head
+  ctx.fillStyle = bodyColor;
+  ctx.beginPath();
+  ctx.arc(0, -size + 10, size * 0.85, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = limbColor;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Ears
+  ctx.fillStyle = earColor;
+  ctx.beginPath();
+  ctx.arc(-size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eye Patches
+  ctx.fillStyle = eyePatchColor;
+  ctx.beginPath();
+  ctx.arc(-size * 0.3, -size + 10, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(size * 0.3, -size + 10, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Inner eyes
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(-size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
+  ctx.arc(size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Nose
+  ctx.fillStyle = limbColor;
+  ctx.beginPath();
+  ctx.ellipse(0, -size + 14, 3, 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Front limbs
+  ctx.fillStyle = limbColor;
+  ctx.beginPath();
+  ctx.arc(size - 8, size - 3, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(size - 6, size - 14, 7, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Headband
+  ctx.fillStyle = headbandColor;
+  ctx.fillRect(-size * 0.8, -size - 4, size * 1.6, 6);
+  ctx.beginPath();
+  ctx.moveTo(-size * 0.7, -size - 1);
+  ctx.lineTo(-size * 0.7 - 12, -size + 5);
+  ctx.lineTo(-size * 0.7, -size + 3);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawAllCharacterPreviews() {
+  for (let i = 1; i <= 5; i++) {
+    drawCharacterOnCanvas(`char-canvas-${i}`, i);
+  }
+}
+
 // Init buttons
 document.getElementById('btn-start').addEventListener('click', () => {
   document.getElementById('main-menu').classList.add('hidden');
   document.getElementById('char-select-screen').classList.remove('hidden');
+  drawAllCharacterPreviews();
 });
 
 // Character Selection Setup
@@ -2014,6 +2218,7 @@ document.getElementById('btn-next-level').addEventListener('click', startNextLev
 document.getElementById('btn-game-over-restart').addEventListener('click', () => {
   document.getElementById('game-over-screen').classList.add('hidden');
   document.getElementById('char-select-screen').classList.remove('hidden');
+  drawAllCharacterPreviews();
 });
 
 
@@ -2285,5 +2490,6 @@ function spawnCherryBlossomPetals() {
 window.addEventListener('load', () => {
   resizeCanvas();
   spawnCherryBlossomPetals();
+  drawAllCharacterPreviews();
   requestAnimationFrame(gameLoop);
 });
