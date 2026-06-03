@@ -289,13 +289,14 @@ class JadeShard {
 
 // Gong Checkpoint Class
 class Checkpoint {
-  constructor(x, y) {
+  constructor(x, y, isFinish = false) {
     this.x = x;
     this.y = y;
-    this.width = 60;
-    this.height = 70;
+    this.width = isFinish ? 120 : 60;
+    this.height = isFinish ? 110 : 70;
     this.active = false;
     this.glowPulse = 0;
+    this.isFinish = isFinish;
   }
 
   update(dt) {
@@ -305,6 +306,107 @@ class Checkpoint {
   }
 
   draw(ctx) {
+    if (this.isFinish) {
+      ctx.save();
+      
+      // Golden celestial glow
+      const glowAmt = 12 + Math.sin(Date.now() / 200) * 4;
+      ctx.shadowBlur = glowAmt;
+      ctx.shadowColor = '#ffd700';
+
+      // 1. Pillars (Crimson painted columns)
+      ctx.fillStyle = '#c8102e';
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 3;
+      
+      // Left pillar
+      ctx.fillRect(this.x + 12, this.y + 25, 14, this.height - 25);
+      ctx.strokeRect(this.x + 12, this.y + 25, 14, this.height - 25);
+      // Right pillar
+      ctx.fillRect(this.x + this.width - 26, this.y + 25, 14, this.height - 25);
+      ctx.strokeRect(this.x + this.width - 26, this.y + 25, 14, this.height - 25);
+      
+      // Pillar stone bases
+      ctx.fillStyle = '#e0e0e0';
+      ctx.strokeStyle = '#8b7355';
+      ctx.fillRect(this.x + 8, this.y + this.height - 8, 22, 8);
+      ctx.strokeRect(this.x + 8, this.y + this.height - 8, 22, 8);
+      ctx.fillRect(this.x + this.width - 30, this.y + this.height - 8, 22, 8);
+      ctx.strokeRect(this.x + this.width - 30, this.y + this.height - 8, 22, 8);
+
+      // 2. Transom Beam (Crimson crossbeam)
+      ctx.fillStyle = '#c8102e';
+      ctx.fillRect(this.x + 4, this.y + 20, this.width - 8, 8);
+      ctx.strokeRect(this.x + 4, this.y + 20, this.width - 8, 8);
+
+      // 3. Imperial Chinese Roof (Curved and layered gold/red)
+      ctx.fillStyle = '#c8102e';
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y + 20);
+      ctx.lineTo(this.x + this.width, this.y + 20);
+      ctx.lineTo(this.x + this.width - 8, this.y + 10);
+      ctx.lineTo(this.x + 8, this.y + 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Top golden curved tile roof
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath();
+      ctx.moveTo(this.x - 6, this.y + 10);
+      ctx.quadraticCurveTo(this.x + this.width / 2, this.y - 8, this.x + this.width + 6, this.y + 10);
+      ctx.lineTo(this.x + this.width - 12, this.y + 3);
+      ctx.quadraticCurveTo(this.x + this.width / 2, this.y - 12, this.x + 12, this.y + 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 4. Center Signboard / Plaque (glowing tablet)
+      ctx.fillStyle = '#11151c';
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 2;
+      ctx.fillRect(this.x + this.width / 2 - 38, this.y + 12, 76, 17);
+      ctx.strokeRect(this.x + this.width / 2 - 38, this.y + 12, 76, 17);
+      
+      // Plaque Text
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 9px var(--font-body)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('ประตูสวรรค์ / เส้นชัย', this.x + this.width / 2, this.y + 21);
+
+      // 5. Hanging Chinese Lanterns (glowing red bulbs)
+      ctx.fillStyle = '#ff2b2b';
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 1;
+      // Left lantern
+      ctx.beginPath();
+      ctx.arc(this.x + 28, this.y + 42, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      // Right lantern
+      ctx.beginPath();
+      ctx.arc(this.x + this.width - 28, this.y + 42, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 6. Giant Yin-Yang background glow in the gateway path
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.1)';
+      ctx.beginPath();
+      ctx.arc(this.x + this.width / 2, this.y + 65, 26, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 7. Floating FINISH label
+      ctx.fillStyle = '#ffd700';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#ffd700';
+      ctx.font = 'bold 15px var(--font-title)';
+      ctx.fillText('FINISH / เส้นชัย', this.x + this.width / 2, this.y - 18);
+
+      ctx.restore();
+      return;
+    }
+
     ctx.save();
     
     // Draw Frame (Traditional Torii structure)
@@ -936,8 +1038,8 @@ function generateLevel() {
   const summitPlatform = new Platform(100, -PEAK_HEIGHT, summitWidth, 60, 'normal');
   game.platforms.push(summitPlatform);
 
-  // Magnificent Win Banner shrine on the peak
-  game.checkpoints.push(new Checkpoint(V_WIDTH / 2 - 30, -PEAK_HEIGHT - 70));
+  // Magnificent Celestial Gate (Finish Line) on the peak
+  game.checkpoints.push(new Checkpoint(V_WIDTH / 2 - 60, -PEAK_HEIGHT - 110, true));
 }
 
 // Check collision between AABB boxes
@@ -1032,8 +1134,8 @@ function handleCollisions(dt) {
   // Checkpoint Gong collision check
   for (let cp of game.checkpoints) {
     if (checkAABB(player, cp)) {
-      // Is this the peak shrine?
-      if (cp.y <= -PEAK_HEIGHT - 65) {
+      // Is this the peak finish gate?
+      if (cp.isFinish) {
         handleLevelCleared();
         return;
       }
