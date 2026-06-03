@@ -861,7 +861,58 @@ const player = {
     }
     ctx.rotate(rot);
 
-    // Draw cute Panda monk
+    // Dynamic Character Cosmetics
+    let limbColor = '#1c1e22';
+    let bodyColor = '#ffffff';
+    let sashColor = '#c8102e';
+    let buckleColor = '#ffd700';
+    let headbandColor = '#c8102e';
+    let earColor = '#1c1e22';
+    let eyePatchColor = '#1c1e22';
+
+    const char = game.selectedCharacter;
+    if (char === 1) { // วายุ (Wind Seeker) - Jade Green Leaf theme
+      limbColor = '#133520';
+      bodyColor = '#f0fdf4';
+      sashColor = '#12d58a';
+      buckleColor = '#ffffff';
+      headbandColor = '#12d58a';
+      earColor = '#133520';
+      eyePatchColor = '#133520';
+    } else if (char === 2) { // โชคดี (Fortune Sage) - Imperial Gold Scholar theme
+      limbColor = '#2b2203';
+      bodyColor = '#fffbeb';
+      sashColor = '#eab308';
+      buckleColor = '#ffffff';
+      headbandColor = '#eab308';
+      earColor = '#2b2203';
+      eyePatchColor = '#2b2203';
+    } else if (char === 3) { // อายุยืน (Longevity Master) - Elder Sage Peach Pink theme
+      limbColor = '#4b5563'; // Grey instead of black for aged master
+      bodyColor = '#fff1f2';
+      sashColor = '#fda4af';
+      buckleColor = '#eab308';
+      headbandColor = '#fda4af';
+      earColor = '#4b5563';
+      eyePatchColor = '#4b5563';
+    } else if (char === 4) { // กายแกร่ง (Iron Body) - Steel Slate/Iron Armor theme
+      limbColor = '#374151';
+      bodyColor = '#e5e7eb';
+      sashColor = '#4b5563';
+      buckleColor = '#9ca3af';
+      headbandColor = '#4b5563';
+      earColor = '#374151';
+      eyePatchColor = '#374151';
+    } else if (char === 5) { // เมฆา (Cloud Master) - Cloud Sky Blue theme
+      limbColor = '#0f172a';
+      bodyColor = '#f0f9ff';
+      sashColor = '#06b6d4';
+      buckleColor = '#ffffff';
+      headbandColor = '#06b6d4';
+      earColor = '#0f172a';
+      eyePatchColor = '#0f172a';
+    }
+
     const size = this.width / 2;
     
     // Face direction scaling
@@ -869,8 +920,8 @@ const player = {
       ctx.scale(-1, 1);
     }
 
-    // 1. Black Limbs (behind body)
-    ctx.fillStyle = '#1c1e22';
+    // 1. Limbs (behind body)
+    ctx.fillStyle = limbColor;
     // Back Arm
     ctx.beginPath();
     ctx.arc(-size + 6, size - 14, 7, 0, Math.PI * 2);
@@ -880,36 +931,78 @@ const player = {
     ctx.arc(-size + 8, size - 3, 8, 0, Math.PI * 2);
     ctx.fill();
 
-    // 2. White main body/belly
-    ctx.fillStyle = '#ffffff';
+    // 2. Main body/belly
+    ctx.fillStyle = bodyColor;
     ctx.beginPath();
     ctx.arc(0, 0, size, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#1c1e22';
+    ctx.strokeStyle = limbColor;
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // 3. Red Monk Sash (belt)
-    ctx.fillStyle = '#c8102e';
+    // Extra details on body based on character
+    if (char === 1) {
+      // Leaf decoration on body
+      ctx.fillStyle = '#12d58a';
+      ctx.beginPath();
+      ctx.ellipse(-size * 0.3, size * 0.3, 4, 6, Math.PI/4, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (char === 2) {
+      // Coin/Gold symbol on body
+      ctx.fillStyle = '#eab308';
+      ctx.beginPath();
+      ctx.arc(0, 0, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = bodyColor;
+      ctx.fillRect(-1.5, -1.5, 3, 3);
+    } else if (char === 3) {
+      // Rosy peach cheeks
+      ctx.fillStyle = 'rgba(251, 113, 133, 0.4)';
+      ctx.beginPath();
+      ctx.arc(-size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
+      ctx.arc(size * 0.4, -size * 0.2, 5, 0, Math.PI*2);
+      ctx.fill();
+    } else if (char === 4) {
+      // Armor chestplate stripe
+      ctx.strokeStyle = '#9ca3af';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.7, 0);
+      ctx.lineTo(size * 0.7, 0);
+      ctx.stroke();
+    } else if (char === 5) {
+      // Cloud swirl on belly
+      ctx.fillStyle = '#bae6fd';
+      ctx.beginPath();
+      ctx.arc(-size * 0.2, size * 0.3, 4, 0, Math.PI * 2);
+      ctx.arc(0, size * 0.3, 5, 0, Math.PI * 2);
+      ctx.arc(size * 0.2, size * 0.3, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. Monk Sash (belt)
+    ctx.fillStyle = sashColor;
     ctx.fillRect(-size + 1, size - 13, size * 2 - 2, 7);
-    ctx.fillStyle = '#ffd700'; // gold belt buckle
+    ctx.fillStyle = buckleColor; 
     ctx.fillRect(-4, size - 13, 8, 7);
 
-    // 4. Black chest / shoulders ring
-    ctx.fillStyle = '#1c1e22';
+    // 4. Chest / shoulders ring
+    ctx.fillStyle = limbColor;
     ctx.beginPath();
     ctx.arc(0, -size + 14, size * 0.95, Math.PI, 2 * Math.PI);
     ctx.fill();
 
     // 5. Panda Head
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = bodyColor;
     ctx.beginPath();
     ctx.arc(0, -size + 10, size * 0.85, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = limbColor;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // 6. Black ears
-    ctx.fillStyle = '#1c1e22';
+    // 6. Ears
+    ctx.fillStyle = earColor;
     // Left ear
     ctx.beginPath();
     ctx.arc(-size * 0.65, -size * 0.1, 7, 0, Math.PI * 2);
@@ -920,7 +1013,7 @@ const player = {
     ctx.fill();
 
     // 7. Eye Patches
-    ctx.fillStyle = '#1c1e22';
+    ctx.fillStyle = eyePatchColor;
     // Left eye patch
     ctx.beginPath();
     ctx.arc(-size * 0.3, -size + 10, 5, 0, Math.PI * 2);
@@ -937,13 +1030,14 @@ const player = {
     ctx.arc(size * 0.28, -size + 10, 1.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // 9. Black nose
-    ctx.fillStyle = '#1c1e22';
+    // 9. Nose
+    ctx.fillStyle = limbColor;
     ctx.beginPath();
     ctx.ellipse(0, -size + 14, 3, 2, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // 10. Front limbs (in front of body)
+    ctx.fillStyle = limbColor;
     // Front Foot
     ctx.beginPath();
     ctx.arc(size - 8, size - 3, 8, 0, Math.PI * 2);
@@ -953,8 +1047,8 @@ const player = {
     ctx.arc(size - 6, size - 14, 7, 0, Math.PI * 2);
     ctx.fill();
 
-    // 11. Red Headband (with tail flowing behind)
-    ctx.fillStyle = '#c8102e';
+    // 11. Headband (with tail flowing behind)
+    ctx.fillStyle = headbandColor;
     ctx.fillRect(-size * 0.8, -size - 4, size * 1.6, 6);
     // Flowing tails
     ctx.beginPath();
