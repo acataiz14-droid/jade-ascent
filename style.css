@@ -138,6 +138,15 @@ canvas {
   box-shadow: 0 0 30px var(--jade-glow) !important;
 }
 
+.crimson-border {
+  border: 2px solid var(--crimson) !important;
+  box-shadow: 0 0 30px var(--crimson-glow) !important;
+}
+
+.crimson-text {
+  color: var(--crimson) !important;
+}
+
 /* --- OVERLAYS (MENU / WIN / GAME OVER) --- */
 .overlay {
   position: absolute;

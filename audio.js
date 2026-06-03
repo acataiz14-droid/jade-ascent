@@ -284,6 +284,18 @@ class AudioEngine {
     osc2.stop(now + 0.4);
   }
 
+  playDefeat() {
+    if (!this.ctx || this.muted) return;
+    
+    // Play a sad descending pentatonic melody
+    const scale = this.pentatonicScales[1]; // C major pentatonic
+    const notes = [scale[4], scale[3], scale[2], scale[1], scale[0]];
+    
+    notes.forEach((freq, idx) => {
+      this.pluckGuzheng(freq / 2, idx * 0.15, 0.4); // Descending and lower octave
+    });
+  }
+
   playWin() {
     if (!this.ctx || this.muted) return;
     

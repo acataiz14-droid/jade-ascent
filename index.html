@@ -205,6 +205,24 @@
     </div>
   </div>
 
+  <!-- Game Over Screen -->
+  <div id="game-over-screen" class="overlay hidden">
+    <div class="menu-content glass-panel crimson-border">
+      <h1 class="congrats-title crimson-text">TEST FAILED</h1>
+      <h2 class="congrats-subtitle">พลังชีวิตหมดลงแล้ว! 💀</h2>
+      <p class="congrats-desc">
+        คุณไม่สามารถทนทานต่อบททดสอบของภูเขาศักดิ์สิทธิ์ได้ พลังชีวิตของคุณลดลงเหลือศูนย์ ส่งผลให้ต้องเริ่มต้นใหม่อีกครั้งตั้งแต่ด่านแรก!
+      </p>
+      <div class="stat-box">
+        <p>ด่านสุดท้ายที่ทำได้: <strong class="crimson-text" id="game-over-level">ด่าน 1</strong></p>
+        <p>ความสูงสุดท้าย: <strong class="gold-text" id="game-over-height">0m</strong></p>
+      </div>
+      <button id="btn-game-over-restart" class="btn btn-primary btn-large">
+        <span>START OVER / เริ่มใหม่ทั้งหมด ➔</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Chinese Question Modal -->
   <div id="question-modal" class="overlay hidden">
     <div class="menu-content glass-panel chinese-theme-modal" id="question-card">

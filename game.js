@@ -1222,6 +1222,7 @@ function startGame() {
   audio.init();
   document.getElementById('main-menu').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('game-over-screen').classList.add('hidden');
   
   game.state = 'PLAYING';
   game.currentLevel = 1;
@@ -1229,6 +1230,11 @@ function startGame() {
   game.altitude = 0;
   game.upgrades = { jump: 0, speed: 0, doublejump: 0, float: 0 };
   document.getElementById('level-clear-screen').classList.add('hidden');
+  
+  // Reset peak and total heights back to Level 1 values
+  const levelData = LEVELS_CONFIG[1];
+  PEAK_HEIGHT = levelData.heightMeters * 14.5;
+  TOTAL_HEIGHT = PEAK_HEIGHT + 500;
   
   // Reset starting checkpoint coordinates
   game.lastCheckpointX = V_WIDTH / 2 - 20;
@@ -1484,11 +1490,25 @@ function checkQuestionAnswer(selectedIndex, clickedBtn) {
     
     setTimeout(() => {
       if (player.health <= 0) {
-        // Player dies (out of health)
-        player.health = player.maxHealth;
-        game.isQuestionActive = false;
+        // Player dies (out of health) - Trigger Permadeath Game Over
+        game.isQuestionActive = true; // Freeze physics
+        audio.playDefeat();
+        
+        // Hide modals and HUD
         document.getElementById('question-modal').classList.add('hidden');
-        respawnAtCheckpoint();
+        document.getElementById('hud').classList.add('hidden');
+        
+        // Populate stats for Game Over screen
+        document.getElementById('game-over-level').innerText = `ด่าน ${game.currentLevel}`;
+        
+        const targetMeters = LEVELS_CONFIG[game.currentLevel].heightMeters;
+        let realHeight = Math.floor(Math.abs(player.y) / 14.5);
+        if (realHeight < 0) realHeight = 0;
+        if (realHeight > targetMeters) realHeight = targetMeters;
+        document.getElementById('game-over-height').innerText = `${realHeight}m / ${targetMeters}m`;
+        
+        // Show Game Over overlay
+        document.getElementById('game-over-screen').classList.remove('hidden');
       } else {
         // Pick another question and display
         triggerQuestion(game.currentQuestionMilestone);
@@ -1684,6 +1704,7 @@ document.getElementById('audio-control').addEventListener('click', () => {
 document.getElementById('btn-start').addEventListener('click', startGame);
 document.getElementById('btn-restart').addEventListener('click', restartGame);
 document.getElementById('btn-next-level').addEventListener('click', startNextLevel);
+document.getElementById('btn-game-over-restart').addEventListener('click', startGame);
 
 
 // --- PARALLAX BACKGROUND RENDER ---
