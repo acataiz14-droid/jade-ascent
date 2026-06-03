@@ -518,6 +518,7 @@ class GameState {
     this.currentLevel = 1;
     this.lastQuestionClearedHeight = 0; // The highest 50m milestone cleared
     this.currentQuestionMilestone = 0;  // The milestone currently being attempted
+    this.askedQuestionIds = new Set();  // Set of asked question IDs to prevent repetition
     this.isQuestionActive = false;
   }
 
@@ -1236,6 +1237,7 @@ function startGame() {
   // Reset question flags
   game.lastQuestionClearedHeight = 0;
   game.currentQuestionMilestone = 0;
+  game.askedQuestionIds.clear();
   game.isQuestionActive = false;
   document.getElementById('question-modal').classList.add('hidden');
 
@@ -1324,60 +1326,70 @@ function restartGame() {
 }
 
 // ==========================================
-// CHINESE QUESTION SYSTEM (30M HEIGHT GATE)
+// CHINESE QUESTION SYSTEM (BY LEVEL DIFFICULTY)
 // ==========================================
-const CHINESE_QUESTIONS = [
-  {
-    q: "คำศัพท์ภาษาจีนคำว่า '日' (rì) แปลว่าอะไร?",
-    o: ["พระอาทิตย์ (Sun)", "พระจันทร์ (Moon)", "ภูเขา (Mountain)", "แม่น้ำ (River)"],
-    a: 0
-  },
-  {
-    q: "ผลไม้ชนิดใดในภาษาจีนเรียกว่า '苹果' (píngguǒ)?",
-    o: ["กล้วย (Banana)", "แอปเปิ้ล (Apple)", "ส้ม (Orange)", "องุ่น (Grape)"],
-    a: 1
-  },
-  {
-    q: "คำศัพท์คำว่า '水' (shuǐ) มีความหมายตรงกับข้อใด?",
-    o: ["ไฟ (Fire)", "น้ำ (Water)", "ไม้ (Wood)", "ทอง (Gold)"],
-    a: 1
-  },
-  {
-    q: "หากต้องการทักทายว่า 'สวัสดี' ในภาษาจีน ต้องพูดว่าอย่างไร?",
-    o: ["谢谢 (xièxie)", "你好 (nǐ hǎo)", "再见 (zài jiàn)", "对不起 (duìbuqǐ)"],
-    a: 1
-  },
-  {
-    q: "ตัวอักษรจีนคำว่า '八' (bā) แทนจำนวนตัวเลขใด?",
-    o: ["เลข 6", "เลข 7", "เลข 8", "เลข 9"],
-    a: 2
-  },
-  {
-    q: "สัตว์เลี้ยงชนิดใดในภาษาจีนเรียกว่า '猫' (māo)?",
-    o: ["สุนัข (Dog)", "นก (Bird)", "แมว (Cat)", "ปลา (Fish)"],
-    a: 2
-  },
-  {
-    q: "คำศัพท์ภาษาจีนคำว่า '大' (dà) แปลว่าอะไร?",
-    o: ["เล็ก (Small)", "ใหญ่ (Big)", "กลาง (Medium)", "มาก (Many)"],
-    a: 1
-  },
-  {
-    q: "คำศัพท์คำว่า '月' (yuè) แปลว่าข้อใด?",
-    o: ["พระอาทิตย์ (Sun)", "พระจันทร์ (Moon)", "ก้อนเมฆ (Cloud)", "ดวงดาว (Star)"],
-    a: 1
-  },
-  {
-    q: "เมื่อต้องการกล่าวขอบคุณในภาษาจีน ต้องพูดอย่างไร?",
-    o: ["你好 (nǐ hǎo)", "谢谢 (xièxie)", "再见 (zài jiàn)", "没关系 (méi guān xi)"],
-    a: 1
-  },
-  {
-    q: "คำว่า '五' (wǔ) ในภาษาจีนแทนตัวเลขใด?",
-    o: ["เลข 3", "เลข 4", "เลข 5", "เลข 2"],
-    a: 2
-  }
-];
+const CHINESE_QUESTIONS_BY_LEVEL = {
+  1: [ // Level 1 (Very easy - numbers, basic nouns, hello)
+    { id: "1_1", q: "คำศัพท์ภาษาจีนคำว่า '日' (rì) แปลว่าอะไร?", o: ["พระอาทิตย์ (Sun)", "พระจันทร์ (Moon)", "ภูเขา (Mountain)", "แม่น้ำ (River)"], a: 0 },
+    { id: "1_2", q: "ตัวอักษรจีนคำว่า '八' (bā) แทนจำนวนตัวเลขใด?", o: ["เลข 6", "เลข 7", "เลข 8", "เลข 9"], a: 2 },
+    { id: "1_3", q: "คำว่า '五' (wǔ) ในภาษาจีนแทนตัวเลขใด?", o: ["เลข 3", "เลข 4", "เลข 5", "เลข 2"], a: 2 },
+    { id: "1_4", q: "หากต้องการทักทายว่า 'สวัสดี' ในภาษาจีน ต้องพูดว่าอย่างไร?", o: ["谢谢 (xièxie)", "你好 (nǐ hǎo)", "再见 (zài jiàn)", "对不起 (duìbuqǐ)"], a: 1 },
+    { id: "1_5", q: "คำศัพท์ภาษาจีนคำว่า '大' (dà) แปลว่าอะไร?", o: ["เล็ก (Small)", "ใหญ่ (Big)", "กลาง (Medium)", "มาก (Many)"], a: 1 },
+    { id: "1_6", q: "คำศัพท์คำว่า '人' (rén) แปลว่าอะไร?", o: ["คน (Person)", "นก (Bird)", "หมา (Dog)", "แมว (Cat)"], a: 0 },
+    { id: "1_7", q: "คำศัพท์คำว่า '口' (kǒu) แปลว่าอะไร?", o: ["ตา (Eye)", "หู (Ear)", "ปาก (Mouth)", "จมูก (Nose)"], a: 2 },
+    { id: "1_8", q: "คำศัพท์ภาษาจีนคำว่า '月' (yuè) แปลว่าอะไร?", o: ["พระอาทิตย์ (Sun)", "พระจันทร์ (Moon)", "ก้อนเมฆ (Cloud)", "ดวงดาว (Star)"], a: 1 },
+    { id: "1_9", q: "คำว่า '一' (yī) ในภาษาจีนแทนเลขใด?", o: ["เลข 1", "เลข 2", "เลข 3", "เลข 4"], a: 0 },
+    { id: "1_10", q: "คำศัพท์คำว่า '山' (shān) แปลว่าอะไร?", o: ["ดิน (Soil)", "น้ำ (Water)", "ภูเขา (Mountain)", "ลม (Wind)"], a: 2 }
+  ],
+  2: [ // Level 2 (Easy - family, animals, basic adjectives)
+    { id: "2_1", q: "สัตว์เลี้ยงชนิดใดในภาษาจีนเรียกว่า '猫' (māo)?", o: ["สุนัข (Dog)", "นก (Bird)", "แมว (Cat)", "ปลา (Fish)"], a: 2 },
+    { id: "2_2", q: "สัตว์ชนิดใดในภาษาจีนเรียกว่า '狗' (gǒu)?", o: ["แมว (Cat)", "สุนัข (Dog)", "หมู (Pig)", "ม้า (Horse)"], a: 1 },
+    { id: "2_3", q: "คำว่า '爸爸' (bàba) ในภาษาจีนหมายถึงใคร?", o: ["แม่ (Mother)", "พ่อ (Father)", "พี่ชาย (Older Brother)", "ปู่ (Grandfather)"], a: 1 },
+    { id: "2_4", q: "คำว่า '妈妈' (māma) ในภาษาจีนหมายถึงใคร?", o: ["ยาย (Grandmother)", "พี่สาว (Older Sister)", "แม่ (Mother)", "ป้า (Aunt)"], a: 2 },
+    { id: "2_5", q: "คำศัพท์คำว่า '小' (xiǎo) แปลว่าอะไร?", o: ["ใหญ่ (Big)", "ยาว (Long)", "เล็ก (Small)", "สูง (High)"], a: 2 },
+    { id: "2_6", q: "คำศัพท์คำว่า '火' (huǒ) แปลว่าอะไร?", o: ["น้ำ (Water)", "ดิน (Soil)", "ไฟ (Fire)", "ลม (Wind)"], a: 2 },
+    { id: "2_7", q: "คำศัพท์คำว่า '水' (shuǐ) มีความหมายตรงกับข้อใด?", o: ["ไฟ (Fire)", "น้ำ (Water)", "ไม้ (Wood)", "ทอง (Gold)"], a: 1 },
+    { id: "2_8", q: "ผลไม้ชนิดใดในภาษาจีนเรียกว่า '苹果' (píngguǒ)?", o: ["กล้วย (Banana)", "แอปเปิ้ล (Apple)", "ส้ม (Orange)", "องุ่น (Grape)"], a: 1 },
+    { id: "2_9", q: "คำศัพท์คำว่า '鸟' (niǎo) แปลว่าอะไร?", o: ["ปลา (Fish)", "นก (Bird)", "ไก่ (Chicken)", "เป็ด (Duck)"], a: 1 },
+    { id: "2_10", q: "คำศัพท์คำว่า '鱼' (yú) แปลว่าอะไร?", o: ["นก (Bird)", "สุนัข (Dog)", "ปลา (Fish)", "เต่า (Turtle)"], a: 2 }
+  ],
+  3: [ // Level 3 (Medium - colors, simple verbs, school objects)
+    { id: "3_1", q: "สีใดในภาษาจีนเรียกว่า '红色' (hóng sè)?", o: ["สีน้ำเงิน (Blue)", "สีเหลือง (Yellow)", "สีแดง (Red)", "สีเขียว (Green)"], a: 2 },
+    { id: "3_2", q: "สีใดในภาษาจีนเรียกว่า '绿色' (lǜ sè)?", o: ["สีเขียว (Green)", "สีแดง (Red)", "สีขาว (White)", "สีดำ (Black)"], a: 0 },
+    { id: "3_3", q: "คำกริยาภาษาจีนคำว่า '吃' (chī) แปลว่าอะไร?", o: ["ดื่ม (Drink)", "นอน (Sleep)", "กิน (Eat)", "เดิน (Walk)"], a: 2 },
+    { id: "3_4", q: "คำกริยาภาษาจีนคำว่า '喝' (hē) แปลว่าอะไร?", o: ["กิน (Eat)", "ดื่ม (Drink)", "พูด (Speak)", "ฟัง (Listen)"], a: 1 },
+    { id: "3_5", q: "คำว่า '老师' (lǎoshī) ในภาษาจีนหมายถึงใคร?", o: ["คุณหมอ (Doctor)", "นักเรียน (Student)", "คุณครู (Teacher)", "ตำรวจ (Police)"], a: 2 },
+    { id: "3_6", q: "คำศัพท์คำว่า '学生' (xuéshēng) หมายถึงใคร?", o: ["นักเรียน (Student)", "ทหาร (Soldier)", "พ่อค้า (Merchant)", "พยาบาล (Nurse)"], a: 0 },
+    { id: "3_7", q: "คำว่า '书' (shū) ในภาษาจีนแปลว่าอะไร?", o: ["ดินสอ (Pencil)", "สมุด (Notebook)", "หนังสือ (Book)", "ยางลบ (Eraser)"], a: 2 },
+    { id: "3_8", q: "เมื่อต้องการกล่าวขอบคุณในภาษาจีน ต้องพูดอย่างไร?", o: ["你好 (nǐ hǎo)", "谢谢 (xièxie)", "再见 (zài jiàn)", "没关系 (méi guān xi)"], a: 1 },
+    { id: "3_9", q: "คำศัพท์ภาษาจีนคำว่า '看' (kàn) แปลว่าอะไร?", o: ["เขียน (Write)", "อ่าน (Read)", "ดู/มอง (Look/See)", "ฟัง (Listen)"], a: 2 },
+    { id: "3_10", q: "คำศัพท์คำว่า '多' (duō) ตรงข้ามกับคำว่า '少' (shǎo) แปลว่าอะไรตามลำดับ?", o: ["มาก - น้อย", "น้อย - มาก", "ใหญ่ - เล็ก", "สูง - ต่ำ"], a: 0 }
+  ],
+  4: [ // Level 4 (Hard - places, daily actions, common sentences)
+    { id: "4_1", q: "สถานที่ใดภาษาจีนเรียกว่า '学校' (xuéxiào)?", o: ["บ้าน (Home)", "โรงพยาบาล (Hospital)", "โรงเรียน (School)", "สวนสาธารณะ (Park)"], a: 2 },
+    { id: "4_2", q: "สถานที่ใดภาษาจีนเรียกว่า '家' (jiā)?", o: ["โรงเรียน (School)", "บ้าน (Home)", "ร้านค้า (Shop)", "ตลาด (Market)"], a: 1 },
+    { id: "4_3", q: "คำศัพท์คำว่า '高兴' (gāoxìng) แปลว่าอะไร?", o: ["โกรธ (Angry)", "ดีใจ/มีความสุข (Happy)", "เสียใจ (Sad)", "เหนื่อย (Tired)"], a: 1 },
+    { id: "4_4", q: "ประโยคว่า '我喜欢猫' (wǒ xǐhuān māo) แปลว่าอะไร?", o: ["ฉันมีแมวหนึ่งตัว", "ฉันไม่ชอบแมว", "ฉันชอบแมว", "แมวชอบฉัน"], a: 2 },
+    { id: "4_5", q: "คำศัพท์คำว่า '今天' (jīntiān) แปลว่าอะไร?", o: ["เมื่อวานนี้ (Yesterday)", "วันนี้ (Today)", "พรุ่งนี้ (Tomorrow)", "มะรืนนี้ (Day after tomorrow)"], a: 1 },
+    { id: "4_6", q: "คำกริยาภาษาจีนคำว่า '去' (qù) แปลว่าอะไร?", o: ["มา (Come)", "ไป (Go)", "กลับ (Return)", "นั่ง (Sit)"], a: 1 },
+    { id: "4_7", q: "คำศัพท์คำว่า '漂亮' (piàoliang) แปลว่าอะไร?", o: ["น่าเกลียด (Ugly)", "น่ารัก (Cute)", "สวย (Beautiful)", "หล่อ (Handsome)"], a: 2 },
+    { id: "4_8", q: "คำศัพท์คำว่า '天' (tiān) แปลว่าอะไร?", o: ["ดิน (Earth)", "ท้องฟ้า/วัน (Sky/Day)", "ลม (Wind)", "น้ำ (Water)"], a: 1 },
+    { id: "4_9", q: "ประโยคว่า '你去哪儿？' (nǐ qù nǎr?) แปลว่าอะไร?", o: ["คุณชื่ออะไร?", "คุณอายุเท่าไหร่?", "คุณจะไปไหน?", "คุณทำอะไรอยู่?"], a: 2 },
+    { id: "4_10", q: "คำว่า '再见' (zài jiàn) แปลว่าอะไร?", o: ["สวัสดี (Hello)", "ขอบคุณ (Thank you)", "ลาก่อน/พบกันใหม่ (Goodbye)", "ขอโทษ (Sorry)"], a: 2 }
+  ],
+  5: [ // Level 5 (Hardest - times, simple grammar, pronouns sentence construction)
+    { id: "5_1", q: "คำศัพท์ภาษาจีนคำว่า '现​​在' (xiànzài) แปลว่าอะไร?", o: ["เมื่อก่อน (Before)", "ตอนนี้ (Now)", "อนาคต (Future)", "สายแล้ว (Late)"], a: 1 },
+    { id: "5_2", q: "คำศัพท์คำว่า '医生' (yīshēng) แปลว่าอะไร?", o: ["พยาบาล (Nurse)", "คุณหมอ (Doctor)", "คนไข้ (Patient)", "เภสัชกร (Pharmacist)"], a: 1 },
+    { id: "5_3", q: "ประโยคว่า '我不吃肉' (wǒ bù chī ròu) แปลว่าอะไร?", o: ["ฉันชอบกินเนื้อ", "ฉันไม่กินเนื้อ", "ฉันกินเจ", "ฉันกินเนื้อเป็นหลัก"], a: 1 },
+    { id: "5_4", q: "คำศัพท์คำว่า '明天的天气很好' (míngtiān de tiānqì hěn hǎo) แปลว่าอะไร?", o: ["วันนี้อากาศดีมาก", "เมื่อวานอากาศดีมาก", "พรุ่งนี้อากาศจะดีมาก", "อากาศไม่ดีเลย"], a: 2 },
+    { id: "5_5", q: "ตัวเลขภาษาจีนคำว่า '一百' (yī bǎi) แทนจำนวนเท่าใด?", o: ["10", "50", "100", "1000"], a: 2 },
+    { id: "5_6", q: "ประโยค '这是谁的书？' (zhè shì shéi de shū?) แปลว่าอะไร?", o: ["นี่คือหนังสือของฉัน", "นี่คือหนังสือของใคร?", "หนังสือเล่มนี้ราคาเท่าไหร่?", "คุณชอบอ่านหนังสือไหม?"], a: 1 },
+    { id: "5_7", q: "คำศัพท์คำว่า '中国' (Zhōngguó) แปลว่าประเทศใด?", o: ["ประเทศญี่ปุ่น (Japan)", "ประเทศไทย (Thailand)", "ประเทศจีน (China)", "ประเทศเกาหลี (Korea)"], a: 2 },
+    { id: "5_8", q: "คำลักษณนาม '个' (gè) ใช้ในข้อใด?", o: ["ใช้บอกจำนวนสัตว์", "ใช้บอกลักษณนามทั่วไป (ชิ้น, อัน, คน)", "ใช้บอกจำนวนหนังสือ", "ใช้บอกระดับความสูง"], a: 1 },
+    { id: "5_9", q: "ประโยค '谢谢你帮我' (xièxie nǐ bāng wǒ) แปลว่าอะไร?", o: ["ขอบคุณที่ช่วยฉัน", "ขอบคุณที่มาพบฉัน", "ขอโทษที่ฉันช่วยไม่ได้", "ยินดีที่ได้ช่วยคุณ"], a: 0 },
+    { id: "5_10", q: "คำศัพท์ภาษาจีนคำว่า '聪明' (cōngming) แปลว่าอะไร?", o: ["โง่ (Foolish)", "ขยัน (Diligent)", "ฉลาด (Smart)", "ใจดี (Kind)"], a: 2 }
+  ]
+};
 
 let currentQuestionObj = null;
 
@@ -1392,9 +1404,24 @@ function triggerQuestion(milestone) {
     questionSubtitle.innerText = `ตอบคำถามที่ระดับความสูง ${milestone} เมตร เพื่อผ่านขึ้นสู่ดินแดนถัดไป!`;
   }
   
-  // Pick random question
-  const randIdx = Math.floor(Math.random() * CHINESE_QUESTIONS.length);
-  currentQuestionObj = CHINESE_QUESTIONS[randIdx];
+  // Select pool based on current level (defaults to Level 1 if invalid)
+  const questionPool = CHINESE_QUESTIONS_BY_LEVEL[game.currentLevel] || CHINESE_QUESTIONS_BY_LEVEL[1];
+  
+  // Filter for unused questions in the current level
+  let unusedQuestions = questionPool.filter(q => !game.askedQuestionIds.has(q.id));
+  
+  // If we ran out of unique questions for this level, clear their history and restart pool
+  if (unusedQuestions.length === 0) {
+    questionPool.forEach(q => game.askedQuestionIds.delete(q.id));
+    unusedQuestions = questionPool;
+  }
+  
+  // Pick random question from unused pool
+  const randIdx = Math.floor(Math.random() * unusedQuestions.length);
+  currentQuestionObj = unusedQuestions[randIdx];
+  
+  // Mark this question as asked
+  game.askedQuestionIds.add(currentQuestionObj.id);
   
   // Render text
   document.getElementById('question-text').innerText = currentQuestionObj.q;
