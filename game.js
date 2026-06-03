@@ -938,11 +938,7 @@ const camera = {
   update(playerY, dt) {
     // Keep player in the middle of canvas view vertically
     const idealY = playerY - V_HEIGHT * 0.65;
-    
-    // Only scroll camera target upwards (more negative)
-    if (idealY < this.targetY) {
-      this.targetY = idealY;
-    }
+    this.targetY = idealY;
 
     // Camera cannot scroll down past the ground (camera.y cannot be greater than 0)
     if (this.targetY > 0) this.targetY = 0;
@@ -1965,11 +1961,8 @@ function gameLoop(timestamp) {
       // 6. Check if player fell below starting area and update altitude height
       // If player falls below -120 (start ground platform top is -100), check they wrap or fall to bottom
       if (player.y > camera.y + V_HEIGHT || player.y > 100) {
-        // Fell off bottom/viewport! Calculate fall meters to the checkpoint they will respawn at
-        const fallMeters = (game.lastCheckpointY - player.highestY) / 14.5;
-        if (fallMeters >= 50) {
-          triggerFallDamage(fallMeters);
-        }
+        // Fell off bottom/viewport! Always lose 1 heart and restart stage
+        triggerFallDamage(50); // Force 1 heart of damage (50m+)
         if (player.health > 0) {
           respawnAtCheckpoint();
         }
