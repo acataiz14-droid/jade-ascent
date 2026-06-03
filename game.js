@@ -947,7 +947,8 @@ class SeededRandom {
 function generateLevel() {
   const levelData = LEVELS_CONFIG[game.currentLevel];
   PEAK_HEIGHT = levelData.heightMeters * 14.5;
-  TOTAL_HEIGHT = PEAK_HEIGHT + 500;
+  const finishHeight = PEAK_HEIGHT * 0.9;
+  TOTAL_HEIGHT = finishHeight + 500;
 
   game.platforms = [];
   game.shards = [];
@@ -963,24 +964,24 @@ function generateLevel() {
   let currentY = -220;
   const platformHeight = 22;
 
-  // Track height zones
-  while (Math.abs(currentY) < TOTAL_HEIGHT - 600) {
+  // Track height zones (generate platforms up to 90% of level height)
+  while (Math.abs(currentY) < finishHeight - 400) {
     const relativeHeight = Math.abs(currentY);
-    const zone = relativeHeight < TOTAL_HEIGHT * 0.33 ? 1 
-               : relativeHeight < TOTAL_HEIGHT * 0.66 ? 2 
+    const zone = relativeHeight < finishHeight * 0.33 ? 1 
+               : relativeHeight < finishHeight * 0.66 ? 2 
                : 3;
 
     // Platform widths shrink as we climb (harder)
-    let pWidth = 140 - (relativeHeight / TOTAL_HEIGHT) * 65;
+    let pWidth = 140 - (relativeHeight / finishHeight) * 65;
     if (pWidth < 65) pWidth = 65;
 
     // Gap ranges increase as we climb
     let minGapX = 50;
-    let maxGapX = 220 + (relativeHeight / TOTAL_HEIGHT) * 120;
+    let maxGapX = 220 + (relativeHeight / finishHeight) * 120;
     if (maxGapX > 380) maxGapX = 380;
 
     let minGapY = 70;
-    let maxGapY = 110 + (relativeHeight / TOTAL_HEIGHT) * 60;
+    let maxGapY = 110 + (relativeHeight / finishHeight) * 60;
     if (maxGapY > 175) maxGapY = 175;
 
     // Determine platform type based on zone
@@ -1033,13 +1034,13 @@ function generateLevel() {
     currentY -= stepY;
   }
 
-  // 3. Summit Celestial Palace Platform (Final Peak)
+  // 3. Summit Celestial Palace Platform (Final Peak at 90% of level height)
   const summitWidth = V_WIDTH - 200;
-  const summitPlatform = new Platform(100, -PEAK_HEIGHT, summitWidth, 60, 'normal');
+  const summitPlatform = new Platform(100, -finishHeight, summitWidth, 60, 'normal');
   game.platforms.push(summitPlatform);
 
   // Magnificent Celestial Gate (Finish Line) on the peak
-  game.checkpoints.push(new Checkpoint(V_WIDTH / 2 - 60, -PEAK_HEIGHT - 110, true));
+  game.checkpoints.push(new Checkpoint(V_WIDTH / 2 - 60, -finishHeight - 110, true));
 }
 
 // Check collision between AABB boxes
@@ -1272,7 +1273,8 @@ function startNextLevel() {
   // Update PEAK_HEIGHT & TOTAL_HEIGHT for the new level
   const levelData = LEVELS_CONFIG[game.currentLevel];
   PEAK_HEIGHT = levelData.heightMeters * 14.5;
-  TOTAL_HEIGHT = PEAK_HEIGHT + 500;
+  const finishHeight = PEAK_HEIGHT * 0.9;
+  TOTAL_HEIGHT = finishHeight + 500;
   
   // Reset checkpoint coords to start pad of the new level
   game.lastCheckpointX = V_WIDTH / 2 - 20;
