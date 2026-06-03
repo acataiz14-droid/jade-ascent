@@ -133,6 +133,11 @@ canvas {
   box-shadow: 0 0 30px var(--gold-glow) !important;
 }
 
+.jade-border {
+  border: 2px solid var(--jade) !important;
+  box-shadow: 0 0 30px var(--jade-glow) !important;
+}
+
 /* --- OVERLAYS (MENU / WIN / GAME OVER) --- */
 .overlay {
   position: absolute;

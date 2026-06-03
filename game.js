@@ -5,8 +5,17 @@
 // Virtual Game Constants
 const V_WIDTH = 800;
 const V_HEIGHT = 950;
-const TOTAL_HEIGHT = 15000; // Total height of the mountain (pixels)
-const PEAK_HEIGHT = 14500; // Height of the summit platform
+
+const LEVELS_CONFIG = {
+  1: { name: "ด่าน 1: หุบเขาไม้ไผ่ (Bamboo Valley)", heightMeters: 500, emoji: "🎋" },
+  2: { name: "ด่าน 2: วิหารลอยฟ้า (Cloud Temple)", heightMeters: 1000, emoji: "☁️" },
+  3: { name: "ด่าน 3: เต๋าแห่งจักรวาล (Cosmic Tao)", heightMeters: 1500, emoji: "🌌" },
+  4: { name: "ด่าน 4: แดนสวรรค์เบื้องบน (High Heavens)", heightMeters: 2500, emoji: "⚡" },
+  5: { name: "ด่าน 5: ยอดเขาไร้สิ้นสุด (Infinite Summit)", heightMeters: 5000, emoji: "🐉" }
+};
+
+let PEAK_HEIGHT = LEVELS_CONFIG[1].heightMeters * 14.5;
+let TOTAL_HEIGHT = PEAK_HEIGHT + 500;
 
 // Setup Canvas and Context
 const canvas = document.getElementById('game-canvas');
@@ -393,6 +402,7 @@ class GameState {
     this.lastCheckpointY = -140; // Default: start pad top
     
     this.shopOpen = false;
+    this.currentLevel = 1;
     this.lastQuestionClearedHeight = 0; // The highest 50m milestone cleared
     this.currentQuestionMilestone = 0;  // The milestone currently being attempted
     this.isQuestionActive = false;
@@ -831,13 +841,18 @@ class SeededRandom {
   }
 }
 
-// Generate complete mountain level (0m to 1000m)
+// Generate complete mountain level
 function generateLevel() {
+  const levelData = LEVELS_CONFIG[game.currentLevel];
+  PEAK_HEIGHT = levelData.heightMeters * 14.5;
+  TOTAL_HEIGHT = PEAK_HEIGHT + 500;
+
   game.platforms = [];
   game.shards = [];
   game.checkpoints = [];
 
-  const rand = new SeededRandom(888); // Static seed
+  // Unique random seed per level
+  const rand = new SeededRandom(888 + game.currentLevel * 111);
 
   // 1. Starting Platform (Ground)
   game.platforms.push(new Platform(50, -100, V_WIDTH - 100, 40, 'normal'));
@@ -1019,7 +1034,7 @@ function handleCollisions(dt) {
     if (checkAABB(player, cp)) {
       // Is this the peak shrine?
       if (cp.y <= -PEAK_HEIGHT - 65) {
-        winGame();
+        handleLevelCleared();
         return;
       }
 
@@ -1087,9 +1102,11 @@ function startGame() {
   document.getElementById('hud').classList.remove('hidden');
   
   game.state = 'PLAYING';
+  game.currentLevel = 1;
   game.jadeCount = 0;
   game.altitude = 0;
   game.upgrades = { jump: 0, speed: 0, doublejump: 0, float: 0 };
+  document.getElementById('level-clear-screen').classList.add('hidden');
   
   // Reset starting checkpoint coordinates
   game.lastCheckpointX = V_WIDTH / 2 - 20;
@@ -1120,6 +1137,64 @@ function winGame() {
   document.getElementById('final-jade').innerText = game.jadeCount;
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('win-screen').classList.remove('hidden');
+}
+
+function handleLevelCleared() {
+  audio.playGong();
+  
+  if (game.currentLevel === 5) {
+    // Reached peak of Level 5! Player wins the entire game!
+    winGame();
+  } else {
+    // Level cleared! Show the level-clear-screen modal
+    game.isQuestionActive = true; // freeze player physics
+    
+    const nextLvl = game.currentLevel + 1;
+    const nextConfig = LEVELS_CONFIG[nextLvl];
+    const currentConfig = LEVELS_CONFIG[game.currentLevel];
+    
+    document.getElementById('level-clear-title').innerText = `LEVEL ${game.currentLevel} CLEARED`;
+    document.getElementById('level-clear-subtitle').innerText = `ผ่านด่าน ${game.currentLevel} สำเร็จ! ${currentConfig.emoji}`;
+    document.getElementById('level-clear-desc').innerText = `คุณปีนขึ้นมาถึงความสูง ${currentConfig.heightMeters} เมตรสำเร็จ! มาลุยด่านต่อไปกันเลย!`;
+    document.getElementById('next-level-name').innerText = `${nextConfig.name} (ความสูง ${nextConfig.heightMeters} เมตร)`;
+    document.getElementById('level-clear-jade').innerText = game.jadeCount;
+    
+    document.getElementById('level-clear-screen').classList.remove('hidden');
+  }
+}
+
+function startNextLevel() {
+  document.getElementById('level-clear-screen').classList.add('hidden');
+  game.currentLevel++;
+  
+  // Update PEAK_HEIGHT & TOTAL_HEIGHT for the new level
+  const levelData = LEVELS_CONFIG[game.currentLevel];
+  PEAK_HEIGHT = levelData.heightMeters * 14.5;
+  TOTAL_HEIGHT = PEAK_HEIGHT + 500;
+  
+  // Reset checkpoint coords to start pad of the new level
+  game.lastCheckpointX = V_WIDTH / 2 - 20;
+  game.lastCheckpointY = -140;
+
+  // Reset question milestones for the new level
+  game.lastQuestionClearedHeight = 0;
+  game.currentQuestionMilestone = 0;
+  
+  // Unfreeze game physics
+  game.isQuestionActive = false;
+  
+  // Reset player state (keep shards and upgrades)
+  player.reset(); // This is perfect, resets position/velocity/health but keeps upgrades
+  camera.reset();
+  
+  generateLevel();
+  
+  // Instantly set camera to avoid jarring scroll on start
+  camera.y = player.y - V_HEIGHT * 0.65;
+  camera.targetY = camera.y;
+  
+  updateHUD();
+  updateShopUI();
 }
 
 function restartGame() {
@@ -1289,23 +1364,24 @@ function updateHUD() {
   }
   document.getElementById('health-val').innerText = heartsStr;
 
-  // Altitude goes from 0m to 1000m based on vertical climb
-  // 15,000px height means ~15px = 1m
+  // Altitude goes from 0m to targetMeters based on level vertical climb
+  const targetMeters = LEVELS_CONFIG[game.currentLevel].heightMeters;
   let realHeight = Math.floor(Math.abs(player.y) / 14.5);
   if (realHeight < 0) realHeight = 0;
-  if (realHeight > 1000) realHeight = 1000;
+  if (realHeight > targetMeters) realHeight = targetMeters;
   
   game.altitude = realHeight;
-  document.getElementById('height-val').innerText = realHeight + 'm';
+  document.getElementById('height-val').innerText = `${realHeight}m / ${targetMeters}m (ด่าน ${game.currentLevel})`;
   
   // Progress fill %
-  const pct = (realHeight / 1000) * 100;
+  const pct = (realHeight / targetMeters) * 100;
   document.getElementById('progress-fill').style.width = pct + '%';
   
-  // Dynamic audio zone adjustment based on height
-  if (realHeight < 330) {
+  // Dynamic audio zone adjustment based on height ratio
+  const heightRatio = realHeight / targetMeters;
+  if (heightRatio < 0.33) {
     audio.setZone(1);
-  } else if (realHeight < 660) {
+  } else if (heightRatio < 0.66) {
     audio.setZone(2);
   } else {
     audio.setZone(3);
@@ -1459,6 +1535,7 @@ document.getElementById('audio-control').addEventListener('click', () => {
 // Init buttons
 document.getElementById('btn-start').addEventListener('click', startGame);
 document.getElementById('btn-restart').addEventListener('click', restartGame);
+document.getElementById('btn-next-level').addEventListener('click', startNextLevel);
 
 
 // --- PARALLAX BACKGROUND RENDER ---
