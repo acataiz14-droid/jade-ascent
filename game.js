@@ -560,6 +560,7 @@ const player = {
   jumpCount: 0,
   maxJumps: 2,
   doubleJumpCooldownTimer: 0,
+  tripleJumpCooldownTimer: 0,
   facingLeft: false,
   squashX: 1,
   squashY: 1,
@@ -584,6 +585,7 @@ const player = {
     // Character 1 (วายุ) gets 3 jumps, others have 2
     this.maxJumps = (game.selectedCharacter === 1) ? 3 : 2;
     this.doubleJumpCooldownTimer = 0;
+    this.tripleJumpCooldownTimer = 0;
     this.squashX = 1;
     this.squashY = 1;
   },
@@ -708,6 +710,28 @@ const player = {
       }
     }
 
+    // Decrement triple jump cooldown for Seeker 1
+    if (this.tripleJumpCooldownTimer > 0) {
+      this.tripleJumpCooldownTimer -= dt;
+      if (this.tripleJumpCooldownTimer <= 0) {
+        this.tripleJumpCooldownTimer = 0;
+        // Green/Jade chimes when triple jump is ready!
+        for (let i = 0; i < 10; i++) {
+          game.particles.push(
+            new Particle(
+              this.x + this.width/2,
+              this.y + this.height/2,
+              '#12d58a',
+              (Math.random() - 0.5) * 4,
+              (Math.random() - 0.5) * 4,
+              2 + Math.random() * 2.5,
+              0.4 + Math.random() * 0.3
+            )
+          );
+        }
+      }
+    }
+
     // Track highest Y position reached during leap/fall
     if (this.grounded) {
       this.highestY = this.y;
@@ -756,28 +780,56 @@ const player = {
         );
       }
     } else if (this.jumpCount < this.maxJumps) {
-      // Character 1 (วายุ) bypasses double jump cooldown
-      if (this.doubleJumpCooldownTimer <= 0 || game.selectedCharacter === 1) {
-        this.vy = this.getJumpVel() * 0.95; // Slightly lower double jump
-        this.jumpCount++;
-        if (game.selectedCharacter !== 1) {
-          this.doubleJumpCooldownTimer = this.getDoubleJumpCooldownMax();
+      if (this.jumpCount === 2) {
+        // This is the 3rd jump (Triple Jump) for Seeker 1 - requires cooldown
+        if (this.tripleJumpCooldownTimer <= 0) {
+          this.vy = this.getJumpVel() * 0.95;
+          this.jumpCount++;
+          this.tripleJumpCooldownTimer = this.getDoubleJumpCooldownMax();
+          this.squashX = 0.8;
+          this.squashY = 1.25;
+          audio.playJump();
+          
+          // Green/Jade feather particles for triple jump
+          for (let i = 0; i < 12; i++) {
+            game.particles.push(
+              new Particle(
+                this.x + this.width/2, this.y + this.height/2,
+                '#12d58a', // Green/Jade sparkles
+                (Math.random() - 0.5) * 6,
+                (Math.random() - 0.5) * 6,
+                2 + Math.random() * 4,
+                0.6 + Math.random() * 0.4
+              )
+            );
+          }
         }
-        this.squashX = 0.8;
-        this.squashY = 1.25;
-        audio.playJump();
-        // Phoenix feather particles (double jump!)
-        for (let i = 0; i < 10; i++) {
-          game.particles.push(
-            new Particle(
-              this.x + this.width/2, this.y + this.height/2,
-              '#ffd700', // Gold sparkles
-              (Math.random() - 0.5) * 6,
-              (Math.random() - 0.5) * 6,
-              2 + Math.random() * 4,
-              0.6 + Math.random() * 0.4
-            )
-          );
+      } else {
+        // This is the 2nd jump (Double Jump)
+        // Seeker 1 has no cooldown on the 2nd jump, others check doubleJumpCooldownTimer
+        if (game.selectedCharacter === 1 || this.doubleJumpCooldownTimer <= 0) {
+          this.vy = this.getJumpVel() * 0.95;
+          this.jumpCount++;
+          if (game.selectedCharacter !== 1) {
+            this.doubleJumpCooldownTimer = this.getDoubleJumpCooldownMax();
+          }
+          this.squashX = 0.8;
+          this.squashY = 1.25;
+          audio.playJump();
+          
+          // Phoenix feather particles (double jump!)
+          for (let i = 0; i < 10; i++) {
+            game.particles.push(
+              new Particle(
+                this.x + this.width/2, this.y + this.height/2,
+                '#ffd700', // Gold sparkles
+                (Math.random() - 0.5) * 6,
+                (Math.random() - 0.5) * 6,
+                2 + Math.random() * 4,
+                0.6 + Math.random() * 0.4
+              )
+            );
+          }
         }
       }
     }
