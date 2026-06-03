@@ -1694,10 +1694,21 @@ function triggerQuestion(milestone) {
   // Filter for unused questions in the current level
   let unusedQuestions = questionPool.filter(q => !game.askedQuestionIds.has(q.id));
   
-  // If we ran out of unique questions for this level, clear their history and restart pool
+  // If we ran out of unique questions for this level, search in OTHER levels' pools
   if (unusedQuestions.length === 0) {
-    questionPool.forEach(q => game.askedQuestionIds.delete(q.id));
-    unusedQuestions = questionPool;
+    let allQuestions = [];
+    for (let l = 1; l <= 5; l++) {
+      if (CHINESE_QUESTIONS_BY_LEVEL[l]) {
+        allQuestions = allQuestions.concat(CHINESE_QUESTIONS_BY_LEVEL[l]);
+      }
+    }
+    unusedQuestions = allQuestions.filter(q => !game.askedQuestionIds.has(q.id));
+    
+    // If absolutely ALL questions in the entire game are exhausted, clear history and restart pool
+    if (unusedQuestions.length === 0) {
+      game.askedQuestionIds.clear();
+      unusedQuestions = questionPool;
+    }
   }
   
   // Pick random question from unused pool
