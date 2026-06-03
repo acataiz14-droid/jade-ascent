@@ -597,6 +597,11 @@ const player = {
     return cd[game.upgrades.doublejump] !== undefined ? cd[game.upgrades.doublejump] : 5.0;
   },
 
+  getTripleJumpCooldownMax() {
+    // 3rd jump cooldown is 50% longer than double jump cooldown
+    return this.getDoubleJumpCooldownMax() * 1.5;
+  },
+
   getJumpVel() {
     // Each level increases jump power by 8%
     return this.baseJumpVel * (1 + game.upgrades.jump * 0.08);
@@ -785,7 +790,7 @@ const player = {
         if (this.tripleJumpCooldownTimer <= 0) {
           this.vy = this.getJumpVel() * 0.95;
           this.jumpCount++;
-          this.tripleJumpCooldownTimer = this.getDoubleJumpCooldownMax();
+          this.tripleJumpCooldownTimer = this.getTripleJumpCooldownMax();
           this.squashX = 0.8;
           this.squashY = 1.25;
           audio.playJump();
@@ -957,7 +962,7 @@ const player = {
 
     // 12. Draw Jump Cooldown / Ready Ring
     if (game.selectedCharacter === 1) {
-      const maxCd = this.getDoubleJumpCooldownMax();
+      const maxCd = this.getTripleJumpCooldownMax();
       if (this.tripleJumpCooldownTimer > 0) {
         const pct = this.tripleJumpCooldownTimer / maxCd; // 1 to 0
         
