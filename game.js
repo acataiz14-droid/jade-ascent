@@ -553,8 +553,8 @@ const player = {
   width: 40,
   height: 40,
   grounded: false,
-  health: 6,
-  maxHealth: 6,
+  health: 5,
+  maxHealth: 5,
   jumpCount: 0,
   maxJumps: 2,
   doubleJumpCooldownTimer: 0,
@@ -574,8 +574,8 @@ const player = {
     this.vx = 0;
     this.vy = 0;
     this.grounded = false;
-    this.health = 6;
-    this.maxHealth = 6;
+    this.health = 5;
+    this.maxHealth = 5;
     this.jumpCount = 0;
     this.maxJumps = 2;
     this.doubleJumpCooldownTimer = 0;
