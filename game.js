@@ -555,6 +555,7 @@ const player = {
   grounded: false,
   health: 5,
   maxHealth: 5,
+  highestY: -140,
   jumpCount: 0,
   maxJumps: 2,
   doubleJumpCooldownTimer: 0,
@@ -576,6 +577,7 @@ const player = {
     this.grounded = false;
     this.health = 5;
     this.maxHealth = 5;
+    this.highestY = -140;
     this.jumpCount = 0;
     this.maxJumps = 2;
     this.doubleJumpCooldownTimer = 0;
@@ -700,6 +702,15 @@ const player = {
             )
           );
         }
+      }
+    }
+
+    // Track highest Y position reached during leap/fall
+    if (this.grounded) {
+      this.highestY = this.y;
+    } else {
+      if (this.y < this.highestY) {
+        this.highestY = this.y;
       }
     }
   },
@@ -1084,6 +1095,14 @@ function handleCollisions(dt) {
       // Check if player lands on top of the platform (downward moving velocity)
       const prevBottom = player.y - (player.vy * dt * 60) + player.height;
       if (player.vy >= 0 && prevBottom <= platform.y + 12) {
+        // Fall damage check if they land from the air
+        if (!player.grounded) {
+          const fallMeters = (player.y - player.highestY) / 14.5;
+          if (fallMeters >= 50) {
+            triggerFallDamage(fallMeters);
+          }
+        }
+
         player.y = platform.y - player.height;
         player.vy = 0;
         player.grounded = true;
@@ -1188,6 +1207,49 @@ function handleCollisions(dt) {
   }
 }
 
+// Trigger Fall Damage when player falls >= 50m
+function triggerFallDamage(meters) {
+  player.health--;
+  audio.playDamage();
+  updateHUD();
+  
+  // Shake HUD health card
+  const hudHealthCard = document.getElementById('hud-health-card');
+  if (hudHealthCard) {
+    hudHealthCard.classList.add('shake-effect');
+    setTimeout(() => hudHealthCard.classList.remove('shake-effect'), 500);
+  }
+  
+  // Vignette red flash effect on canvas wrapper
+  const container = document.querySelector('.canvas-container');
+  if (container) {
+    container.classList.add('damage-flash');
+    setTimeout(() => container.classList.remove('damage-flash'), 300);
+  }
+  
+  if (player.health <= 0) {
+    // Player dies from fall damage - Trigger Permadeath Game Over
+    game.isQuestionActive = true; // Freeze physics
+    audio.playDefeat();
+    
+    // Hide HUD
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('question-modal').classList.add('hidden');
+    
+    // Populate stats for Game Over screen
+    document.getElementById('game-over-level').innerText = `ด่าน ${game.currentLevel}`;
+    
+    const targetMeters = LEVELS_CONFIG[game.currentLevel].heightMeters;
+    let realHeight = Math.floor(Math.abs(player.y) / 14.5);
+    if (realHeight < 0) realHeight = 0;
+    if (realHeight > targetMeters) realHeight = targetMeters;
+    document.getElementById('game-over-height').innerText = `${realHeight}m / ${targetMeters}m`;
+    
+    // Show Game Over overlay
+    document.getElementById('game-over-screen').classList.remove('hidden');
+  }
+}
+
 // Respawn at Checkpoint
 function respawnAtCheckpoint() {
   if (game.state !== 'PLAYING') return;
@@ -1198,6 +1260,7 @@ function respawnAtCheckpoint() {
   player.vy = 0;
   player.grounded = true;
   player.jumpCount = 0;
+  player.highestY = game.lastCheckpointY; // Reset highestY to checkpoint height
   camera.y = player.y - V_HEIGHT * 0.65; // snap camera close
 
   audio.playFall();
@@ -1881,7 +1944,13 @@ function gameLoop(timestamp) {
       // If player falls below -120 (start ground platform top is -100), check they wrap or fall to bottom
       if (player.y > 100) {
         // Fell off bottom! Loop them back to ground base or checkpoint
-        respawnAtCheckpoint();
+        const fallMeters = (player.y - player.highestY) / 14.5;
+        if (fallMeters >= 50) {
+          triggerFallDamage(fallMeters);
+        }
+        if (player.health > 0) {
+          respawnAtCheckpoint();
+        }
       }
       
       updateHUD();
