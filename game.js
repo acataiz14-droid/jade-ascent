@@ -955,8 +955,41 @@ const player = {
     ctx.closePath();
     ctx.fill();
 
-    // 12. Draw Double Jump Cooldown Ring (if active)
-    if (this.doubleJumpCooldownTimer > 0) {
+    // 12. Draw Jump Cooldown / Ready Ring
+    if (game.selectedCharacter === 1) {
+      const maxCd = this.getDoubleJumpCooldownMax();
+      if (this.tripleJumpCooldownTimer > 0) {
+        const pct = this.tripleJumpCooldownTimer / maxCd; // 1 to 0
+        
+        ctx.save();
+        ctx.strokeStyle = 'rgba(18, 213, 138, 0.2)'; // faint jade-green
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 1.35, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Active fill arc (jade-green ring charging up to 100%)
+        ctx.strokeStyle = '#12d58a'; // bright jade-green
+        ctx.lineWidth = 4;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = '#12d58a';
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 1.35, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * (1 - pct)));
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // Ready state: solid glowing jade-green ring
+        ctx.save();
+        ctx.strokeStyle = '#12d58a'; // bright jade-green
+        ctx.lineWidth = 4;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#12d58a';
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 1.35, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    } else if (this.doubleJumpCooldownTimer > 0) {
       const maxCd = this.getDoubleJumpCooldownMax();
       const pct = this.doubleJumpCooldownTimer / maxCd; // 1 to 0
       
@@ -1674,25 +1707,6 @@ function updateHUD() {
     }
   }
   document.getElementById('health-val').innerText = heartsStr;
-
-  // Update Triple Jump Cooldown HUD for Character 1 (วายุ)
-  const cooldownCard = document.getElementById('hud-cooldown-card');
-  if (cooldownCard) {
-    if (game.selectedCharacter === 1) {
-      cooldownCard.classList.remove('hidden');
-      if (player.tripleJumpCooldownTimer > 0) {
-        document.getElementById('cooldown-val').innerText = `${player.tripleJumpCooldownTimer.toFixed(1)}s`;
-        cooldownCard.classList.add('cooldown-active');
-        cooldownCard.classList.remove('cooldown-ready');
-      } else {
-        document.getElementById('cooldown-val').innerText = 'READY';
-        cooldownCard.classList.add('cooldown-ready');
-        cooldownCard.classList.remove('cooldown-active');
-      }
-    } else {
-      cooldownCard.classList.add('hidden');
-    }
-  }
 
   // Altitude goes from 0m to targetMeters based on level vertical climb
   const targetMeters = LEVELS_CONFIG[game.currentLevel].heightMeters;
