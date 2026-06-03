@@ -531,7 +531,11 @@ class GameState {
       max = 3;
     }
     if (lvl >= max) return 'MAX';
-    return Math.floor(config.base * Math.pow(config.mult, lvl));
+    let cost = Math.floor(config.base * Math.pow(config.mult, lvl));
+    if (this.selectedCharacter === 5) {
+      cost = Math.floor(cost * 0.8);
+    }
+    return cost;
   }
 
   buyUpgrade(type) {
@@ -547,7 +551,10 @@ class GameState {
   }
 
   buyHeart() {
-    const cost = 15;
+    let cost = 15;
+    if (this.selectedCharacter === 5) {
+      cost = Math.floor(cost * 0.8);
+    }
     if (this.jadeCount < cost || player.health >= player.maxHealth) return false;
     
     this.jadeCount -= cost;
@@ -1804,7 +1811,10 @@ function updateShopUI() {
   // Update Buy Heart button state
   const heartBtn = document.getElementById('buy-heart');
   if (heartBtn) {
-    const cost = 15;
+    let cost = 15;
+    if (game.selectedCharacter === 5) {
+      cost = Math.floor(cost * 0.8);
+    }
     const costValSpan = heartBtn.querySelector('.cost-val');
     if (player.health >= player.maxHealth) {
       costValSpan.innerText = 'FULL';
