@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Jade Ascent: Don't Look Down (Chinese Theme)</title>
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Noto+Sans+Thai:wght@400;600;800&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Falling Cherry Blossoms Container -->
+  <div id="blossom-container" class="blossom-container"></div>
+
+  <!-- Background Music Controller Toggle -->
+  <div id="audio-control" class="audio-control" title="Toggle Sound">
+    <span class="audio-icon">🔇</span>
+  </div>
+
+  <!-- Main Menu Overlay -->
+  <div id="main-menu" class="overlay">
+    <div class="menu-content glass-panel">
+      <h1 class="game-title">JADE ASCENT</h1>
+      <h2 class="game-subtitle">ไต่เขาหยกศักดิ์สิทธิ์</h2>
+      <div class="menu-decoration">
+        <span class="cloud-dec">☁️</span>
+        <span class="dragon-dec">🐉</span>
+        <span class="cloud-dec">☁️</span>
+      </div>
+      
+      <p class="game-desc">
+        Climb the sacred peaks to reach the Celestial Realm. Collect Jade Shards along the way, strike the ancient Gongs to save your progress, and buy mystical Taoist power-ups at the Shop. Remember... <strong>Don't Look Down!</strong>
+      </p>
+
+      <div class="instructions-card">
+        <h3>How to Play / วิธีเล่น</h3>
+        <div class="controls-list">
+          <div><kbd>A</kbd> / <kbd>D</kbd> or <kbd>←</kbd> / <kbd>→</kbd> : Move Left/Right (เดินซ้าย/ขวา)</div>
+          <div><kbd>Spacebar</kbd> / <kbd>W</kbd> / <kbd>↑</kbd> : Jump (กระโดด)</div>
+          <div><kbd>R</kbd> : Teleport to Checkpoint (กลับจุดเซฟ)</div>
+          <div><kbd>E</kbd> / <kbd>Shop Button</kbd> : Open Upgrades Shop (เปิดร้านค้า)</div>
+        </div>
+      </div>
+
+      <button id="btn-start" class="btn btn-primary btn-large">
+        <span>START ASCENT / เริ่มการปีน</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- HUD overlay (Heads-Up Display) -->
+  <div id="hud" class="hud-container hidden">
+    <!-- Left: Jade Shards & Health -->
+    <div class="hud-left-group">
+      <div class="hud-item jade-counter">
+        <div class="hud-icon">🟢</div>
+        <div class="hud-label-val">
+          <span class="hud-label">JADE SHARDS</span>
+          <span id="jade-count" class="hud-value">0</span>
+        </div>
+      </div>
+
+      <div class="hud-item health-counter" id="hud-health-card">
+        <div class="hud-icon">❤️</div>
+        <div class="hud-label-val">
+          <span class="hud-label">HEALTH</span>
+          <span id="health-val" class="hud-value">❤️❤️❤️❤️❤️❤️</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Height Progress -->
+    <div class="hud-item height-meter">
+      <div class="hud-icon">🏔️</div>
+      <div class="hud-label-val">
+        <span class="hud-label">HEIGHT</span>
+        <span id="height-val" class="hud-value">0m</span>
+      </div>
+      <div class="progress-bar-container">
+        <div id="progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Right: Controls Info / Shop Toggle -->
+    <div class="hud-actions">
+      <button id="btn-toggle-shop" class="btn btn-secondary">
+        <span>🛒 SHOP (E)</span>
+      </button>
+      <button id="btn-respawn" class="btn btn-danger" title="Teleport back to the last active checkpoint">
+        <span>⛩️ RESPAWN (R)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Shop Sidebar Overlay -->
+  <div id="shop-modal" class="shop-overlay hidden">
+    <div class="shop-content glass-panel">
+      <div class="shop-header">
+        <h2>☯️ TAOIST UPGRADES</h2>
+        <button id="btn-close-shop" class="shop-close-btn">&times;</button>
+      </div>
+      <div class="shop-subheader">
+        Spend your <span class="jade-highlight">🟢 Jade Shards</span> to unlock mythical techniques.
+      </div>
+      
+      <div class="shop-items-list">
+        <!-- Upgrade Card: Jump height -->
+        <div class="shop-item-card" data-upgrade="jump">
+          <div class="item-icon">🍃</div>
+          <div class="item-details">
+            <h3>Qinggong / วิชาตัวเบา</h3>
+            <p>Increases your jump power. (Lv. <span id="lvl-jump">0</span>)</p>
+          </div>
+          <button class="btn btn-buy" id="buy-jump">
+            <span class="cost-val">10</span> <span class="cost-currency">🟢</span>
+          </button>
+        </div>
+
+        <!-- Upgrade Card: Speed boost -->
+        <div class="shop-item-card" data-upgrade="speed">
+          <div class="item-icon">⚡</div>
+          <div class="item-details">
+            <h3>Wind Walker / ย่างก้าวกระแสลม</h3>
+            <p>Increases your movement speed. (Lv. <span id="lvl-speed">0</span>)</p>
+          </div>
+          <button class="btn btn-buy" id="buy-speed">
+            <span class="cost-val">15</span> <span class="cost-currency">🟢</span>
+          </button>
+        </div>
+
+        <!-- Upgrade Card: Double Jump -->
+        <div class="shop-item-card" data-upgrade="doublejump">
+          <div class="item-icon">🪶</div>
+          <div class="item-details">
+            <h3>Phoenix Feather / ขนนกฟีนิกซ์</h3>
+            <p>Reduces Double Jump cooldown. (Lv. <span id="lvl-doublejump">0</span>/5)</p>
+          </div>
+          <button class="btn btn-buy" id="buy-doublejump">
+            <span class="cost-val">35</span> <span class="cost-currency">🟢</span>
+          </button>
+        </div>
+
+        <!-- Upgrade Card: Slow Fall -->
+        <div class="shop-item-card" data-upgrade="float">
+          <div class="item-icon">📜</div>
+          <div class="item-details">
+            <h3>Talisman of Levitation / ยันต์ลอยตัว</h3>
+            <p>Decreases gravity fall speed. (Lv. <span id="lvl-float">0</span>)</p>
+          </div>
+          <button class="btn btn-buy" id="buy-float">
+            <span class="cost-val">30</span> <span class="cost-currency">🟢</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Controls Overlay (Visible only on mobile/touch screens) -->
+  <div id="mobile-controls" class="mobile-controls-container hidden-desktop">
+    <div class="dpad-left-right">
+      <button id="btn-left" class="mobile-btn">◀</button>
+      <button id="btn-right" class="mobile-btn">▶</button>
+    </div>
+    <div class="actions-right">
+      <button id="btn-jump" class="mobile-btn jump-btn">JUMP</button>
+    </div>
+  </div>
+
+  <!-- Game Win Screen -->
+  <div id="win-screen" class="overlay hidden">
+    <div class="menu-content glass-panel gold-border">
+      <h1 class="congrats-title">CELESTIAL REACED</h1>
+      <h2 class="congrats-subtitle">บรรลุสู่สวรรค์เก้าชั้นฟ้า! 🐉</h2>
+      <p class="congrats-desc">
+        You successfully scaled the legendary peaks and entered the Celestial Realm! 
+        Your agility and wisdom have earned you immortality.
+      </p>
+      <div class="stat-box">
+        <p>Final Altitude: <strong class="gold-text">1000m</strong></p>
+        <p>Total Jade Shards: <strong class="jade-text" id="final-jade">0</strong></p>
+      </div>
+      <button id="btn-restart" class="btn btn-primary btn-large">
+        <span>ASCEND AGAIN / ปีนอีกครั้ง</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Chinese Question Modal -->
+  <div id="question-modal" class="overlay hidden">
+    <div class="menu-content glass-panel chinese-theme-modal" id="question-card">
+      <h2 class="question-title">☯️ บททดสอบภาษาจีน ☯️</h2>
+      <p class="question-subtitle">ตอบคำถามเพื่อผ่านขึ้นสู่ดินแดนความสูงถัดไป!</p>
+      
+      <div class="question-box">
+        <p id="question-text" class="question-prompt">คำถามจะปรากฏที่นี่</p>
+        <div id="question-options" class="options-container">
+          <!-- Options generated dynamically -->
+        </div>
+      </div>
+      
+      <div class="question-status">
+        <span id="question-feedback" class="feedback-text"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Canvas Container -->
+  <div class="canvas-container">
+    <canvas id="game-canvas"></canvas>
+  </div>
+
+  <!-- Load JavaScript Scripts -->
+  <script type="module" src="audio.js"></script>
+  <script type="module" src="game.js"></script>
+</body>
+</html>

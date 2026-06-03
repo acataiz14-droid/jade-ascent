@@ -1,0 +1,15 @@
+{
+  "name": "jade-ascent",
+  "version": "1.0.0",
+  "description": "Jade Ascent: Don't Look Down - Chinese Theme Platformer Game",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && npx vercel --prod ./dist --yes"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
