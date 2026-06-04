@@ -68,6 +68,7 @@ canvas {
   background-color: #12151c;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
   display: block;
+  touch-action: none; /* Prevent browser scroll/zoom interfering with canvas input */
 }
 
 /* --- AMBIENT PETALS (CHERRY BLOSSOMS) --- */
@@ -642,14 +643,18 @@ kbd {
 /* --- MOBILE ON-SCREEN CONTROLS --- */
 .mobile-controls-container {
   position: absolute;
-  bottom: 30px;
+  bottom: env(safe-area-inset-bottom, 20px);
+  bottom: max(env(safe-area-inset-bottom, 0px), 20px);
   left: 0;
   width: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 0 30px;
+  align-items: center;
+  padding: 0 20px;
   z-index: 6;
   pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.2s ease;
 }
 
 .mobile-controls-container.hidden-desktop {
@@ -659,8 +664,16 @@ kbd {
 
 .dpad-left-right, .actions-right {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   pointer-events: auto;
+}
+
+.mobile-center-actions {
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+  flex: 1;
+  justify-content: center;
 }
 
 .mobile-btn {
@@ -688,12 +701,19 @@ kbd {
 }
 
 .jump-btn {
-  width: 85px;
-  height: 85px;
-  font-size: 1.1rem;
+  width: 80px;
+  height: 80px;
+  font-size: 1rem;
   background: linear-gradient(135deg, var(--crimson-dark), var(--crimson));
   border-color: rgba(255, 215, 0, 0.3);
   font-weight: 800;
+}
+
+.mobile-shop-btn {
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, rgba(0,168,107,0.5), rgba(18,213,138,0.3));
+  border-color: var(--jade);
+  box-shadow: 0 4px 15px var(--jade-glow);
 }
 
 /* --- GAME WIN OVERLAYS --- */
@@ -762,6 +782,14 @@ kbd {
   }
   .shop-content {
     max-width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    border-radius: 0;
+    padding: 20px;
+  }
+  .shop-items-list {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Show mobile controls if pointer device is touch */
@@ -773,6 +801,38 @@ kbd {
 @media (pointer: coarse) {
   .mobile-controls-container.hidden-desktop {
     display: flex;
+  }
+
+  /* Increase tap targets on touch devices */
+  .mobile-btn {
+    width: 72px;
+    height: 72px;
+  }
+
+  /* Make option buttons easier to tap on mobile */
+  .option-btn {
+    padding: 16px 18px;
+    font-size: 1rem;
+  }
+}
+
+/* Landscape phone: shrink controls & canvas so nothing overlaps */
+@media (max-height: 500px) and (pointer: coarse) {
+  .mobile-controls-container {
+    bottom: 8px;
+  }
+  .mobile-btn {
+    width: 58px;
+    height: 58px;
+    font-size: 1.5rem;
+  }
+  .jump-btn {
+    width: 65px;
+    height: 65px;
+    font-size: 0.85rem;
+  }
+  .hud-container {
+    top: 5px;
   }
 }
 
