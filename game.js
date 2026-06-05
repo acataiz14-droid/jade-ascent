@@ -588,7 +588,8 @@ const player = {
   squashX: 1,
   squashY: 1,
   runCycle: 0,
-  
+  invincibleTimer: 0,
+
   // Base parameters (Levels will add multipliers)
   baseJumpVel: -11.5,
   baseSpeed: 5.2,
@@ -611,6 +612,7 @@ const player = {
     this.tripleJumpCooldownTimer = 0;
     this.squashX = 1;
     this.squashY = 1;
+    this.invincibleTimer = 0;
   },
 
   getDoubleJumpCooldownMax() {
@@ -979,6 +981,206 @@ class SeededRandom {
 }
 
 // Generate complete mountain level
+// ==========================================
+// ENEMY CLASS - Zone 1 Bamboo Slime
+// ==========================================
+class Enemy {
+  constructor(x, y, patrolLeft, patrolRight) {
+    this.x = x;
+    this.y = y;
+    this.width = 32;
+    this.height = 32;
+    this.vx = 1.2;
+    this.vy = 0;
+    this.grounded = false;
+    this.alive = true;
+    this.dying = false;
+    this.deathTimer = 0;
+    this.facingLeft = false;
+    this.patrolLeft = patrolLeft + 4;
+    this.patrolRight = patrolRight - 4;
+    this.walkCycle = 0;
+    this.eyeBlink = 0;
+  }
+
+  update(dt) {
+    if (!this.alive && !this.dying) return;
+    if (this.dying) {
+      this.deathTimer -= dt;
+      this.vy += 0.4;
+      this.y += this.vy;
+      if (this.deathTimer <= 0) { this.alive = false; this.dying = false; }
+      return;
+    }
+    this.vy += 0.45 * dt * 60;
+    if (this.vy > 15) this.vy = 15;
+    this.x += this.vx * dt * 60;
+    this.walkCycle += Math.abs(this.vx) * dt * 60 * 0.15;
+    this.eyeBlink += dt;
+    if (this.x <= this.patrolLeft) { this.vx = Math.abs(this.vx); this.facingLeft = false; }
+    else if (this.x + this.width >= this.patrolRight) { this.vx = -Math.abs(this.vx); this.facingLeft = true; }
+    this.y += this.vy * dt * 60;
+    this.grounded = false;
+    for (const plat of game.platforms) {
+      if (this.x < plat.x + plat.width && this.x + this.width > plat.x &&
+          this.y + this.height >= plat.y && this.y + this.height <= plat.y + plat.height + 12 && this.vy >= 0) {
+        this.y = plat.y - this.height; this.vy = 0; this.grounded = true;
+      }
+    }
+    if (this.x < 0) { this.x = 0; this.vx = Math.abs(this.vx); }
+    if (this.x + this.width > V_WIDTH) { this.x = V_WIDTH - this.width; this.vx = -Math.abs(this.vx); }
+  }
+
+  die() {
+    this.dying = true;
+    this.deathTimer = 0.4;
+    this.vy = -6;
+    this.vx = 0;
+    for (let i = 0; i < 10; i++) {
+      game.particles.push(new Particle(this.x + 16, this.y + 16, '#4ade80',
+        (Math.random()-0.5)*6, (Math.random()-0.5)*6-2, 2+Math.random()*2.5, 0.5+Math.random()*0.4));
+    }
+    for (let i = 0; i < 5; i++) {
+      game.particles.push(new Particle(this.x + 16, this.y + 16, '#12d58a',
+        (Math.random()-0.5)*5, (Math.random()-0.5)*5-3, 3+Math.random()*2, 0.7+Math.random()*0.4));
+    }
+  }
+
+  draw(ctx) {
+    if (!this.alive && !this.dying) return;
+    const alpha = this.dying ? Math.max(0, this.deathTimer / 0.4) : 1.0;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const cx = this.x + this.width / 2;
+    const cy = this.y + this.height / 2;
+    const bounce = Math.sin(this.walkCycle * Math.PI) * 0.08;
+    const scaleY = 1 + bounce, scaleX = 1 - bounce * 0.5;
+    ctx.save();
+    ctx.translate(cx, this.y + this.height);
+    ctx.scale(scaleX, scaleY);
+    ctx.translate(-cx, -(this.y + this.height));
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath(); ctx.ellipse(cx, this.y+this.height+2, 14, 4, 0, 0, Math.PI*2); ctx.fill();
+    // Body
+    const grad = ctx.createRadialGradient(cx-4, cy-4, 2, cx, cy, 18);
+    grad.addColorStop(0, '#86efac'); grad.addColorStop(0.6, '#22c55e'); grad.addColorStop(1, '#15803d');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.ellipse(cx, cy+4, 16, 14, 0, 0, Math.PI*2); ctx.fill();
+    // Highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.beginPath(); ctx.ellipse(cx-5, cy-3, 7, 5, -0.3, 0, Math.PI*2); ctx.fill();
+    // Eyes
+    const isBlinking = (this.eyeBlink % 3) < 0.12;
+    const ed = this.facingLeft ? -1 : 1;
+    const lx = cx + ed*4 - 6, rx = cx + ed*4 + 2, ey = cy - 1;
+    if (!isBlinking) {
+      ctx.fillStyle = 'white';
+      ctx.beginPath(); ctx.arc(lx, ey, 5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(rx, ey, 5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#1a1a2e';
+      ctx.beginPath(); ctx.arc(lx+ed, ey+1, 2.5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(rx+ed, ey+1, 2.5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.beginPath(); ctx.arc(lx+ed-1, ey-1, 1, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(rx+ed-1, ey-1, 1, 0, Math.PI*2); ctx.fill();
+    } else {
+      ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(lx, ey, 4, 0, Math.PI); ctx.stroke();
+      ctx.beginPath(); ctx.arc(rx, ey, 4, 0, Math.PI); ctx.stroke();
+    }
+    // Eyebrows
+    ctx.strokeStyle = '#166534'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(lx-4, ey-6); ctx.lineTo(lx+3, ey-5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx-2, ey-5); ctx.lineTo(rx+4, ey-6); ctx.stroke();
+    // Antenna
+    ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx, this.y+2); ctx.lineTo(cx-3, this.y-7); ctx.stroke();
+    ctx.fillStyle = '#4ade80';
+    ctx.beginPath(); ctx.arc(cx-3, this.y-8, 3, 0, Math.PI*2); ctx.fill();
+    ctx.restore(); // restore scale
+    // Stomp hint arrow
+    const pulse = 0.55 + Math.sin(Date.now() * 0.004) * 0.45;
+    ctx.globalAlpha = alpha * pulse;
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('▼', cx, this.y - 8);
+    ctx.restore();
+  }
+}
+
+// ==========================================
+// PLAYER-ENEMY COLLISION
+// ==========================================
+function checkEnemyCollisions(dt) {
+  for (let enemy of game.enemies) {
+    if (!enemy.alive || enemy.dying) continue;
+    const pL = player.x, pR = player.x + player.width;
+    const pT = player.y, pB = player.y + player.height;
+    const eL = enemy.x, eR = enemy.x + enemy.width;
+    const eT = enemy.y, eB = enemy.y + enemy.height;
+    if (!(pR > eL && pL < eR && pB > eT && pT < eB)) continue;
+    // Stomp: player falling and was above enemy top before this frame
+    const prevBottom = pB - (player.vy * dt * 60);
+    if (player.vy > 0 && prevBottom <= eT + 14) {
+      enemy.die();
+      audio.playCollect();
+      game.jadeCount++;
+      updateHUD();
+      player.vy = player.getJumpVel() * 0.65;
+      player.jumpCount = 0;
+      showFloatingText(enemy.x + 16, enemy.y - 16, '+1 玉', '#12d58a');
+    } else if (player.invincibleTimer <= 0) {
+      player.health--;
+      player.invincibleTimer = 1.5;
+      audio.playDamage();
+      updateHUD();
+      const kd = player.x < enemy.x + enemy.width / 2 ? -1 : 1;
+      player.vx = kd * 7; player.vy = -4;
+      const hudCard = document.getElementById('hud-health-card');
+      if (hudCard) { hudCard.classList.add('shake-effect'); setTimeout(()=>hudCard.classList.remove('shake-effect'),500); }
+      const cont = document.querySelector('.canvas-container');
+      if (cont) { cont.classList.add('damage-flash'); setTimeout(()=>cont.classList.remove('damage-flash'),300); }
+      if (player.health <= 0) {
+        game.isQuestionActive = true;
+        audio.playDefeat();
+        document.getElementById('hud').classList.add('hidden');
+        document.getElementById('question-modal').classList.add('hidden');
+        document.getElementById('game-over-level').innerText = 'ด่าน ' + game.currentLevel;
+        const tm = LEVELS_CONFIG[game.currentLevel].heightMeters;
+        let rh = Math.floor(Math.abs(player.y) / 14.5);
+        if (rh < 0) rh = 0; if (rh > tm) rh = tm;
+        document.getElementById('game-over-height').innerText = rh + 'm / ' + tm + 'm';
+        document.getElementById('game-over-jade').innerText = game.jadeCount;
+        document.getElementById('game-over-screen').classList.remove('hidden');
+      }
+    }
+  }
+}
+
+// Floating "+1 jade" text above enemy
+function showFloatingText(x, y, text, color) {
+  game.floatingTexts = game.floatingTexts || [];
+  game.floatingTexts.push({
+    x, y, text, color, life: 1.3, vy: -1.8,
+    update(dt) { this.y += this.vy; this.life -= dt; },
+    draw(ctx) {
+      if (this.life <= 0) return;
+      const a = Math.min(1, this.life / 0.5);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.font = 'bold 17px "Noto Serif TC", serif';
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = 'rgba(0,0,0,0.7)'; ctx.lineWidth = 3;
+      ctx.strokeText(text, this.x, this.y);
+      ctx.fillStyle = color;
+      ctx.fillText(text, this.x, this.y);
+      ctx.restore();
+    }
+  });
+}
+
 function generateLevel() {
   const levelData = LEVELS_CONFIG[game.currentLevel];
   PEAK_HEIGHT = levelData.heightMeters * 14.5;
@@ -987,6 +1189,7 @@ function generateLevel() {
   game.platforms = [];
   game.shards = [];
   game.checkpoints = [];
+  game.enemies = [];
 
   // Unique random seed per level
   const rand = new SeededRandom(888 + game.currentLevel * 111);
@@ -1052,6 +1255,16 @@ function generateLevel() {
       const shardX = platform.x + platform.width / 2 - 9;
       const shardY = platform.y - 45;
       game.shards.push(new JadeShard(shardX, shardY));
+    }
+
+    // Spawn enemies in Zone 1 (first level) on normal platforms wide enough
+    if (game.currentLevel === 1 && zone === 1 && pType === 'normal' && pWidth >= 80) {
+      const enemyRoll = rand.next();
+      if (enemyRoll < 0.45) {
+        const enemyX = platform.x + platform.width / 2 - 16;
+        const enemyY = platform.y - 36;
+        game.enemies.push(new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width));
+      }
     }
 
     // Spawn Gong Checkpoints every ~1000px vertically (~100m)
@@ -2665,8 +2878,27 @@ function render() {
     }
   }
 
-  // 6. Draw Player Monk
-  player.draw(ctx);
+  // 6. Draw Enemies
+  if (game.enemies) {
+    for (let enemy of game.enemies) {
+      if (!enemy.alive && !enemy.dying) continue;
+      if (enemy.y + enemy.height > camera.y && enemy.y < camera.y + V_HEIGHT) {
+        enemy.draw(ctx);
+      }
+    }
+  }
+
+  // 7. Draw Player Monk (blink when invincible)
+  if (player.invincibleTimer <= 0 || Math.floor(player.invincibleTimer * 10) % 2 === 0) {
+    player.draw(ctx);
+  }
+
+  // 8. Draw floating reward texts
+  if (game.floatingTexts) {
+    for (let ft of game.floatingTexts) {
+      ft.draw(ctx);
+    }
+  }
 
   ctx.restore();
 }
@@ -2702,8 +2934,26 @@ function gameLoop(timestamp) {
         cp.update(dt);
       }
 
+      // 4b. Update enemies
+      if (game.enemies) {
+        for (let enemy of game.enemies) {
+          enemy.update(dt);
+        }
+      }
+
       // 5. Collision checks
       handleCollisions(dt);
+
+      // 5b. Player-enemy collision
+      if (game.enemies) {
+        checkEnemyCollisions(dt);
+      }
+
+      // 5c. Tick player invincibility
+      if (player.invincibleTimer > 0) {
+        player.invincibleTimer -= dt;
+        if (player.invincibleTimer < 0) player.invincibleTimer = 0;
+      }
 
       // 6. Check if player fell below starting area and update altitude height
       // If player falls below -120 (start ground platform top is -100), check they wrap or fall to bottom
@@ -2730,6 +2980,14 @@ function gameLoop(timestamp) {
       p.update(dt);
       if (p.life <= 0) {
         game.particles.splice(i, 1);
+      }
+    }
+
+    // 7b. Update floating texts
+    if (game.floatingTexts) {
+      for (let i = game.floatingTexts.length - 1; i >= 0; i--) {
+        game.floatingTexts[i].update(dt);
+        if (game.floatingTexts[i].life <= 0) game.floatingTexts.splice(i, 1);
       }
     }
 
