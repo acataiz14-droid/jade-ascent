@@ -50,6 +50,84 @@
     </div>
   </div>
 
+  <!-- Level Selection Screen -->
+  <div id="level-select-screen" class="overlay hidden">
+    <div class="menu-content glass-panel gold-border level-select-panel">
+      <h1 class="congrats-title">SELECT YOUR PATH</h1>
+      <h2 class="congrats-subtitle">เลือกด่านที่ต้องการปีน 🏔️</h2>
+      <p class="congrats-desc" style="margin-bottom: 20px;">
+        แต่ละด่านจะยากขึ้นเรื่อยๆ เลือกด่านที่ต้องการท้าทาย!
+      </p>
+
+      <div class="level-grid">
+        <!-- Level 1 -->
+        <div class="level-card" data-level="1">
+          <div class="level-emoji">🎋</div>
+          <h3>ด่าน 1</h3>
+          <p class="level-name">หุบเขาไม้ไผ่</p>
+          <p class="level-name-en">Bamboo Valley</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 500m</span>
+            <span class="level-difficulty diff-1">★☆☆☆☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" data-level="1">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 2 -->
+        <div class="level-card" data-level="2">
+          <div class="level-emoji">☁️</div>
+          <h3>ด่าน 2</h3>
+          <p class="level-name">วิหารลอยฟ้า</p>
+          <p class="level-name-en">Cloud Temple</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 1,000m</span>
+            <span class="level-difficulty diff-2">★★☆☆☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" data-level="2">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 3 -->
+        <div class="level-card" data-level="3">
+          <div class="level-emoji">🌌</div>
+          <h3>ด่าน 3</h3>
+          <p class="level-name">ด่านของน้องเก้า 🌸🧸</p>
+          <p class="level-name-en">Nong Kao's Level</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 1,500m</span>
+            <span class="level-difficulty diff-3">★★★☆☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" data-level="3">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 4 -->
+        <div class="level-card" data-level="4">
+          <div class="level-emoji">⚡</div>
+          <h3>ด่าน 4</h3>
+          <p class="level-name">แดนสวรรค์เบื้องบน</p>
+          <p class="level-name-en">High Heavens</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 2,500m</span>
+            <span class="level-difficulty diff-4">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" data-level="4">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 5 -->
+        <div class="level-card" data-level="5">
+          <div class="level-emoji">🐉</div>
+          <h3>ด่าน 5</h3>
+          <p class="level-name">ยอดเขาไร้สิ้นสุด</p>
+          <p class="level-name-en">Infinite Summit</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 5,000m</span>
+            <span class="level-difficulty diff-5">★★★★★</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" data-level="5">เริ่มด่านนี้</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Character Selection Screen -->
   <div id="char-select-screen" class="overlay hidden">
     <div class="menu-content glass-panel gold-border char-select-panel">
@@ -215,6 +293,19 @@
           </button>
         </div>
 
+        <!-- Upgrade Card: Shooting -->
+        <div class="shop-item-card" data-upgrade="shooting">
+          <div class="item-icon">🔮</div>
+          <div class="item-details">
+            <h3>Jade Bolt / กระสุนหยก</h3>
+            <p>ยิงกระสุนหยกกำจัดศัตรู กด <kbd>F</kbd> เพื่อยิง (Lv. <span id="lvl-shooting">0</span>/<span id="max-shooting">2</span>)</p>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Lv.1: กระสุนพุ่งระยะสั้น | Lv.2: กระสุนกลิ้งตามแพลตฟอร์ม</p>
+          </div>
+          <button class="btn btn-buy" id="buy-shooting">
+            <span class="cost-val">30</span> <span class="cost-currency">🟢</span>
+          </button>
+        </div>
+
         <!-- Upgrade Card: Buy Heart -->
         <div class="shop-item-card" data-upgrade="heart">
           <div class="item-icon">❤️</div>
@@ -240,6 +331,7 @@
       <button id="btn-mobile-shop" class="mobile-btn mobile-shop-btn">🛒</button>
     </div>
     <div class="actions-right">
+      <button id="btn-shoot" class="mobile-btn shoot-btn">🔮</button>
       <button id="btn-jump" class="mobile-btn jump-btn">JUMP</button>
     </div>
   </div>
@@ -292,6 +384,7 @@
       <div class="stat-box">
         <p>ด่านสุดท้ายที่ทำได้: <strong class="crimson-text" id="game-over-level">ด่าน 1</strong></p>
         <p>ความสูงสุดท้าย: <strong class="gold-text" id="game-over-height">0m</strong></p>
+        <p>หยกเขียวสะสมได้: <strong class="jade-text" id="game-over-jade">0</strong> 🟢</p>
       </div>
       <button id="btn-game-over-restart" class="btn btn-primary btn-large">
         <span>START OVER / เริ่มใหม่ทั้งหมด ➔</span>
