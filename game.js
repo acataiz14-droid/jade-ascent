@@ -25,16 +25,22 @@ const ctx = canvas.getContext('2d');
 const bgImages = {
   bamboo: new Image(),
   clouds: new Image(),
-  cosmic: new Image()
+  cosmic: new Image(),
+  heavens: new Image(),
+  summit: new Image()
 };
 bgImages.bamboo.src = 'assets/bg_bamboo.png';
 bgImages.clouds.src = 'assets/bg_clouds.png';
 bgImages.cosmic.src = 'assets/bg_cosmic.png';
+bgImages.heavens.src = 'assets/bg_heavens.png';
+bgImages.summit.src = 'assets/bg_summit.png';
 
-const bgLoaded = { bamboo: false, clouds: false, cosmic: false };
+const bgLoaded = { bamboo: false, clouds: false, cosmic: false, heavens: false, summit: false };
 bgImages.bamboo.onload = () => bgLoaded.bamboo = true;
 bgImages.clouds.onload = () => bgLoaded.clouds = true;
 bgImages.cosmic.onload = () => bgLoaded.cosmic = true;
+bgImages.heavens.onload = () => bgLoaded.heavens = true;
+bgImages.summit.onload = () => bgLoaded.summit = true;
 
 // Helper to draw rounded rectangles
 function drawRoundRect(ctx, x, y, width, height, radius, fill, stroke) {
@@ -495,7 +501,8 @@ class GameState {
       jump: 0,
       speed: 0,
       doublejump: 0,
-      float: 0
+      float: 0,
+      shooting: 0
     };
 
     // Upgrade costs base and multipliers
@@ -503,12 +510,14 @@ class GameState {
       jump: { base: 10, mult: 1.5, max: 5 },
       speed: { base: 15, mult: 1.5, max: 5 },
       doublejump: { base: 35, mult: 1.6, max: 5 },
-      float: { base: 30, mult: 1.6, max: 5 }
+      float: { base: 30, mult: 1.6, max: 5 },
+      shooting: { base: 30, mult: 1, max: 2, fixedCosts: [30, 50] }
     };
     
     this.platforms = [];
     this.shards = [];
     this.checkpoints = [];
+    this.projectiles = [];
     this.particles = [];
     
     this.lastCheckpointX = V_WIDTH / 2 - 20;
@@ -531,6 +540,12 @@ class GameState {
       max = 3;
     }
     if (lvl >= max) return 'MAX';
+    // Fixed costs for shooting upgrade
+    if (config.fixedCosts) {
+      let cost = config.fixedCosts[lvl];
+      if (this.selectedCharacter === 5) cost = Math.floor(cost * 0.8);
+      return cost;
+    }
     let cost = Math.floor(config.base * Math.pow(config.mult, lvl));
     if (this.selectedCharacter === 5) {
       cost = Math.floor(cost * 0.8);
@@ -589,6 +604,7 @@ const player = {
   squashY: 1,
   runCycle: 0,
   invincibleTimer: 0,
+  shootCooldown: 0,
 
   // Base parameters (Levels will add multipliers)
   baseJumpVel: -11.5,
@@ -613,6 +629,7 @@ const player = {
     this.squashX = 1;
     this.squashY = 1;
     this.invincibleTimer = 0;
+    this.shootCooldown = 0;
   },
 
   getDoubleJumpCooldownMax() {
@@ -760,6 +777,12 @@ const player = {
           );
         }
       }
+    }
+
+    // Decrement shoot cooldown
+    if (this.shootCooldown > 0) {
+      this.shootCooldown -= dt;
+      if (this.shootCooldown < 0) this.shootCooldown = 0;
     }
 
     // Track highest Y position reached during leap/fall
@@ -980,17 +1003,159 @@ class SeededRandom {
   }
 }
 
+// ==========================================
+// PROJECTILE CLASS - Jade Bolt
+// ==========================================
+class Projectile {
+  constructor(x, y, vx, vy, level) {
+    this.x = x;
+    this.y = y;
+    this.width = 16;
+    this.height = 16;
+    this.vx = vx;
+    this.vy = vy;
+    this.level = level;
+    this.phase = 'fly'; // 'fly' or 'roll'
+    this.startX = x;
+    this.maxFlyDistance = 180; // Fly short distance horizontally (e.g. 180px)
+    this.alive = true;
+    this.lifeTime = 5.0; // Max lifetime in seconds for safety
+  }
+
+  update(dt) {
+    this.lifeTime -= dt;
+    if (this.lifeTime <= 0) {
+      this.alive = false;
+      return;
+    }
+
+    if (this.phase === 'fly') {
+      // Just fly straight horizontally, ignore gravity
+      this.x += this.vx * dt * 60;
+      // Check distance
+      if (Math.abs(this.x - this.startX) >= this.maxFlyDistance) {
+        if (this.level === 1) {
+          this.alive = false;
+        } else {
+          // Level 2 transitions to rolling phase
+          this.phase = 'roll';
+          this.vy = 0;
+          // Keep vx direction but maybe roll speed could be adjusted or kept same
+          const dir = Math.sign(this.vx) || 1;
+          this.vx = dir * 3.5;
+        }
+      }
+    } else if (this.phase === 'roll') {
+      // Apply gravity
+      this.vy += 0.45 * dt * 60;
+      if (this.vy > 12) this.vy = 12;
+
+      this.x += this.vx * dt * 60;
+      this.y += this.vy * dt * 60;
+
+      // Platform collision so it rolls on them
+      for (const plat of game.platforms) {
+        if (plat.crumbled) continue;
+        if (this.x < plat.x + plat.width && this.x + this.width > plat.x &&
+            this.y + this.height >= plat.y && this.y + this.height <= plat.y + 12 && this.vy >= 0) {
+          this.y = plat.y - this.height;
+          this.vy = 0;
+        }
+      }
+
+      // If it hits walls, reverse direction
+      if (this.x < 0) {
+        this.x = 0;
+        this.vx = -this.vx;
+      }
+      if (this.x + this.width > V_WIDTH) {
+        this.x = V_WIDTH - this.width;
+        this.vx = -this.vx;
+      }
+    }
+
+    // Check collision with all active enemies
+    for (let enemy of game.enemies) {
+      if (enemy.alive && !enemy.dying) {
+        if (checkAABB(this, enemy)) {
+          enemy.die();
+          audio.playCollect();
+          const jadeReward = (game.selectedCharacter === 3) ? 2 : 1;
+          game.jadeCount += jadeReward;
+          updateHUD();
+          showFloatingText(enemy.x + 16, enemy.y - 16, '+' + jadeReward + ' 玉', '#12d58a');
+          this.alive = false;
+          break;
+        }
+      }
+    }
+  }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = '#00ffaa';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#00ffaa';
+    
+    if (this.level === 1) {
+      // Horizontal crystal shape
+      ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+      ctx.rotate(this.vx < 0 ? Math.PI : 0);
+      ctx.beginPath();
+      ctx.moveTo(8, 0);
+      ctx.lineTo(2, 4);
+      ctx.lineTo(-8, 4);
+      ctx.lineTo(-8, -4);
+      ctx.lineTo(2, -4);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      // Level 2: spinning jade sphere
+      ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 7, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw internal details (spiral/cross to show rolling)
+      ctx.strokeStyle = '#005533';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const angle = (Date.now() * 0.01 * (this.vx > 0 ? 1 : -1)) % (Math.PI * 2);
+      ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 4, angle, angle + Math.PI);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+function playerShoot() {
+  if (game.upgrades.shooting <= 0) return;
+  if (player.shootCooldown > 0) return;
+
+  player.shootCooldown = 0.4;
+
+  const dir = player.facingLeft ? -1 : 1;
+  const projectileSpeed = 8.5;
+
+  const startX = player.facingLeft ? (player.x - 12) : (player.x + player.width - 4);
+  const startY = player.y + player.height / 2 - 8;
+
+  const proj = new Projectile(startX, startY, dir * projectileSpeed, 0, game.upgrades.shooting);
+  game.projectiles.push(proj);
+
+  audio.playShoot();
+}
+
 // Generate complete mountain level
 // ==========================================
 // ENEMY CLASS - Zone 1 Bamboo Slime
 // ==========================================
 class Enemy {
-  constructor(x, y, patrolLeft, patrolRight) {
+  constructor(x, y, patrolLeft, patrolRight, speed = 1.2) {
     this.x = x;
     this.y = y;
     this.width = 32;
     this.height = 32;
-    this.vx = 1.2;
+    this.vx = speed;
     this.vy = 0;
     this.grounded = false;
     this.alive = true;
@@ -1001,6 +1166,7 @@ class Enemy {
     this.patrolRight = patrolRight - 4;
     this.walkCycle = 0;
     this.eyeBlink = 0;
+    this.speed = speed;
   }
 
   update(dt) {
@@ -1126,11 +1292,13 @@ function checkEnemyCollisions(dt) {
     if (player.vy > 0 && prevBottom <= eT + 14) {
       enemy.die();
       audio.playCollect();
-      game.jadeCount++;
+      // Turtle character (id 3) gets double jade from stomping enemies
+      const jadeReward = (game.selectedCharacter === 3) ? 2 : 1;
+      game.jadeCount += jadeReward;
       updateHUD();
       player.vy = player.getJumpVel() * 0.65;
       player.jumpCount = 0;
-      showFloatingText(enemy.x + 16, enemy.y - 16, '+1 玉', '#12d58a');
+      showFloatingText(enemy.x + 16, enemy.y - 16, '+' + jadeReward + ' 玉', '#12d58a');
     } else if (player.invincibleTimer <= 0) {
       player.health--;
       player.invincibleTimer = 1.5;
@@ -1152,7 +1320,8 @@ function checkEnemyCollisions(dt) {
         let rh = Math.floor(Math.abs(player.y) / 14.5);
         if (rh < 0) rh = 0; if (rh > tm) rh = tm;
         document.getElementById('game-over-height').innerText = rh + 'm / ' + tm + 'm';
-        document.getElementById('game-over-jade').innerText = game.jadeCount;
+        const jadeEl = document.getElementById('game-over-jade');
+        if (jadeEl) jadeEl.innerText = game.jadeCount;
         document.getElementById('game-over-screen').classList.remove('hidden');
       }
     }
@@ -1257,13 +1426,35 @@ function generateLevel() {
       game.shards.push(new JadeShard(shardX, shardY));
     }
 
-    // Spawn enemies in Zone 1 (first level) on normal platforms wide enough
-    if (game.currentLevel === 1 && zone === 1 && pType === 'normal' && pWidth >= 80) {
-      const enemyRoll = rand.next();
-      if (enemyRoll < 0.45) {
-        const enemyX = platform.x + platform.width / 2 - 16;
-        const enemyY = platform.y - 36;
-        game.enemies.push(new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width));
+    // Spawn enemies on platforms — all levels, scaling difficulty by level & zone
+    {
+      // Base spawn chance scales up with level
+      const baseChance = [0, 0.40, 0.48, 0.55, 0.62, 0.68][game.currentLevel] || 0.40;
+      // Zone 1: all levels. Zone 2: level 2+. Zone 3: level 3+
+      const zoneAllowed = zone === 1 || (zone === 2 && game.currentLevel >= 2) || (zone === 3 && game.currentLevel >= 3);
+      // Enemies only spawn on platforms wide enough (normal/moving) — not crumbly/slippery
+      const typeAllowed = pType === 'normal' || (pType === 'moving' && game.currentLevel >= 3);
+      const widthOk = pWidth >= 75;
+
+      if (game.currentLevel > 1 && game.currentLevel !== 3 && zoneAllowed && typeAllowed && widthOk) {
+        // Zone 2 & 3 have slightly higher chance
+        const zoneBonus = zone === 2 ? 0.08 : zone === 3 ? 0.14 : 0;
+        const spawnChance = baseChance + zoneBonus;
+        const enemyRoll = rand.next();
+        if (enemyRoll < spawnChance) {
+          const enemyX = platform.x + platform.width / 2 - 16;
+          const enemyY = platform.y - 36;
+          // Speed: levels 1-3 scale up, levels 4-5 fixed at 2.0
+          let enemySpeed;
+          if (game.currentLevel >= 4) {
+            enemySpeed = 2.0;
+          } else {
+            const levelSpeedMult = 1 + (game.currentLevel - 1) * 0.35;
+            const zoneSpeedMult = 1 + (zone - 1) * 0.15;
+            enemySpeed = Math.min(1.2 * levelSpeedMult * zoneSpeedMult, 2.0);
+          }
+          game.enemies.push(new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed));
+        }
       }
     }
 
@@ -1472,6 +1663,9 @@ function triggerFallDamage(meters) {
     if (realHeight > targetMeters) realHeight = targetMeters;
     document.getElementById('game-over-height').innerText = `${realHeight}m / ${targetMeters}m`;
     
+    const jadeEl = document.getElementById('game-over-jade');
+    if (jadeEl) jadeEl.innerText = game.jadeCount;
+    
     // Show Game Over overlay
     document.getElementById('game-over-screen').classList.remove('hidden');
   }
@@ -1534,14 +1728,17 @@ function startGame() {
   document.getElementById('game-over-screen').classList.add('hidden');
   
   game.state = 'PLAYING';
-  game.currentLevel = 1;
+  game.currentLevel = game.pendingLevel || 1;
   game.jadeCount = 0;
   game.altitude = 0;
-  game.upgrades = { jump: 0, speed: 0, doublejump: 0, float: 0 };
+  game.upgrades = { jump: 0, speed: 0, doublejump: 0, float: 0, shooting: 0 };
+  game.projectiles = [];
+  game.shootCooldown = 0;
   document.getElementById('level-clear-screen').classList.add('hidden');
+  document.getElementById('level-select-screen').classList.add('hidden');
   
-  // Reset peak and total heights back to Level 1 values
-  const levelData = LEVELS_CONFIG[1];
+  // Reset peak and total heights to selected level values
+  const levelData = LEVELS_CONFIG[game.currentLevel];
   PEAK_HEIGHT = levelData.heightMeters * 14.5;
   TOTAL_HEIGHT = PEAK_HEIGHT + 500;
   
@@ -1661,37 +1858,26 @@ const CHINESE_QUESTIONS_BY_LEVEL = {
     { id: "2_7", q: "คำศัพท์ภาษาจีนคำว่า '羊' (yáng) แปลว่าอะไร?", o: ["สุนัข (Dog)", "วัว (Cow)", "แกะ (Sheep)", "ไก่ (Chicken)"], a: 2 },
     { id: "2_8", q: "คำศัพท์ภาษาจีนคำว่า '鸟' (niǎo) แปลว่าอะไร?", o: ["ปลา (Fish)", "กระต่าย (Rabbit)", "แมว (Cat)", "นก (Bird)"], a: 3 }
   ],
-  3: [ // Level 3 (Medium - colors, simple verbs, school objects)
-    { id: "3_1", q: "สีใดในภาษาจีนเรียกว่า '红色' (hóng sè)?", o: ["สีน้ำเงิน (Blue)", "สีเหลือง (Yellow)", "สีแดง (Red)", "สีเขียว (Green)"], a: 2 },
-    { id: "3_2", q: "สีใดในภาษาจีนเรียกว่า '绿色' (lǜ sè)?", o: ["สีเขียว (Green)", "สีแดง (Red)", "สีขาว (White)", "สีดำ (Black)"], a: 0 },
-    { id: "3_3", q: "คำกริยาภาษาจีนคำว่า '吃' (chī) แปลว่าอะไร?", o: ["ดื่ม (Drink)", "นอน (Sleep)", "กิน (Eat)", "เดิน (Walk)"], a: 2 },
-    { id: "3_4", q: "คำกริยาภาษาจีนคำว่า '喝' (hē) แปลว่าอะไร?", o: ["กิน (Eat)", "ดื่ม (Drink)", "พูด (Speak)", "ฟัง (Listen)"], a: 1 },
-    { id: "3_5", q: "คำว่า '老师' (lǎoshī) ในภาษาจีนหมายถึงใคร?", o: ["คุณหมอ (Doctor)", "นักเรียน (Student)", "คุณครู (Teacher)", "ตำรวจ (Police)"], a: 2 },
-    { id: "3_6", q: "คำศัพท์คำว่า '学生' (xuéshēng) หมายถึงใคร?", o: ["นักเรียน (Student)", "ทหาร (Soldier)", "พ่อค้า (Merchant)", "พยาบาล (Nurse)"], a: 0 },
-    { id: "3_7", q: "คำว่า '书' (shū) ในภาษาจีนแปลว่าอะไร?", o: ["ดินสอ (Pencil)", "สมุด (Notebook)", "หนังสือ (Book)", "ยางลบ (Eraser)"], a: 2 },
-    { id: "3_8", q: "เมื่อต้องการกล่าวขอบคุณในภาษาจีน ต้องพูดอย่างไร?", o: ["你好 (nǐ hǎo)", "谢谢 (xièxie)", "再见 (zài jiàn)", "没关系 (méi guān xi)"], a: 1 },
-    { id: "3_9", q: "คำศัพท์ภาษาจีนคำว่า '看' (kàn) แปลว่าอะไร?", o: ["เขียน (Write)", "อ่าน (Read)", "ดู/มอง (Look/See)", "ฟัง (Listen)"], a: 2 },
-    { id: "3_10", q: "คำศัพท์คำว่า '多' (duō) ตรงข้ามกับคำว่า '少' (shǎo) แปลว่าอะไรตามลำดับ?", o: ["มาก - น้อย", "น้อย - มาก", "ใหญ่ - เล็ก", "สูง - ต่ำ"], a: 0 },
-    { id: "3_11", q: "สีใดในภาษาจีนเรียกว่า '黄色' (huáng sè)?", o: ["สีแดง (Red)", "สีเขียว (Green)", "สีเหลือง (Yellow)", "สีส้ม (Orange)"], a: 2 },
-    { id: "3_12", q: "สีใดในภาษาจีนเรียกว่า '蓝色' (lán sè)?", o: ["สีน้ำเงิน/สีฟ้า (Blue)", "สีม่วง (Purple)", "สีขาว (White)", "สีดำ (Black)"], a: 0 },
-    { id: "3_13", q: "สีใดในภาษาจีนเรียกว่า '白色' (bái sè)?", o: ["สีดำ (Black)", "สีเทา (Grey)", "สีขาว (White)", "สีชมพู (Pink)"], a: 2 },
-    { id: "3_14", q: "สีใดในภาษาจีนเรียกว่า '黑色' (hēi sè)?", o: ["สีขาว (White)", "สีดำ (Black)", "สีน้ำตาล (Brown)", "สีทอง (Gold)"], a: 1 },
-    { id: "3_15", q: "คำกริยาภาษาจีนคำว่า '写' (xiě) แปลว่าอะไร?", o: ["อ่าน (Read)", "เขียน (Write)", "พูด (Speak)", "ฟัง (Listen)"], a: 1 },
-    { id: "3_16", q: "คำกริยาภาษาจีนคำว่า '听' (tīng) แปลว่าอะไร?", o: ["ฟัง (Listen)", "ดู (Look)", "กิน (Eat)", "นอน (Sleep)"], a: 0 },
-    { id: "3_17", q: "คำกริยาภาษาจีนคำว่า '说' (shuō) แปลว่าอะไร?", o: ["เขียน (Write)", "พูด (Speak)", "ร้องเพลง (Sing)", "เต้น (Dance)"], a: 1 },
-    { id: "3_18", q: "คำศัพท์ภาษาจีนคำว่า '笔' (bǐ) แปลว่าอะไร?", o: ["สมุด (Notebook)", "ไม้บรรทัด (Ruler)", "หนังสือ (Book)", "ปากกา/ดินสอ (Pen/Pencil)"], a: 3 },
-    { id: "3_19", q: "คำศัพท์ภาษาจีนคำว่า '本子' (běnzi) แปลว่าอะไร?", o: ["หนังสือ (Book)", "สมุดบันทึก (Notebook)", "กระเป๋า (Bag)", "ยางลบ (Eraser)"], a: 1 },
-    { id: "3_20", q: "คำศัพท์ภาษาจีนคำว่า '书包' (shūbāo) แปลว่าอะไร?", o: ["กระเป๋านักเรียน (School bag)", "กล่องดินสอ (Pencil case)", "โต๊ะเรียน (Desk)", "ห้องสมุด (Library)"], a: 0 },
-    { id: "3_21", q: "คำกริยาภาษาจีนคำว่า '去' (qù) แปลว่าอะไร?", o: ["มา (Come)", "ไป (Go)", "กลับ (Return)", "หยุด (Stop)"], a: 1 },
-    { id: "3_22", q: "คำกริยาภาษาจีนคำว่า '来' (lái) แปลว่าอะไร?", o: ["ไป (Go)", "มา (Come)", "เดิน (Walk)", "วิ่ง (Run)"], a: 1 },
-    { id: "3_23", q: "คำกริยาภาษาจีนคำว่า '买' (mǎi) แปลว่าอะไร?", o: ["ขาย (Sell)", "ซื้อ (Buy)", "เช่า (Rent)", "ยืม (Borrow)"], a: 1 },
-    { id: "3_24", q: "คำกริยาภาษาจีนคำว่า '卖' (mài) แปลว่าอะไร?", o: ["ซื้อ (Buy)", "ขาย (Sell)", "แจก (Giveaway)", "แลกเปลี่ยน (Exchange)"], a: 1 },
-    { id: "3_25", q: "คำศัพท์ภาษาจีนคำว่า '钱' (qián) แปลว่าอะไร?", o: ["ของขวัญ (Gift)", "เงิน (Money)", "หยก (Jade)", "ทอง (Gold)"], a: 1 },
-    { id: "3_26", q: "คำศัพท์ภาษาจีนคำว่า '衣服' (yīfu) แปลว่าอะไร?", o: ["กางเกง", "หมวก", "รองเท้า", "เสื้อผ้า"], a: 3 },
-    { id: "3_27", q: "คำศัพท์ภาษาจีนคำว่า '鞋' (xié) แปลว่าอะไร?", o: ["เสื้อ", "ถุงเท้า", "รองเท้า", "เข็มขัด"], a: 2 },
-    { id: "3_28", q: "คำศัพท์ภาษาจีนคำว่า '热' (rè) แปลว่าอะไร?", o: ["หนาว (Cold)", "ร้อน (Hot)", "อุ่น (Warm)", "เย็น (Cool)"], a: 1 },
-    { id: "3_29", q: "คำศัพท์ภาษาจีนคำว่า '冷' (lěng) แปลว่าอะไร?", o: ["ร้อน (Hot)", "อุ่น (Warm)", "หนาว (Cold)", "เย็นสบาย (Cool)"], a: 2 },
-    { id: "3_30", q: "คำศัพท์ภาษาจีนคำว่า '水饺' (shuǐjiǎo) แปลว่าอะไร?", o: ["ก๋วยเตี๋ยว (Noodles)", "เกี๊ยวน้ำ/เกี๊ยวซ่า (Dumplings)", "ข้าวผัด (Fried rice)", "ซาลาเปา (Steamed bun)"], a: 1 }
+  3: [ // Level 3 (Custom Chinese Vocabularies - Repeating Pool)
+    { id: "3_1", q: "คำศัพท์ภาษาจีนคำว่า 'ài' แปลว่าอะไร?", o: ["เกลียด (Hate)", "รัก (Love)", "ชอบ (Like)", "โกรธ (Angry)"], a: 1 },
+    { id: "3_2", q: "คำศัพท์ภาษาจีนคำว่า 'Tàiguó' แปลว่าอะไร?", o: ["ประเทศจีน (China)", "ประเทศญี่ปุ่น (Japan)", "ประเทศไทย (Thailand)", "ประเทศอังกฤษ (England)"], a: 2 },
+    { id: "3_3", q: "คำศัพท์ภาษาจีนคำว่า 'shuǐ' แปลว่าอะไร?", o: ["ไฟ (Fire)", "น้ำ (Water)", "ดิน (Earth)", "ลม (Wind)"], a: 1 },
+    { id: "3_4", q: "คำศัพท์ภาษาจีนคำว่า 'lái' แปลว่าอะไร?", o: ["ไป (Go)", "นอน (Sleep)", "นั่ง (Sit)", "มา (Come)"], a: 3 },
+    { id: "3_5", q: "ตัวเลขภาษาจีนคำว่า 'èr' หมายถึงจำนวนเท่าใด?", o: ["หนึ่ง (1)", "สอง (2)", "สาม (3)", "สี่ (4)"], a: 1 },
+    { id: "3_6", q: "ตัวเลขภาษาจีนคำว่า 'sān' หมายถึงจำนวนเท่าใด?", o: ["สาม (3)", "ห้า (5)", "เจ็ด (7)", "เก้า (9)"], a: 0 },
+    { id: "3_7", q: "ตัวเลขภาษาจีนคำว่า 'liù' หมายถึงจำนวนเท่าใด?", o: ["ห้า (5)", "หก (6)", "เจ็ด (7)", "แปด (8)"], a: 1 },
+    { id: "3_8", q: "ตัวเลขภาษาจีนคำว่า 'jiǔ' หมายถึงจำนวนเท่าใด?", o: ["แปด (8)", "เก้า (9)", "สิบ (10)", "หก (6)"], a: 1 },
+    { id: "3_9", q: "คำศัพท์ภาษาจีนคำว่า 'měi' แปลว่าอะไร?", o: ["ขี้เหร่ (Ugly)", "น่ากลัว (Scary)", "สวย / งาม (Beautiful)", "แปลก (Strange)"], a: 2 },
+    { id: "3_10", q: "คำอวัยวะร่างกายภาษาจีนคำว่า 'tuǐ' แปลว่าอะไร?", o: ["แขน (Arm)", "ขา (Leg)", "หัว (Head)", "หู (Ear)"], a: 1 },
+    { id: "3_11", q: "คำศัพท์ภาษาจีนคำว่า 'gǒu' แปลว่าอะไร?", o: ["แมว (Cat)", "นก (Bird)", "วัว (Cow)", "สุนัข (Dog)"], a: 3 },
+    { id: "3_12", q: "คำศัพท์ภาษาจีนคำว่า 'niú' แปลว่าอะไร?", o: ["วัว (Cow)", "แกะ (Sheep)", "เสือ (Tiger)", "สิงโต (Lion)"], a: 0 },
+    { id: "3_13", q: "คำอวัยวะร่างกายภาษาจีนคำว่า 'tóu' แปลว่าอะไร?", o: ["หัว (Head)", "ตา (Eye)", "จมูก (Nose)", "ปาก (Mouse)"], a: 0 },
+    { id: "3_14", q: "คำศัพท์ภาษาจีนคำว่า 'tóng xué men' แปลว่าอะไร?", o: ["คุณครูทั้งหลาย (Teachers)", "นักเรียนทั้งหลาย / เพื่อนนักเรียน (Students)", "ผู้ปกครอง (Parents)", "คนทำความสะอาด (Cleaners)"], a: 1 },
+    { id: "3_15", q: "คำศัพท์ภาษาจีนคำว่า 'hǎo' แปลว่าอะไร?", o: ["เลว (Bad)", "ดี (Good)", "แย่ (Terrible)", "เฉยๆ (Normal)"], a: 1 },
+    { id: "3_16", q: "คำกริยาภาษาจีนคำว่า 'pǎo' แปลว่าอะไร?", o: ["เดิน (Walk)", "วิ่ง (Run)", "กระโดด (Jump)", "ปีน (Climb)"], a: 1 },
+    { id: "3_17", q: "คำศัพท์ภาษาจีนคำว่า 'qiú' แปลว่าอะไร?", o: ["หนังสือ (Book)", "ลูกบอล (Ball)", "โต๊ะ (Table)", "เก้าอี้ (Chair)"], a: 1 },
+    { id: "3_18", q: "คำศัพท์กลุ่มคำว่า 'tóu tuǐ shuǐ qiú' เมื่อแปลรวมกันตามลำดับ หมายถึงข้อใด?", o: ["น้ำ วัว วิ่ง บิน", "หัว ขา น้ำ ลูกบอล", "วัว ขา หัว ลูกบอล", "สุนัข หัว รัก ประเทศไทย"], a: 1 },
+    { id: "3_19", q: "คำกริยาภาษาจีนคำว่า 'fēi' แปลว่าอะไร?", o: ["ว่ายน้ำ (Swim)", "กระโดด (Jump)", "บิน (Fly)", "มุด (Dive)"], a: 2 }
   ],
   4: [ // Level 4 (Hard - places, daily actions, common sentences)
     { id: "4_1", q: "สถานที่ใดภาษาจีนเรียกว่า '学校' (xuéxiào)?", o: ["บ้าน (Home)", "โรงพยาบาล (Hospital)", "โรงเรียน (School)", "สวนสาธารณะ (Park)"], a: 2 },
@@ -1778,8 +1964,8 @@ function triggerQuestion(milestone) {
   // Filter for unused questions in the current level
   let unusedQuestions = questionPool.filter(q => !game.askedQuestionIds.has(q.id));
   
-  // If we are on Level 1 or Level 2 and all questions are used, reset asked questions for that level to loop them
-  if ((game.currentLevel === 1 || game.currentLevel === 2) && unusedQuestions.length === 0) {
+  // If we are on Level 1, Level 2, or Level 3 and all questions are used, reset asked questions for that level to loop them
+  if ((game.currentLevel === 1 || game.currentLevel === 2 || game.currentLevel === 3) && unusedQuestions.length === 0) {
     questionPool.forEach(q => game.askedQuestionIds.delete(q.id));
     unusedQuestions = questionPool;
   }
@@ -1943,7 +2129,7 @@ function updateHUD() {
 
 // Update Shop items button levels and states
 function updateShopUI() {
-  const categories = ['jump', 'speed', 'doublejump', 'float'];
+  const categories = ['jump', 'speed', 'doublejump', 'float', 'shooting'];
   
   categories.forEach(cat => {
     const lvlSpan = document.getElementById(`lvl-${cat}`);
@@ -2029,6 +2215,9 @@ window.addEventListener('keydown', e => {
   if ((k === ' ' || e.code === 'Space' || e.key === 'ArrowUp' || e.code === 'ArrowUp' || k === 'w' || e.code === 'KeyW') && !game.shopOpen && !e.repeat) {
     player.jump();
   }
+  if ((k === 'f' || e.code === 'KeyF') && !game.shopOpen && !e.repeat) {
+    playerShoot();
+  }
 });
 
 window.addEventListener('keyup', e => {
@@ -2062,6 +2251,13 @@ document.getElementById('btn-jump').addEventListener('touchstart', e => {
   e.preventDefault();
   if (game.state === 'PLAYING' && !game.shopOpen) {
     player.jump();
+  }
+});
+
+document.getElementById('btn-shoot').addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (game.state === 'PLAYING' && !game.shopOpen) {
+    playerShoot();
   }
 });
 
@@ -2103,6 +2299,7 @@ document.getElementById('buy-jump').addEventListener('click', () => game.buyUpgr
 document.getElementById('buy-speed').addEventListener('click', () => game.buyUpgrade('speed'));
 document.getElementById('buy-doublejump').addEventListener('click', () => game.buyUpgrade('doublejump'));
 document.getElementById('buy-float').addEventListener('click', () => game.buyUpgrade('float'));
+document.getElementById('buy-shooting').addEventListener('click', () => game.buyUpgrade('shooting'));
 document.getElementById('buy-heart').addEventListener('click', () => game.buyHeart());
 
 // Sound Toggle click
@@ -2723,8 +2920,18 @@ function drawAllCharacterPreviews() {
 // Init buttons
 document.getElementById('btn-start').addEventListener('click', () => {
   document.getElementById('main-menu').classList.add('hidden');
-  document.getElementById('char-select-screen').classList.remove('hidden');
-  drawAllCharacterPreviews();
+  document.getElementById('level-select-screen').classList.remove('hidden');
+});
+
+// Level Selection Setup
+document.querySelectorAll('.btn-select-level').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const level = parseInt(btn.getAttribute('data-level'));
+    game.pendingLevel = level;
+    document.getElementById('level-select-screen').classList.add('hidden');
+    document.getElementById('char-select-screen').classList.remove('hidden');
+    drawAllCharacterPreviews();
+  });
 });
 
 // Character Selection Setup
@@ -2743,53 +2950,35 @@ document.getElementById('btn-next-level').addEventListener('click', startNextLev
 
 document.getElementById('btn-game-over-restart').addEventListener('click', () => {
   document.getElementById('game-over-screen').classList.add('hidden');
-  document.getElementById('char-select-screen').classList.remove('hidden');
-  drawAllCharacterPreviews();
+  document.getElementById('level-select-screen').classList.remove('hidden');
 });
 
 
 // --- PARALLAX BACKGROUND RENDER ---
 function drawParallaxBackgrounds() {
   const camY = camera.y;
+  const lvl = game.currentLevel;
 
-  // Zone 1: Bamboo Forest (Red/Green Slate Gradient + Art)
-  if (camY >= -TOTAL_HEIGHT * 0.4) {
+  if (lvl === 1) {
+    // Level 1: Bamboo Valley (🎋)
     if (bgLoaded.bamboo) {
-      // Infinite tiled vertical parallax
       const py = -camY * 0.2 % V_HEIGHT;
       ctx.drawImage(bgImages.bamboo, 0, py, V_WIDTH, V_HEIGHT);
       ctx.drawImage(bgImages.bamboo, 0, py - V_HEIGHT, V_WIDTH, V_HEIGHT);
     } else {
-      // Fallback bamboo gradient
       const grad = ctx.createLinearGradient(0, 0, 0, V_HEIGHT);
       grad.addColorStop(0, '#101614');
       grad.addColorStop(1, '#1b2922');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
     }
-  }
-
-  // Zone 2: Cloud Temple (Sunset Gold/Pink clouds)
-  const zone2Active = camY < -TOTAL_HEIGHT * 0.2 && camY > -TOTAL_HEIGHT * 0.8;
-  if (zone2Active) {
-    ctx.save();
-    // Fade alpha based on range
-    if (camY >= -TOTAL_HEIGHT * 0.33) {
-      // Fade in from zone 1
-      const alpha = Math.abs(camY + TOTAL_HEIGHT * 0.2) / (TOTAL_HEIGHT * 0.13);
-      ctx.globalAlpha = Math.min(1, Math.max(0, alpha));
-    } else if (camY <= -TOTAL_HEIGHT * 0.66) {
-      // Fade out to zone 3
-      const alpha = 1 - (Math.abs(camY + TOTAL_HEIGHT * 0.66) / (TOTAL_HEIGHT * 0.14));
-      ctx.globalAlpha = Math.min(1, Math.max(0, alpha));
-    }
-    
+  } else if (lvl === 2) {
+    // Level 2: Cloud Temple (☁️)
     if (bgLoaded.clouds) {
       const py = -camY * 0.15 % V_HEIGHT;
       ctx.drawImage(bgImages.clouds, 0, py, V_WIDTH, V_HEIGHT);
       ctx.drawImage(bgImages.clouds, 0, py - V_HEIGHT, V_WIDTH, V_HEIGHT);
     } else {
-      // Sunset cloud gradient
       const grad = ctx.createLinearGradient(0, 0, 0, V_HEIGHT);
       grad.addColorStop(0, '#36182c');
       grad.addColorStop(0.5, '#6a2a4b');
@@ -2797,23 +2986,13 @@ function drawParallaxBackgrounds() {
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
     }
-    ctx.restore();
-  }
-
-  // Zone 3: Cosmic Tao (Yin-Yang Starry Space)
-  if (camY <= -TOTAL_HEIGHT * 0.6) {
-    ctx.save();
-    // Fade in
-    if (camY >= -TOTAL_HEIGHT * 0.66) {
-      const alpha = Math.abs(camY + TOTAL_HEIGHT * 0.6) / (TOTAL_HEIGHT * 0.06);
-      ctx.globalAlpha = Math.min(1, Math.max(0, alpha));
-    }
+  } else if (lvl === 3) {
+    // Level 3: Cosmic Tao (🌌)
     if (bgLoaded.cosmic) {
       const py = -camY * 0.08 % V_HEIGHT;
       ctx.drawImage(bgImages.cosmic, 0, py, V_WIDTH, V_HEIGHT);
       ctx.drawImage(bgImages.cosmic, 0, py - V_HEIGHT, V_WIDTH, V_HEIGHT);
     } else {
-      // Cosmic Space Gradient
       const grad = ctx.createLinearGradient(0, 0, 0, V_HEIGHT);
       grad.addColorStop(0, '#040508');
       grad.addColorStop(0.7, '#0b0f19');
@@ -2833,7 +3012,40 @@ function drawParallaxBackgrounds() {
         ctx.fill();
       }
     }
-    ctx.restore();
+  } else if (lvl === 4) {
+    // Level 4: High Heavens (⚡)
+    if (bgLoaded.heavens) {
+      const py = -camY * 0.12 % V_HEIGHT;
+      ctx.drawImage(bgImages.heavens, 0, py, V_WIDTH, V_HEIGHT);
+      ctx.drawImage(bgImages.heavens, 0, py - V_HEIGHT, V_WIDTH, V_HEIGHT);
+    } else {
+      const grad = ctx.createLinearGradient(0, 0, 0, V_HEIGHT);
+      grad.addColorStop(0, '#0f0c1b');
+      grad.addColorStop(0.5, '#201a30');
+      grad.addColorStop(1, '#2f2b5c');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+    }
+
+    // Dynamic lightning flashes on Level 4
+    if (Math.random() < 0.008) {
+      ctx.fillStyle = 'rgba(235, 245, 255, 0.4)';
+      ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+    }
+  } else if (lvl === 5) {
+    // Level 5: Infinite Summit (🐉)
+    if (bgLoaded.summit) {
+      const py = -camY * 0.1 % V_HEIGHT;
+      ctx.drawImage(bgImages.summit, 0, py, V_WIDTH, V_HEIGHT);
+      ctx.drawImage(bgImages.summit, 0, py - V_HEIGHT, V_WIDTH, V_HEIGHT);
+    } else {
+      const grad = ctx.createLinearGradient(0, 0, 0, V_HEIGHT);
+      grad.addColorStop(0, '#2d1502');
+      grad.addColorStop(0.5, '#5c3d0b');
+      grad.addColorStop(1, '#b08a33');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+    }
   }
 }
 
@@ -2888,6 +3100,15 @@ function render() {
     }
   }
 
+  // 6b. Draw Projectiles
+  if (game.projectiles) {
+    for (let proj of game.projectiles) {
+      if (proj.y + proj.height > camera.y && proj.y < camera.y + V_HEIGHT) {
+        proj.draw(ctx);
+      }
+    }
+  }
+
   // 7. Draw Player Monk (blink when invincible)
   if (player.invincibleTimer <= 0 || Math.floor(player.invincibleTimer * 10) % 2 === 0) {
     player.draw(ctx);
@@ -2938,6 +3159,17 @@ function gameLoop(timestamp) {
       if (game.enemies) {
         for (let enemy of game.enemies) {
           enemy.update(dt);
+        }
+      }
+
+      // 4c. Update projectiles
+      if (game.projectiles) {
+        for (let i = game.projectiles.length - 1; i >= 0; i--) {
+          const proj = game.projectiles[i];
+          proj.update(dt);
+          if (!proj.alive) {
+            game.projectiles.splice(i, 1);
+          }
         }
       }
 
