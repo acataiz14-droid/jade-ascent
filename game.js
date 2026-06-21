@@ -12,7 +12,7 @@ const LEVELS_CONFIG = {
   3: { name: "ด่าน 3: เต๋าแห่งจักรวาล (Cosmic Tao)", heightMeters: 1500, emoji: "🌌" },
   4: { name: "ด่าน 4: แดนสวรรค์เบื้องบน (High Heavens)", heightMeters: 2500, emoji: "⚡" },
   5: { name: "ด่าน 5: ยอดเขาไร้สิ้นสุด (Infinite Summit)", heightMeters: 5000, emoji: "🐉" },
-  9: { name: "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸", heightMeters: 1500, emoji: "🌸", isSpecial: true }
+  9: { name: "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸", heightMeters: 1000, emoji: "🌸", isSpecial: true }
 };
 
 let PEAK_HEIGHT = LEVELS_CONFIG[1].heightMeters * 14.5;
@@ -1785,7 +1785,7 @@ function winGame() {
     if (winDesc) {
       winDesc.innerText = "คุณสามารถปีนผ่านด่านพิเศษและทำแบบฝึกหัดคำศัพท์ของน้องเก้าได้สำเร็จ! ยอดเยี่ยมมากครับ!";
     }
-    if (finalAltitude) finalAltitude.innerText = "1500m";
+    if (finalAltitude) finalAltitude.innerText = "1000m";
   } else {
     if (winTitle) winTitle.innerText = "CELESTIAL REACHED";
     if (winSubtitle) winSubtitle.innerText = "บรรลุสู่สวรรค์เก้าชั้นฟ้า! 🐉";
