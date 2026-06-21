@@ -709,6 +709,15 @@ kbd {
   font-weight: 800;
 }
 
+.shoot-btn {
+  width: 80px;
+  height: 80px;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #005533, var(--jade));
+  border-color: rgba(0, 255, 170, 0.3);
+  font-weight: 800;
+}
+
 .mobile-shop-btn {
   font-size: 1.5rem;
   background: linear-gradient(135deg, rgba(0,168,107,0.5), rgba(18,213,138,0.3));
@@ -830,6 +839,11 @@ kbd {
     width: 65px;
     height: 65px;
     font-size: 0.85rem;
+  }
+  .shoot-btn {
+    width: 65px;
+    height: 65px;
+    font-size: 1.2rem;
   }
   .hud-container {
     top: 5px;
@@ -967,10 +981,136 @@ kbd {
   25% { transform: translate(-8px, 0); }
   75% { transform: translate(8px, 0); }
 }
+
+/* --- LEVEL SELECTION SCREEN --- */
+.level-select-panel {
+  max-width: 900px !important;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 14px;
+  width: 100%;
+  margin-top: 18px;
+}
+
+.level-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 20px 14px 16px;
+  text-align: center;
+  transition: all 0.35s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.level-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.level-card:hover::before {
+  opacity: 1;
+}
+
+.level-card:hover {
+  background: rgba(255, 215, 0, 0.06);
+  border-color: rgba(255, 215, 0, 0.4);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(255, 215, 0, 0.15);
+}
+
+.level-emoji {
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+}
+
+.level-card:hover .level-emoji {
+  transform: scale(1.25) rotate(-5deg);
+}
+
+.level-card h3 {
+  font-family: var(--font-title);
+  color: var(--gold);
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.level-name {
+  font-size: 0.9rem;
+  color: var(--white);
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.level-name-en {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.level-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.level-height {
+  font-size: 0.82rem;
+  color: var(--jade);
+  font-weight: 600;
+}
+
+.level-difficulty {
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+}
+
+.diff-1 { color: #4ade80; }
+.diff-2 { color: #60a5fa; }
+.diff-3 { color: #c084fc; }
+.diff-4 { color: #fb923c; }
+.diff-5 { color: #f87171; }
+
+.btn-select-level {
+  width: 100%;
+  padding: 8px 14px;
+  font-size: 0.88rem;
+  border-radius: 20px;
+  margin-top: auto;
+}
+
+.level-card:hover .btn-select-level {
+  background: var(--gold);
+  color: var(--bg-slate);
+  border-color: var(--gold);
+}
+
 /* --- CHARACTER SELECTION SCREEN --- */
 .char-select-panel {
   max-width: 1000px !important;
   width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .char-grid {
