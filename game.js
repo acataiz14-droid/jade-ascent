@@ -1168,6 +1168,8 @@ class Enemy {
     this.walkCycle = 0;
     this.eyeBlink = 0;
     this.speed = speed;
+    this.startY = y;
+    this.isFlying = false;
   }
 
   update(dt) {
@@ -1179,23 +1181,34 @@ class Enemy {
       if (this.deathTimer <= 0) { this.alive = false; this.dying = false; }
       return;
     }
-    this.vy += 0.45 * dt * 60;
-    if (this.vy > 15) this.vy = 15;
-    this.x += this.vx * dt * 60;
-    this.walkCycle += Math.abs(this.vx) * dt * 60 * 0.15;
-    this.eyeBlink += dt;
-    if (this.x <= this.patrolLeft) { this.vx = Math.abs(this.vx); this.facingLeft = false; }
-    else if (this.x + this.width >= this.patrolRight) { this.vx = -Math.abs(this.vx); this.facingLeft = true; }
-    this.y += this.vy * dt * 60;
-    this.grounded = false;
-    for (const plat of game.platforms) {
-      if (this.x < plat.x + plat.width && this.x + this.width > plat.x &&
-          this.y + this.height >= plat.y && this.y + this.height <= plat.y + plat.height + 12 && this.vy >= 0) {
-        this.y = plat.y - this.height; this.vy = 0; this.grounded = true;
+    if (this.isFlying) {
+      this.x += this.vx * dt * 60;
+      this.walkCycle += Math.abs(this.vx) * dt * 60 * 0.15;
+      this.eyeBlink += dt;
+      this.y = this.startY + Math.sin(this.walkCycle * 0.5) * 12;
+      if (this.x <= this.patrolLeft) { this.vx = Math.abs(this.vx); this.facingLeft = false; }
+      else if (this.x + this.width >= this.patrolRight) { this.vx = -Math.abs(this.vx); this.facingLeft = true; }
+      if (this.x < 0) { this.x = 0; this.vx = Math.abs(this.vx); }
+      if (this.x + this.width > V_WIDTH) { this.x = V_WIDTH - this.width; this.vx = -Math.abs(this.vx); }
+    } else {
+      this.vy += 0.45 * dt * 60;
+      if (this.vy > 15) this.vy = 15;
+      this.x += this.vx * dt * 60;
+      this.walkCycle += Math.abs(this.vx) * dt * 60 * 0.15;
+      this.eyeBlink += dt;
+      if (this.x <= this.patrolLeft) { this.vx = Math.abs(this.vx); this.facingLeft = false; }
+      else if (this.x + this.width >= this.patrolRight) { this.vx = -Math.abs(this.vx); this.facingLeft = true; }
+      this.y += this.vy * dt * 60;
+      this.grounded = false;
+      for (const plat of game.platforms) {
+        if (this.x < plat.x + plat.width && this.x + this.width > plat.x &&
+            this.y + this.height >= plat.y && this.y + this.height <= plat.y + plat.height + 12 && this.vy >= 0) {
+          this.y = plat.y - this.height; this.vy = 0; this.grounded = true;
+        }
       }
+      if (this.x < 0) { this.x = 0; this.vx = Math.abs(this.vx); }
+      if (this.x + this.width > V_WIDTH) { this.x = V_WIDTH - this.width; this.vx = -Math.abs(this.vx); }
     }
-    if (this.x < 0) { this.x = 0; this.vx = Math.abs(this.vx); }
-    if (this.x + this.width > V_WIDTH) { this.x = V_WIDTH - this.width; this.vx = -Math.abs(this.vx); }
   }
 
   die() {
@@ -1231,9 +1244,33 @@ class Enemy {
     ctx.beginPath(); ctx.ellipse(cx, this.y+this.height+2, 14, 4, 0, 0, Math.PI*2); ctx.fill();
     // Body
     const grad = ctx.createRadialGradient(cx-4, cy-4, 2, cx, cy, 18);
-    grad.addColorStop(0, '#86efac'); grad.addColorStop(0.6, '#22c55e'); grad.addColorStop(1, '#15803d');
+    if (this.isFlying) {
+      grad.addColorStop(0, '#f472b6'); grad.addColorStop(0.6, '#a855f7'); grad.addColorStop(1, '#6b21a8');
+    } else {
+      grad.addColorStop(0, '#86efac'); grad.addColorStop(0.6, '#22c55e'); grad.addColorStop(1, '#15803d');
+    }
     ctx.fillStyle = grad;
     ctx.beginPath(); ctx.ellipse(cx, cy+4, 16, 14, 0, 0, Math.PI*2); ctx.fill();
+
+    // Wings (only if flying)
+    if (this.isFlying) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      
+      // Left Wing
+      ctx.save();
+      ctx.translate(cx - 14, cy - 2);
+      const flap = Math.sin(this.walkCycle * 2.5) * 0.4;
+      ctx.rotate(-0.4 + flap);
+      ctx.beginPath(); ctx.ellipse(0, 0, 10, 4, 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+      
+      // Right Wing
+      ctx.save();
+      ctx.translate(cx + 14, cy - 2);
+      ctx.rotate(0.4 - flap);
+      ctx.beginPath(); ctx.ellipse(0, 0, 10, 4, 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
     // Highlight
     ctx.fillStyle = 'rgba(255,255,255,0.22)';
     ctx.beginPath(); ctx.ellipse(cx-5, cy-3, 7, 5, -0.3, 0, Math.PI*2); ctx.fill();
@@ -1439,23 +1476,41 @@ function generateLevel() {
       const widthOk = pWidth >= 75;
 
       if (game.currentLevel > 1 && game.currentLevel !== 9 && zoneAllowed && typeAllowed && widthOk) {
-        // Zone 2 & 3 have slightly higher chance
-        const zoneBonus = zone === 2 ? 0.08 : zone === 3 ? 0.14 : 0;
-        const spawnChance = baseChance + zoneBonus;
-        const enemyRoll = rand.next();
-        if (enemyRoll < spawnChance) {
-          const enemyX = platform.x + platform.width / 2 - 16;
-          const enemyY = platform.y - 36;
-          // Speed: levels 1-3 scale up, levels 4-5 fixed at 2.0
-          let enemySpeed;
-          if (game.currentLevel >= 4) {
-            enemySpeed = 2.0;
-          } else {
-            const levelSpeedMult = 1 + (game.currentLevel - 1) * 0.35;
-            const zoneSpeedMult = 1 + (zone - 1) * 0.15;
-            enemySpeed = Math.min(1.2 * levelSpeedMult * zoneSpeedMult, 2.0);
+        const platMeters = Math.floor(Math.abs(platform.y) / 14.5);
+        let allowed = true;
+        if (game.currentLevel === 3) {
+          if (platMeters < 300) {
+            allowed = false;
           }
-          game.enemies.push(new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed));
+        }
+        
+        if (allowed) {
+          // Zone 2 & 3 have slightly higher chance
+          const zoneBonus = zone === 2 ? 0.08 : zone === 3 ? 0.14 : 0;
+          const spawnChance = baseChance + zoneBonus;
+          const enemyRoll = rand.next();
+          if (enemyRoll < spawnChance) {
+            const enemyX = platform.x + platform.width / 2 - 16;
+            const enemyY = platform.y - 36;
+            // Speed: levels 1-3 scale up, levels 4-5 fixed at 2.0
+            let enemySpeed;
+            if (game.currentLevel >= 4) {
+              enemySpeed = 2.0;
+            } else {
+              const levelSpeedMult = 1 + (game.currentLevel - 1) * 0.35;
+              const zoneSpeedMult = 1 + (zone - 1) * 0.15;
+              enemySpeed = Math.min(1.2 * levelSpeedMult * zoneSpeedMult, 2.0);
+            }
+            const enemy = new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed);
+            if (game.currentLevel === 3 && platMeters >= 600) {
+              if (rand.next() < 0.6) {
+                enemy.isFlying = true;
+                enemy.y = platform.y - 50;
+                enemy.startY = enemy.y;
+              }
+            }
+            game.enemies.push(enemy);
+          }
         }
       }
     }
