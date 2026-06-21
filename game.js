@@ -9,9 +9,10 @@ const V_HEIGHT = 950;
 const LEVELS_CONFIG = {
   1: { name: "ด่าน 1: หุบเขาไม้ไผ่ (Bamboo Valley)", heightMeters: 500, emoji: "🎋" },
   2: { name: "ด่าน 2: วิหารลอยฟ้า (Cloud Temple)", heightMeters: 1000, emoji: "☁️" },
-  3: { name: "ด่าน 3: ด่านของน้องเก้า 🌸🧸", heightMeters: 1500, emoji: "🌌" },
+  3: { name: "ด่าน 3: เต๋าแห่งจักรวาล (Cosmic Tao)", heightMeters: 1500, emoji: "🌌" },
   4: { name: "ด่าน 4: แดนสวรรค์เบื้องบน (High Heavens)", heightMeters: 2500, emoji: "⚡" },
-  5: { name: "ด่าน 5: ยอดเขาไร้สิ้นสุด (Infinite Summit)", heightMeters: 5000, emoji: "🐉" }
+  5: { name: "ด่าน 5: ยอดเขาไร้สิ้นสุด (Infinite Summit)", heightMeters: 5000, emoji: "🐉" },
+  9: { name: "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸", heightMeters: 1500, emoji: "🌸", isSpecial: true }
 };
 
 let PEAK_HEIGHT = LEVELS_CONFIG[1].heightMeters * 14.5;
@@ -1315,7 +1316,8 @@ function checkEnemyCollisions(dt) {
         audio.playDefeat();
         document.getElementById('hud').classList.add('hidden');
         document.getElementById('question-modal').classList.add('hidden');
-        document.getElementById('game-over-level').innerText = 'ด่าน ' + game.currentLevel;
+        const lvlText = LEVELS_CONFIG[game.currentLevel].isSpecial ? "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸" : 'ด่าน ' + game.currentLevel;
+        document.getElementById('game-over-level').innerText = lvlText;
         const tm = LEVELS_CONFIG[game.currentLevel].heightMeters;
         let rh = Math.floor(Math.abs(player.y) / 14.5);
         if (rh < 0) rh = 0; if (rh > tm) rh = tm;
@@ -1436,7 +1438,7 @@ function generateLevel() {
       const typeAllowed = pType === 'normal' || (pType === 'moving' && game.currentLevel >= 3);
       const widthOk = pWidth >= 75;
 
-      if (game.currentLevel > 1 && game.currentLevel !== 3 && zoneAllowed && typeAllowed && widthOk) {
+      if (game.currentLevel > 1 && game.currentLevel !== 9 && zoneAllowed && typeAllowed && widthOk) {
         // Zone 2 & 3 have slightly higher chance
         const zoneBonus = zone === 2 ? 0.08 : zone === 3 ? 0.14 : 0;
         const spawnChance = baseChance + zoneBonus;
@@ -1655,7 +1657,8 @@ function triggerFallDamage(meters) {
     document.getElementById('question-modal').classList.add('hidden');
     
     // Populate stats for Game Over screen
-    document.getElementById('game-over-level').innerText = `ด่าน ${game.currentLevel}`;
+    const lvlText = LEVELS_CONFIG[game.currentLevel].isSpecial ? "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸" : `ด่าน ${game.currentLevel}`;
+    document.getElementById('game-over-level').innerText = lvlText;
     
     const targetMeters = LEVELS_CONFIG[game.currentLevel].heightMeters;
     let realHeight = Math.floor(Math.abs(player.y) / 14.5);
@@ -1770,6 +1773,28 @@ function winGame() {
   game.state = 'WIN';
   audio.playWin();
   document.getElementById('final-jade').innerText = game.jadeCount;
+  
+  const winTitle = document.querySelector('#win-screen .congrats-title');
+  const winSubtitle = document.querySelector('#win-screen .congrats-subtitle');
+  const winDesc = document.querySelector('#win-screen .congrats-desc');
+  const finalAltitude = document.querySelector('#win-screen .stat-box p strong.gold-text');
+  
+  if (game.currentLevel === 9) {
+    if (winTitle) winTitle.innerText = "SPECIAL CLEAR";
+    if (winSubtitle) winSubtitle.innerText = "ผ่านด่านพิเศษของน้องเก้าสำเร็จ! 🌸🧸";
+    if (winDesc) {
+      winDesc.innerText = "คุณสามารถปีนผ่านด่านพิเศษและทำแบบฝึกหัดคำศัพท์ของน้องเก้าได้สำเร็จ! ยอดเยี่ยมมากครับ!";
+    }
+    if (finalAltitude) finalAltitude.innerText = "1500m";
+  } else {
+    if (winTitle) winTitle.innerText = "CELESTIAL REACHED";
+    if (winSubtitle) winSubtitle.innerText = "บรรลุสู่สวรรค์เก้าชั้นฟ้า! 🐉";
+    if (winDesc) {
+      winDesc.innerText = "You successfully scaled the legendary peaks and entered the Celestial Realm! Your agility and wisdom have earned you immortality.";
+    }
+    if (finalAltitude) finalAltitude.innerText = "5000m";
+  }
+  
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('win-screen').classList.remove('hidden');
 }
@@ -1777,8 +1802,8 @@ function winGame() {
 function handleLevelCleared() {
   audio.playGong();
   
-  if (game.currentLevel === 5) {
-    // Reached peak of Level 5! Player wins the entire game!
+  if (game.currentLevel === 5 || game.currentLevel === 9) {
+    // Reached peak of Level 5 or Level 9! Player wins the entire game!
     winGame();
   } else {
     // Level cleared! Show the level-clear-screen modal
@@ -1858,26 +1883,35 @@ const CHINESE_QUESTIONS_BY_LEVEL = {
     { id: "2_7", q: "คำศัพท์ภาษาจีนคำว่า '羊' (yáng) แปลว่าอะไร?", o: ["สุนัข (Dog)", "วัว (Cow)", "แกะ (Sheep)", "ไก่ (Chicken)"], a: 2 },
     { id: "2_8", q: "คำศัพท์ภาษาจีนคำว่า '鸟' (niǎo) แปลว่าอะไร?", o: ["ปลา (Fish)", "กระต่าย (Rabbit)", "แมว (Cat)", "นก (Bird)"], a: 3 }
   ],
-  3: [ // Level 3 (Custom Chinese Vocabularies - Repeating Pool)
-    { id: "3_1", q: "คำศัพท์ภาษาจีนคำว่า 'ài' แปลว่าอะไร?", o: ["เกลียด (Hate)", "รัก (Love)", "ชอบ (Like)", "โกรธ (Angry)"], a: 1 },
-    { id: "3_2", q: "คำศัพท์ภาษาจีนคำว่า 'Tàiguó' แปลว่าอะไร?", o: ["ประเทศจีน (China)", "ประเทศญี่ปุ่น (Japan)", "ประเทศไทย (Thailand)", "ประเทศอังกฤษ (England)"], a: 2 },
-    { id: "3_3", q: "คำศัพท์ภาษาจีนคำว่า 'shuǐ' แปลว่าอะไร?", o: ["ไฟ (Fire)", "น้ำ (Water)", "ดิน (Earth)", "ลม (Wind)"], a: 1 },
-    { id: "3_4", q: "คำศัพท์ภาษาจีนคำว่า 'lái' แปลว่าอะไร?", o: ["ไป (Go)", "นอน (Sleep)", "นั่ง (Sit)", "มา (Come)"], a: 3 },
-    { id: "3_5", q: "ตัวเลขภาษาจีนคำว่า 'èr' หมายถึงจำนวนเท่าใด?", o: ["หนึ่ง (1)", "สอง (2)", "สาม (3)", "สี่ (4)"], a: 1 },
-    { id: "3_6", q: "ตัวเลขภาษาจีนคำว่า 'sān' หมายถึงจำนวนเท่าใด?", o: ["สาม (3)", "ห้า (5)", "เจ็ด (7)", "เก้า (9)"], a: 0 },
-    { id: "3_7", q: "ตัวเลขภาษาจีนคำว่า 'liù' หมายถึงจำนวนเท่าใด?", o: ["ห้า (5)", "หก (6)", "เจ็ด (7)", "แปด (8)"], a: 1 },
-    { id: "3_8", q: "ตัวเลขภาษาจีนคำว่า 'jiǔ' หมายถึงจำนวนเท่าใด?", o: ["แปด (8)", "เก้า (9)", "สิบ (10)", "หก (6)"], a: 1 },
-    { id: "3_9", q: "คำศัพท์ภาษาจีนคำว่า 'mèi' แปลว่าอะไร?", o: ["พี่สาว (Elder sister)", "น้องสาว (Younger sister)", "คุณแม่ (Mother)", "เพื่อน (Friend)"], a: 1 },
-    { id: "3_10", q: "คำอวัยวะร่างกายภาษาจีนคำว่า 'tuǐ' แปลว่าอะไร?", o: ["แขน (Arm)", "ขา (Leg)", "หัว (Head)", "หู (Ear)"], a: 1 },
-    { id: "3_11", q: "คำศัพท์ภาษาจีนคำว่า 'gǒu' แปลว่าอะไร?", o: ["แมว (Cat)", "นก (Bird)", "วัว (Cow)", "สุนัข (Dog)"], a: 3 },
-    { id: "3_12", q: "คำศัพท์ภาษาจีนคำว่า 'niú' แปลว่าอะไร?", o: ["วัว (Cow)", "แกะ (Sheep)", "เสือ (Tiger)", "สิงโต (Lion)"], a: 0 },
-    { id: "3_13", q: "คำอวัยวะร่างกายภาษาจีนคำว่า 'tóu' แปลว่าอะไร?", o: ["หัว (Head)", "ตา (Eye)", "จมูก (Nose)", "ปาก (Mouse)"], a: 0 },
-    { id: "3_14", q: "คำศัพท์ภาษาจีนคำว่า 'tóng xué men' แปลว่าอะไร?", o: ["คุณครูทั้งหลาย (Teachers)", "นักเรียนทั้งหลาย / เพื่อนนักเรียน (Students)", "ผู้ปกครอง (Parents)", "คนทำความสะอาด (Cleaners)"], a: 1 },
-    { id: "3_15", q: "คำศัพท์ภาษาจีนคำว่า 'hǎo' แปลว่าอะไร?", o: ["เลว (Bad)", "ดี (Good)", "แย่ (Terrible)", "เฉยๆ (Normal)"], a: 1 },
-    { id: "3_16", q: "คำกริยาภาษาจีนคำว่า 'pǎo' แปลว่าอะไร?", o: ["เดิน (Walk)", "วิ่ง (Run)", "กระโดด (Jump)", "ปีน (Climb)"], a: 1 },
-    { id: "3_17", q: "คำศัพท์ภาษาจีนคำว่า 'qiú' แปลว่าอะไร?", o: ["หนังสือ (Book)", "ลูกบอล (Ball)", "โต๊ะ (Table)", "เก้าอี้ (Chair)"], a: 1 },
-    { id: "3_18", q: "คำศัพท์กลุ่มคำว่า 'tóu tuǐ shuǐ qiú' เมื่อแปลรวมกันตามลำดับ หมายถึงข้อใด?", o: ["น้ำ วัว วิ่ง บิน", "หัว ขา น้ำ ลูกบอล", "วัว ขา หัว ลูกบอล", "สุนัข หัว รัก ประเทศไทย"], a: 1 },
-    { id: "3_19", q: "คำกริยาภาษาจีนคำว่า 'fēi' แปลว่าอะไร?", o: ["ว่ายน้ำ (Swim)", "กระโดด (Jump)", "บิน (Fly)", "มุด (Dive)"], a: 2 }
+  3: [ // Level 3 (Body Parts - Repeating Pool)
+    { id: "3_1", q: "คำศัพท์ภาษาจีนคำว่า '头' (tóu) แปลว่าอะไร?", o: ["หัว (Head)", "แขน (Arm)", "ขา (Leg)", "มือ (Hand)"], a: 0 },
+    { id: "3_2", q: "คำศัพท์ภาษาจีนคำว่า '眼睛' (yǎnjing) แปลว่าอะไร?", o: ["จมูก (Nose)", "ตา (Eyes)", "หู (Ears)", "ปาก (Mouth)"], a: 1 },
+    { id: "3_3", q: "คำศัพท์ภาษาจีนคำว่า '耳朵' (ěrduo) แปลว่าอะไร?", o: ["ตา (Eyes)", "ปาก (Mouth)", "หู (Ears)", "เท้า (Foot)"], a: 2 },
+    { id: "3_4", q: "คำศัพท์ภาษาจีนคำว่า '鼻子' (bízi) แปลว่าอะไร?", o: ["หู (Ears)", "ตา (Eyes)", "ปาก (Mouth)", "จมูก (Nose)"], a: 3 },
+    { id: "3_5", q: "คำศัพท์ภาษาจีนคำว่า '嘴' (zuǐ) แปลว่าอะไร?", o: ["ฟัน (Teeth)", "ปาก (Mouth)", "จมูก (Nose)", "ตา (Eyes)"], a: 1 },
+    { id: "3_6", q: "คำศัพท์ภาษาจีนคำว่า '手' (shǒu) แปลว่าอะไร?", o: ["มือ (Hand)", "เท้า (Foot)", "แขน (Arm)", "ขา (Leg)"], a: 0 },
+    { id: "3_7", q: "คำศัพท์ภาษาจีนคำว่า '脚' (jiǎo) แปลว่าอะไร?", o: ["มือ (Hand)", "เท้า (Foot / Feet)", "หู (Ears)", "หัว (Head)"], a: 1 }
+  ],
+  9: [ // Level 9 (Nong Kao's Custom Vocabularies - Repeating Pool)
+    { id: "9_1", q: "คำศัพท์ภาษาจีนคำว่า 'ài' แปลว่าอะไร?", o: ["เกลียด (Hate)", "รัก (Love)", "ชอบ (Like)", "โกรธ (Angry)"], a: 1 },
+    { id: "9_2", q: "คำศัพท์ภาษาจีนคำว่า 'Tàiguó' แปลว่าอะไร?", o: ["ประเทศจีน (China)", "ประเทศญี่ปุ่น (Japan)", "ประเทศไทย (Thailand)", "ประเทศอังกฤษ (England)"], a: 2 },
+    { id: "9_3", q: "คำศัพท์ภาษาจีนคำว่า 'shuǐ' แปลว่าอะไร?", o: ["ไฟ (Fire)", "น้ำ (Water)", "ดิน (Earth)", "ลม (Wind)"], a: 1 },
+    { id: "9_4", q: "คำศัพท์ภาษาจีนคำว่า 'lái' แปลว่าอะไร?", o: ["ไป (Go)", "นอน (Sleep)", "นั่ง (Sit)", "มา (Come)"], a: 3 },
+    { id: "9_5", q: "ตัวเลขภาษาจีนคำว่า 'èr' หมายถึงจำนวนเท่าใด?", o: ["หนึ่ง (1)", "สอง (2)", "สาม (3)", "สี่ (4)"], a: 1 },
+    { id: "9_6", q: "ตัวเลขภาษาจีนคำว่า 'sān' หมายถึงจำนวนเท่าใด?", o: ["สาม (3)", "ห้า (5)", "เจ็ด (7)", "เก้า (9)"], a: 0 },
+    { id: "9_7", q: "ตัวเลขภาษาจีนคำว่า 'liù' หมายถึงจำนวนเท่าใด?", o: ["ห้า (5)", "หก (6)", "เจ็ด (7)", "แปด (8)"], a: 1 },
+    { id: "9_8", q: "ตัวเลขภาษาจีนคำว่า 'jiǔ' หมายถึงจำนวนเท่าใด?", o: ["แปด (8)", "เก้า (9)", "สิบ (10)", "หก (6)"], a: 1 },
+    { id: "9_9", q: "คำศัพท์ภาษาจีนคำว่า 'mèi' แปลว่าอะไร?", o: ["พี่สาว (Elder sister)", "น้องสาว (Younger sister)", "คุณแม่ (Mother)", "เพื่อน (Friend)"], a: 1 },
+    { id: "9_10", q: "คำอวัยวะร่างกายภาษาจีนคำว่า 'tuǐ' แปลว่าอะไร?", o: ["แขน (Arm)", "ขา (Leg)", "หัว (Head)", "หู (Ear)"], a: 1 },
+    { id: "9_11", q: "คำศัพท์ภาษาจีนคำว่า 'gǒu' แปลว่าอะไร?", o: ["แมว (Cat)", "นก (Bird)", "วัว (Cow)", "สุนัข (Dog)"], a: 3 },
+    { id: "9_12", q: "คำศัพท์ภาษาจีนคำว่า 'niú' แปลว่าอะไร?", o: ["วัว (Cow)", "แกะ (Sheep)", "เสือ (Tiger)", "สิงโต (Lion)"], a: 0 },
+    { id: "9_13", q: "คำอวัยวะร่างกายภาษาจีนคำว่า 'tóu' แปลว่าอะไร?", o: ["หัว (Head)", "ตา (Eye)", "จมูก (Nose)", "ปาก (Mouse)"], a: 0 },
+    { id: "9_14", q: "คำศัพท์ภาษาจีนคำว่า 'tóng xué men' แปลว่าอะไร?", o: ["คุณครูทั้งหลาย (Teachers)", "นักเรียนทั้งหลาย / เพื่อนนักเรียน (Students)", "ผู้ปกครอง (Parents)", "คนทำความสะอาด (Cleaners)"], a: 1 },
+    { id: "9_15", q: "คำศัพท์ภาษาจีนคำว่า 'hǎo' แปลว่าอะไร?", o: ["เลว (Bad)", "ดี (Good)", "แย่ (Terrible)", "เฉยๆ (Normal)"], a: 1 },
+    { id: "9_16", q: "คำกริยาภาษาจีนคำว่า 'pǎo' แปลว่าอะไร?", o: ["เดิน (Walk)", "วิ่ง (Run)", "กระโดด (Jump)", "ปีน (Climb)"], a: 1 },
+    { id: "9_17", q: "คำศัพท์ภาษาจีนคำว่า 'qiú' แปลว่าอะไร?", o: ["หนังสือ (Book)", "ลูกบอล (Ball)", "โต๊ะ (Table)", "เก้าอี้ (Chair)"], a: 1 },
+    { id: "9_18", q: "คำศัพท์กลุ่มคำว่า 'tóu tuǐ shuǐ qiú' เมื่อแปลรวมกันตามลำดับ หมายถึงข้อใด?", o: ["น้ำ วัว วิ่ง บิน", "หัว ขา น้ำ ลูกบอล", "วัว ขา หัว ลูกบอล", "สุนัข หัว รัก ประเทศไทย"], a: 1 },
+    { id: "9_19", q: "คำกริยาภาษาจีนคำว่า 'fēi' แปลว่าอะไร?", o: ["ว่ายน้ำ (Swim)", "กระโดด (Jump)", "บิน (Fly)", "มุด (Dive)"], a: 2 }
   ],
   4: [ // Level 4 (Hard - places, daily actions, common sentences)
     { id: "4_1", q: "สถานที่ใดภาษาจีนเรียกว่า '学校' (xuéxiào)?", o: ["บ้าน (Home)", "โรงพยาบาล (Hospital)", "โรงเรียน (School)", "สวนสาธารณะ (Park)"], a: 2 },
@@ -1965,7 +1999,7 @@ function triggerQuestion(milestone) {
   let unusedQuestions = questionPool.filter(q => !game.askedQuestionIds.has(q.id));
   
   // If we are on Level 1, Level 2, or Level 3 and all questions are used, reset asked questions for that level to loop them
-  if ((game.currentLevel === 1 || game.currentLevel === 2 || game.currentLevel === 3) && unusedQuestions.length === 0) {
+  if ((game.currentLevel === 1 || game.currentLevel === 2 || game.currentLevel === 3 || game.currentLevel === 9) && unusedQuestions.length === 0) {
     questionPool.forEach(q => game.askedQuestionIds.delete(q.id));
     unusedQuestions = questionPool;
   }
@@ -2070,7 +2104,8 @@ function checkQuestionAnswer(selectedIndex, clickedBtn) {
         document.getElementById('hud').classList.add('hidden');
         
         // Populate stats for Game Over screen
-        document.getElementById('game-over-level').innerText = `ด่าน ${game.currentLevel}`;
+        const lvlText = LEVELS_CONFIG[game.currentLevel].isSpecial ? "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸" : `ด่าน ${game.currentLevel}`;
+        document.getElementById('game-over-level').innerText = lvlText;
         
         const targetMeters = LEVELS_CONFIG[game.currentLevel].heightMeters;
         let realHeight = Math.floor(Math.abs(player.y) / 14.5);
@@ -2110,7 +2145,8 @@ function updateHUD() {
   if (realHeight > targetMeters) realHeight = targetMeters;
   
   game.altitude = realHeight;
-  document.getElementById('height-val').innerText = `${realHeight}m / ${targetMeters}m (ด่าน ${game.currentLevel})`;
+  const currentName = LEVELS_CONFIG[game.currentLevel].isSpecial ? "ด่านพิเศษ" : `ด่าน ${game.currentLevel}`;
+  document.getElementById('height-val').innerText = `${realHeight}m / ${targetMeters}m (${currentName})`;
   
   // Progress fill %
   const pct = (realHeight / targetMeters) * 100;
