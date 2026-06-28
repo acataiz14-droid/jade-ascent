@@ -1151,7 +1151,7 @@ function playerShoot() {
 // ENEMY CLASS - Zone 1 Bamboo Slime
 // ==========================================
 class Enemy {
-  constructor(x, y, patrolLeft, patrolRight, speed = 1.2) {
+  constructor(x, y, patrolLeft, patrolRight, speed = 1.2, platform = null) {
     this.x = x;
     this.y = y;
     this.width = 32;
@@ -1170,6 +1170,8 @@ class Enemy {
     this.speed = speed;
     this.startY = y;
     this.isFlying = false;
+    this.platform = platform;
+    this.offsetY = platform ? y - platform.y : 0;
   }
 
   update(dt) {
@@ -1181,6 +1183,18 @@ class Enemy {
       if (this.deathTimer <= 0) { this.alive = false; this.dying = false; }
       return;
     }
+
+    // Ride platform movement and adjust patrol bounds dynamically
+    if (this.platform) {
+      this.patrolLeft = this.platform.x + 4;
+      this.patrolRight = this.platform.x + this.platform.width - 4;
+      if (this.platform.type === 'moving') {
+        const dx = this.platform.vx * this.platform.direction * dt * 60;
+        this.x += dx;
+      }
+      this.startY = this.platform.y + this.offsetY;
+    }
+
     if (this.isFlying) {
       this.x += this.vx * dt * 60;
       this.walkCycle += Math.abs(this.vx) * dt * 60 * 0.15;
@@ -1501,7 +1515,7 @@ function generateLevel() {
               const zoneSpeedMult = 1 + (zone - 1) * 0.15;
               enemySpeed = Math.min(1.2 * levelSpeedMult * zoneSpeedMult, 2.0);
             }
-            const enemy = new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed);
+            const enemy = new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed, platform);
             if (game.currentLevel === 3 && platMeters >= 600) {
               if (rand.next() < 0.6) {
                 enemy.isFlying = true;
