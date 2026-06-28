@@ -1515,6 +1515,9 @@ function generateLevel() {
               const zoneSpeedMult = 1 + (zone - 1) * 0.15;
               enemySpeed = Math.min(1.2 * levelSpeedMult * zoneSpeedMult, 2.0);
             }
+            if (game.currentLevel === 3) {
+              enemySpeed *= 0.5;
+            }
             const enemy = new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed, platform);
             if (game.currentLevel === 3 && platMeters >= 600) {
               if (rand.next() < 0.6) {
@@ -1959,7 +1962,10 @@ const CHINESE_QUESTIONS_BY_LEVEL = {
     { id: "3_4", q: "คำศัพท์ภาษาจีนคำว่า '鼻子' (bízi) แปลว่าอะไร?", o: ["หู (Ears)", "ตา (Eyes)", "ปาก (Mouth)", "จมูก (Nose)"], a: 3 },
     { id: "3_5", q: "คำศัพท์ภาษาจีนคำว่า '嘴' (zuǐ) แปลว่าอะไร?", o: ["ฟัน (Teeth)", "ปาก (Mouth)", "จมูก (Nose)", "ตา (Eyes)"], a: 1 },
     { id: "3_6", q: "คำศัพท์ภาษาจีนคำว่า '手' (shǒu) แปลว่าอะไร?", o: ["มือ (Hand)", "เท้า (Foot)", "แขน (Arm)", "ขา (Leg)"], a: 0 },
-    { id: "3_7", q: "คำศัพท์ภาษาจีนคำว่า '脚' (jiǎo) แปลว่าอะไร?", o: ["มือ (Hand)", "เท้า (Foot / Feet)", "หู (Ears)", "หัว (Head)"], a: 1 }
+    { id: "3_7", q: "คำศัพท์ภาษาจีนคำว่า '脚' (jiǎo) แปลว่าอะไร?", o: ["มือ (Hand)", "เท้า (Foot / Feet)", "หู (Ears)", "หัว (Head)"], a: 1 },
+    { id: "3_8", q: "คำศัพท์ภาษาจีนคำว่า '头发' (tóufa) แปลว่าอะไร?", o: ["ผม (Hair)", "คิ้ว (Eyebrow)", "คอ (Neck)", "ไหล่ (Shoulder)"], a: 0 },
+    { id: "3_9", q: "คำศัพท์ภาษาจีนคำว่า '肩膀' (jiānbǎng) แปลว่าอะไร?", o: ["เข่า (Knee)", "เอว (Waist)", "ไหล่ (Shoulder)", "คอ (Neck)"], a: 2 },
+    { id: "3_10", q: "คำศัพท์ภาษาจีนคำว่า '膝盖' (xīgài) แปลว่าอะไร?", o: ["เท้า (Foot)", "เข่า (Knee)", "นิ้วมือ (Finger)", "เล็บ (Nail)"], a: 1 }
   ],
   9: [ // Level 9 (Nong Kao's Custom Vocabularies - Repeating Pool)
     { id: "9_1", q: "คำศัพท์ภาษาจีนคำว่า 'ài' แปลว่าอะไร?", o: ["เกลียด (Hate)", "รัก (Love)", "ชอบ (Like)", "โกรธ (Angry)"], a: 1 },
