@@ -1185,7 +1185,7 @@ class Enemy {
       this.x += this.vx * dt * 60;
       this.walkCycle += Math.abs(this.vx) * dt * 60 * 0.15;
       this.eyeBlink += dt;
-      this.y = this.startY + Math.sin(this.walkCycle * 0.5) * 12;
+      this.y = this.startY + Math.sin(this.walkCycle * 0.08) * (5 * 14.5);
       if (this.x <= this.patrolLeft) { this.vx = Math.abs(this.vx); this.facingLeft = false; }
       else if (this.x + this.width >= this.patrolRight) { this.vx = -Math.abs(this.vx); this.facingLeft = true; }
       if (this.x < 0) { this.x = 0; this.vx = Math.abs(this.vx); }
