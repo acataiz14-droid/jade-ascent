@@ -1493,7 +1493,7 @@ function generateLevel() {
         const platMeters = Math.floor(Math.abs(platform.y) / 14.5);
         let allowed = true;
         if (game.currentLevel === 3) {
-          if (platMeters < 300) {
+          if (platMeters < 300 || pType === 'moving') {
             allowed = false;
           }
         }
