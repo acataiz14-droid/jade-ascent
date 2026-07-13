@@ -1895,6 +1895,7 @@ function generateLevel() {
               if (game.currentLevel === 3) {
                 enemySpeed *= 0.5;
               }
+              enemySpeed *= 0.4; // Reduce speed by 60%
               const enemy = new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed, platform);
               if (game.currentLevel === 3 && platMeters >= 600) {
                 if (rand.next() < 0.6) {
