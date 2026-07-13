@@ -2447,7 +2447,7 @@ function triggerQuestion(milestone) {
   let unusedQuestions = questionPool.filter(q => !game.askedQuestionIds.has(q.id));
   
   // If we are on Level 1, Level 2, or Level 3 and all questions are used, reset asked questions for that level to loop them
-  if ((game.currentLevel === 1 || game.currentLevel === 2 || game.currentLevel === 3 || game.currentLevel === 9) && unusedQuestions.length === 0) {
+  if ((game.currentLevel === 1 || game.currentLevel === 2 || game.currentLevel === 3 || game.currentLevel === 4 || game.currentLevel === 9) && unusedQuestions.length === 0) {
     questionPool.forEach(q => game.askedQuestionIds.delete(q.id));
     unusedQuestions = questionPool;
   }
