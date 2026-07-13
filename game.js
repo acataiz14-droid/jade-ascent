@@ -10,7 +10,7 @@ const LEVELS_CONFIG = {
   1: { name: "ด่าน 1: หุบเขาไม้ไผ่ (Bamboo Valley)", heightMeters: 500, emoji: "🎋" },
   2: { name: "ด่าน 2: วิหารลอยฟ้า (Cloud Temple)", heightMeters: 1000, emoji: "☁️" },
   3: { name: "ด่าน 3: เต๋าแห่งจักรวาล (Cosmic Tao)", heightMeters: 1000, emoji: "🌌" },
-  4: { name: "ด่าน 4: แดนสวรรค์เบื้องบน (High Heavens)", heightMeters: 2500, emoji: "⚡" },
+  4: { name: "ด่าน 4: แดนสวรรค์เบื้องบน (High Heavens)", heightMeters: 800, emoji: "⚡" },
   5: { name: "ด่าน 5: ยอดเขาไร้สิ้นสุด (Infinite Summit)", heightMeters: 5000, emoji: "🐉" },
   9: { name: "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸", heightMeters: 1000, emoji: "🌸", isSpecial: true }
 };
@@ -1090,6 +1090,18 @@ class Projectile {
         }
       }
     }
+
+    // Check collision with Boss
+    if (this.alive && game.boss && game.boss.alive && !game.boss.dying) {
+      if (checkAABB(this, game.boss)) {
+        game.boss.takeDamage(1);
+        audio.playCollect();
+        if (game.boss.alive) {
+          triggerBossQuestion();
+        }
+        this.alive = false;
+      }
+    }
   }
 
   draw(ctx) {
@@ -1324,6 +1336,310 @@ class Enemy {
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('▼', cx, this.y - 8);
+  }
+}
+
+// ==========================================
+// BOSS PROJECTILE CLASS
+// ==========================================
+class BossProjectile {
+  constructor(x, y, vx, vy) {
+    this.x = x;
+    this.y = y;
+    this.width = 12;
+    this.height = 12;
+    this.vx = vx;
+    this.vy = vy;
+    this.alive = true;
+    this.lifeTime = 3.0; // disappear after 3 seconds
+  }
+
+  update(dt) {
+    this.lifeTime -= dt;
+    if (this.lifeTime <= 0) {
+      this.alive = false;
+      return;
+    }
+    this.x += this.vx * dt * 60;
+    this.y += this.vy * dt * 60;
+
+    // Check hit with player
+    const pL = player.x, pR = player.x + player.width;
+    const pT = player.y, pB = player.y + player.height;
+    if (pR > this.x && pL < this.x + this.width && pB > this.y && pT < this.y + this.height) {
+      if (player.invincibleTimer <= 0) {
+        player.health--;
+        player.invincibleTimer = 1.5;
+        audio.playDamage();
+        updateHUD();
+        const hudCard = document.getElementById('hud-health-card');
+        if (hudCard) { hudCard.classList.add('shake-effect'); setTimeout(()=>hudCard.classList.remove('shake-effect'),500); }
+        const cont = document.querySelector('.canvas-container');
+        if (cont) { cont.classList.add('damage-flash'); setTimeout(()=>cont.classList.remove('damage-flash'),300); }
+        
+        // If player health <= 0, trigger defeat
+        if (player.health <= 0) {
+          game.isQuestionActive = true;
+          audio.playDefeat();
+          document.getElementById('hud').classList.add('hidden');
+          document.getElementById('question-modal').classList.add('hidden');
+          const lvlText = LEVELS_CONFIG[game.currentLevel].isSpecial ? "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸" : 'ด่าน ' + game.currentLevel;
+          document.getElementById('game-over-level').innerText = lvlText;
+          const tm = LEVELS_CONFIG[game.currentLevel].heightMeters;
+          let rh = Math.floor(Math.abs(player.y) / 14.5);
+          if (rh < 0) rh = 0; if (rh > tm) rh = tm;
+          document.getElementById('game-over-height').innerText = rh + 'm / ' + tm + 'm';
+          const jadeEl = document.getElementById('game-over-jade');
+          if (jadeEl) jadeEl.innerText = game.jadeCount;
+          document.getElementById('game-over-screen').classList.remove('hidden');
+        }
+      }
+      this.alive = false;
+    }
+  }
+
+  draw(ctx) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.fillStyle = '#ff3300';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#ff6600';
+    ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ==========================================
+// BOSS CLASS - Level 4 High Heavens Boss
+// ==========================================
+class Boss {
+  constructor(x, y, platform) {
+    this.x = x;
+    this.y = y;
+    this.width = 96; // 300% of 32
+    this.height = 96;
+    this.vx = 0.8; // fairly slow
+    this.vy = 0;
+    this.grounded = true;
+    this.alive = true;
+    this.dying = false;
+    this.deathTimer = 0;
+    this.facingLeft = true;
+    
+    this.platform = platform;
+    this.patrolLeft = platform ? platform.x + 8 : x - 100;
+    this.patrolRight = platform ? platform.x + platform.width - 96 - 8 : x + 100;
+    
+    this.hp = 10;
+    this.maxHp = 10;
+    this.shootTimer = 2.5; // shoot every 2.5 seconds
+    this.walkCycle = 0;
+    this.eyeBlink = 0;
+  }
+
+  update(dt) {
+    if (!this.alive && !this.dying) return;
+    if (this.dying) {
+      this.deathTimer -= dt;
+      this.vy += 0.4;
+      this.y += this.vy;
+      if (this.deathTimer <= 0) { this.alive = false; this.dying = false; }
+      return;
+    }
+
+    // Horizontal patrol on platform
+    this.x += this.vx * dt * 60;
+    this.walkCycle += Math.abs(this.vx) * dt * 60 * 0.05;
+    this.eyeBlink += dt;
+
+    if (this.x <= this.patrolLeft) {
+      this.vx = Math.abs(this.vx);
+      this.facingLeft = false;
+    } else if (this.x >= this.patrolRight) {
+      this.vx = -Math.abs(this.vx);
+      this.facingLeft = true;
+    }
+
+    // Keep within screen boundary just in case
+    if (this.x < 0) {
+      this.x = 0;
+      this.vx = Math.abs(this.vx);
+    }
+    if (this.x + this.width > V_WIDTH) {
+      this.x = V_WIDTH - this.width;
+      this.vx = -Math.abs(this.vx);
+    }
+
+    // Shooting: ying rob thit thang (8 directions) every 2.5 seconds
+    this.shootTimer -= dt;
+    if (this.shootTimer <= 0) {
+      this.shootTimer = 2.5;
+      this.shoot8Directions();
+    }
+  }
+
+  shoot8Directions() {
+    audio.playShoot();
+    const cx = this.x + this.width / 2;
+    const cy = this.y + this.height / 2;
+    const speed = 3.5;
+    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+      game.bossProjectiles.push(new BossProjectile(cx - 6, cy - 6, vx, vy));
+    }
+  }
+
+  takeDamage(amount) {
+    if (!this.alive || this.dying) return;
+    this.hp -= amount;
+    
+    // Spawn damage particles
+    for (let i = 0; i < 15; i++) {
+      game.particles.push(new Particle(this.x + this.width/2, this.y + this.height/2, '#ff3300',
+        (Math.random()-0.5)*8, (Math.random()-0.5)*8-2, 3+Math.random()*3, 0.5+Math.random()*0.4));
+    }
+
+    if (this.hp <= 0) {
+      this.die();
+    }
+  }
+
+  die() {
+    this.dying = true;
+    this.deathTimer = 1.5; // Longer death timer for dramatic fall
+    this.vy = -8;
+    this.vx = 0;
+    audio.playGong(); // Epic death gong sound
+    
+    // Huge celebration particle burst
+    for (let i = 0; i < 40; i++) {
+      game.particles.push(new Particle(this.x + this.width/2, this.y + this.height/2, '#ffd700',
+        (Math.random()-0.5)*12, (Math.random()-0.5)*12-5, 4+Math.random()*4, 1.0+Math.random()*0.5));
+    }
+    
+    // Reward player with huge jade shards amount
+    game.jadeCount += 20;
+    updateHUD();
+    showFloatingText(this.x + this.width/2, this.y - 20, '+20 玉 (BOSS DEFEATED)', '#ffd700');
+  }
+
+  draw(ctx) {
+    if (!this.alive && !this.dying) return;
+    const alpha = this.dying ? Math.max(0, this.deathTimer / 1.5) : 1.0;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    
+    const cx = this.x + this.width / 2;
+    const cy = this.y + this.height / 2;
+    
+    const bounce = Math.sin(this.walkCycle * Math.PI) * 0.05;
+    const scaleY = 1 + bounce, scaleX = 1 - bounce * 0.5;
+    
+    ctx.save();
+    ctx.translate(cx, this.y + this.height);
+    ctx.scale(scaleX, scaleY);
+    ctx.translate(-cx, -(this.y + this.height));
+    
+    // Big Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(cx, this.y+this.height+4, 38, 10, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Dark Red/Crimson/Black Boss Body
+    const grad = ctx.createRadialGradient(cx-10, cy-10, 5, cx, cy, 50);
+    grad.addColorStop(0, '#ef4444'); // Bright red center
+    grad.addColorStop(0.5, '#7f1d1d'); // Dark crimson middle
+    grad.addColorStop(1, '#111827'); // Black edge
+    
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy+8, 48, 40, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Antenna/Horns
+    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(cx - 20, this.y + 15);
+    ctx.lineTo(cx - 35, this.y - 15);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + 20, this.y + 15);
+    ctx.lineTo(cx + 35, this.y - 15);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#b91c1c';
+    ctx.beginPath(); ctx.arc(cx-35, this.y-15, 6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+35, this.y-15, 6, 0, Math.PI*2); ctx.fill();
+
+    // Red Glowing Eyes
+    const isBlinking = (this.eyeBlink % 4) < 0.15;
+    const ed = this.facingLeft ? -1 : 1;
+    const lx = cx + ed*12 - 18, rx = cx + ed*12 + 6, ey = cy - 4;
+    if (!isBlinking) {
+      ctx.fillStyle = '#fef08a'; // Yellow white outer eye
+      ctx.beginPath(); ctx.arc(lx, ey, 10, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(rx, ey, 10, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#dc2626'; // Glowing red pupil
+      ctx.beginPath(); ctx.arc(lx+ed*2, ey+1, 5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(rx+ed*2, ey+1, 5, 0, Math.PI*2); ctx.fill();
+    } else {
+      ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(lx, ey, 8, 0, Math.PI); ctx.stroke();
+      ctx.beginPath(); ctx.arc(rx, ey, 8, 0, Math.PI); ctx.stroke();
+    }
+
+    // Angered Eyebrows
+    ctx.strokeStyle = '#000000'; ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.moveTo(lx-8, ey-12); ctx.lineTo(lx+6, ey-6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx-6, ey-6); ctx.lineTo(rx+8, ey-12); ctx.stroke();
+
+    // Angry Mouth
+    ctx.strokeStyle = '#000000'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx - 15, cy + 22);
+    ctx.quadraticCurveTo(cx, cy + 12, cx + 15, cy + 22);
+    ctx.stroke();
+
+    ctx.restore(); // restore scale
+
+    // Draw Boss HP Bar
+    const barWidth = 100;
+    const barHeight = 8;
+    const bx = cx - barWidth / 2;
+    const by = this.y - 25;
+    
+    // HP Bar background
+    ctx.fillStyle = '#4b5563';
+    ctx.fillRect(bx, by, barWidth, barHeight);
+    
+    // HP Bar fill
+    const fillRatio = Math.max(0, this.hp / this.maxHp);
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(bx, by, barWidth * fillRatio, barHeight);
+    
+    // HP Bar border
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(bx, by, barWidth, barHeight);
+
+    // Boss Name
+    ctx.fillStyle = '#ef4444';
+    ctx.font = 'bold 12px "Noto Serif TC", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('守护者 (ผู้พิทักษ์) ' + this.hp + '/' + this.maxHp + ' HP', cx, this.y - 32);
+
+    // Stomp indicator arrow if not dying
+    if (!this.dying) {
+      const pulse = 0.55 + Math.sin(Date.now() * 0.005) * 0.45;
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 20px Arial';
+      ctx.fillText('▼', cx, this.y - 45);
+    }
+    
     ctx.restore();
   }
 }
@@ -1379,6 +1695,57 @@ function checkEnemyCollisions(dt) {
       }
     }
   }
+
+  // Player-Boss collision check
+  if (game.boss && game.boss.alive && !game.boss.dying) {
+    const pL = player.x, pR = player.x + player.width;
+    const pT = player.y, pB = player.y + player.height;
+    const bL = game.boss.x, bR = game.boss.x + game.boss.width;
+    const bT = game.boss.y, bB = game.boss.y + game.boss.height;
+
+    if (pR > bL && pL < bR && pB > bT && pT < bB) {
+      const prevBottom = pB - (player.vy * dt * 60);
+      if (player.vy > 0 && prevBottom <= bT + 20) {
+        // Player stomped on Boss!
+        player.vy = player.getJumpVel() * 0.75;
+        player.jumpCount = 0;
+        
+        // Take 1 HP and trigger Boss question
+        game.boss.takeDamage(1);
+        if (game.boss.alive) {
+          triggerBossQuestion();
+        }
+      } else if (player.invincibleTimer <= 0) {
+        // Player took damage from Boss body contact
+        player.health--;
+        player.invincibleTimer = 1.5;
+        audio.playDamage();
+        updateHUD();
+        const kd = player.x < game.boss.x + game.boss.width / 2 ? -1 : 1;
+        player.vx = kd * 8; player.vy = -5;
+        const hudCard = document.getElementById('hud-health-card');
+        if (hudCard) { hudCard.classList.add('shake-effect'); setTimeout(()=>hudCard.classList.remove('shake-effect'),500); }
+        const cont = document.querySelector('.canvas-container');
+        if (cont) { cont.classList.add('damage-flash'); setTimeout(()=>cont.classList.remove('damage-flash'),300); }
+        
+        if (player.health <= 0) {
+          game.isQuestionActive = true;
+          audio.playDefeat();
+          document.getElementById('hud').classList.add('hidden');
+          document.getElementById('question-modal').classList.add('hidden');
+          const lvlText = LEVELS_CONFIG[game.currentLevel].isSpecial ? "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸" : 'ด่าน ' + game.currentLevel;
+          document.getElementById('game-over-level').innerText = lvlText;
+          const tm = LEVELS_CONFIG[game.currentLevel].heightMeters;
+          let rh = Math.floor(Math.abs(player.y) / 14.5);
+          if (rh < 0) rh = 0; if (rh > tm) rh = tm;
+          document.getElementById('game-over-height').innerText = rh + 'm / ' + tm + 'm';
+          const jadeEl = document.getElementById('game-over-jade');
+          if (jadeEl) jadeEl.innerText = game.jadeCount;
+          document.getElementById('game-over-screen').classList.remove('hidden');
+        }
+      }
+    }
+  }
 }
 
 // Floating "+1 jade" text above enemy
@@ -1412,6 +1779,8 @@ function generateLevel() {
   game.shards = [];
   game.checkpoints = [];
   game.enemies = [];
+  game.boss = null;
+  game.bossProjectiles = [];
 
   // Unique random seed per level
   const rand = new SeededRandom(888 + game.currentLevel * 111);
@@ -1466,84 +1835,102 @@ function generateLevel() {
     // Generate x coordinate (ensure fits inside screen boundaries)
     const pX = rand.nextRange(25, V_WIDTH - pWidth - 25);
     
-    // Create platform
-    const platform = new Platform(pX, currentY, pWidth, platformHeight, pType);
-    game.platforms.push(platform);
-
-    // Spawn Jade Shards on platforms
-    const shardRoll = rand.next();
-    if (shardRoll < 0.65 && pType !== 'crumbly') { // 65% chance
-      // Place jade shards floating above platform
-      const shardX = platform.x + platform.width / 2 - 9;
-      const shardY = platform.y - 45;
-      game.shards.push(new JadeShard(shardX, shardY));
+    // In Level 4, skip procedural platform generation if it is too close to the boss platform at 600m
+    let skipProcedural = false;
+    if (game.currentLevel === 4 && Math.abs(currentY - (-600 * 14.5)) < 120) {
+      skipProcedural = true;
     }
 
-    // Spawn enemies on platforms — all levels, scaling difficulty by level & zone
-    {
-      // Base spawn chance scales up with level
-      const baseChance = [0, 0.40, 0.48, 0.55, 0.62, 0.68][game.currentLevel] || 0.40;
-      // Zone 1: all levels. Zone 2: level 2+. Zone 3: level 3+
-      const zoneAllowed = zone === 1 || (zone === 2 && game.currentLevel >= 2) || (zone === 3 && game.currentLevel >= 3);
-      // Enemies only spawn on platforms wide enough (normal/moving) — not crumbly/slippery
-      const typeAllowed = pType === 'normal' || (pType === 'moving' && game.currentLevel >= 3);
-      const widthOk = pWidth >= 75;
+    if (!skipProcedural) {
+      // Create platform
+      const platform = new Platform(pX, currentY, pWidth, platformHeight, pType);
+      game.platforms.push(platform);
 
-      if (game.currentLevel > 1 && game.currentLevel !== 9 && zoneAllowed && typeAllowed && widthOk) {
-        const platMeters = Math.floor(Math.abs(platform.y) / 14.5);
-        let allowed = true;
-        if (game.currentLevel === 3) {
-          if (platMeters < 300 || pType === 'moving') {
-            allowed = false;
+      // Spawn Jade Shards on platforms
+      const shardRoll = rand.next();
+      if (shardRoll < 0.65 && pType !== 'crumbly') { // 65% chance
+        // Place jade shards floating above platform
+        const shardX = platform.x + platform.width / 2 - 9;
+        const shardY = platform.y - 45;
+        game.shards.push(new JadeShard(shardX, shardY));
+      }
+
+      // Spawn enemies on platforms — all levels, scaling difficulty by level & zone
+      {
+        // Base spawn chance scales up with level
+        const baseChance = [0, 0.40, 0.48, 0.55, 0.62, 0.68][game.currentLevel] || 0.40;
+        // Zone 1: all levels. Zone 2: level 2+. Zone 3: level 3+
+        const zoneAllowed = zone === 1 || (zone === 2 && game.currentLevel >= 2) || (zone === 3 && game.currentLevel >= 3);
+        // Enemies only spawn on platforms wide enough (normal/moving) — not crumbly/slippery
+        const typeAllowed = pType === 'normal' || (pType === 'moving' && game.currentLevel >= 3);
+        const widthOk = pWidth >= 75;
+
+        if (game.currentLevel > 1 && game.currentLevel !== 9 && zoneAllowed && typeAllowed && widthOk) {
+          const platMeters = Math.floor(Math.abs(platform.y) / 14.5);
+          let allowed = true;
+          if (game.currentLevel === 3) {
+            if (platMeters < 300 || pType === 'moving') {
+              allowed = false;
+            }
           }
-        }
-        
-        if (allowed) {
-          // Zone 2 & 3 have slightly higher chance
-          const zoneBonus = zone === 2 ? 0.08 : zone === 3 ? 0.14 : 0;
-          const spawnChance = baseChance + zoneBonus;
-          const enemyRoll = rand.next();
-          if (enemyRoll < spawnChance) {
-            const enemyX = platform.x + platform.width / 2 - 16;
-            const enemyY = platform.y - 36;
-            // Speed: levels 1-3 scale up, levels 4-5 fixed at 2.0
-            let enemySpeed;
-            if (game.currentLevel >= 4) {
-              enemySpeed = 2.0;
-            } else {
-              const levelSpeedMult = 1 + (game.currentLevel - 1) * 0.35;
-              const zoneSpeedMult = 1 + (zone - 1) * 0.15;
-              enemySpeed = Math.min(1.2 * levelSpeedMult * zoneSpeedMult, 2.0);
-            }
-            if (game.currentLevel === 3) {
-              enemySpeed *= 0.5;
-            }
-            const enemy = new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed, platform);
-            if (game.currentLevel === 3 && platMeters >= 600) {
-              if (rand.next() < 0.6) {
-                enemy.isFlying = true;
-                enemy.y = platform.y - 50;
-                enemy.startY = enemy.y;
+          
+          if (allowed) {
+            // Zone 2 & 3 have slightly higher chance
+            const zoneBonus = zone === 2 ? 0.08 : zone === 3 ? 0.14 : 0;
+            const spawnChance = baseChance + zoneBonus;
+            const enemyRoll = rand.next();
+            if (enemyRoll < spawnChance) {
+              const enemyX = platform.x + platform.width / 2 - 16;
+              const enemyY = platform.y - 36;
+              // Speed: levels 1-3 scale up, levels 4-5 fixed at 2.0
+              let enemySpeed;
+              if (game.currentLevel >= 4) {
+                enemySpeed = 2.0;
+              } else {
+                const levelSpeedMult = 1 + (game.currentLevel - 1) * 0.35;
+                const zoneSpeedMult = 1 + (zone - 1) * 0.15;
+                enemySpeed = Math.min(1.2 * levelSpeedMult * zoneSpeedMult, 2.0);
               }
+              if (game.currentLevel === 3) {
+                enemySpeed *= 0.5;
+              }
+              const enemy = new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed, platform);
+              if (game.currentLevel === 3 && platMeters >= 600) {
+                if (rand.next() < 0.6) {
+                  enemy.isFlying = true;
+                  enemy.y = platform.y - 50;
+                  enemy.startY = enemy.y;
+                }
+              }
+              game.enemies.push(enemy);
             }
-            game.enemies.push(enemy);
           }
         }
       }
-    }
 
-    // Spawn Gong Checkpoints every ~1000px vertically (~100m)
-    // Ensure it falls on a Normal platform so it isn't moving/crumbly
-    const nearCheckpointMilestone = Math.floor(relativeHeight / 1200) > Math.floor((relativeHeight - Math.abs(currentY - platform.y)) / 1200);
-    if (nearCheckpointMilestone && pType === 'normal' && pWidth > 80) {
-      const gongX = platform.x + platform.width / 2 - 30;
-      const gongY = platform.y - 70;
-      game.checkpoints.push(new Checkpoint(gongX, gongY));
+      // Spawn Gong Checkpoints every ~1000px vertically (~100m)
+      // Ensure it falls on a Normal platform so it isn't moving/crumbly
+      const nearCheckpointMilestone = Math.floor(relativeHeight / 1200) > Math.floor((relativeHeight - Math.abs(currentY - platform.y)) / 1200);
+      if (nearCheckpointMilestone && pType === 'normal' && pWidth > 80) {
+        const gongX = platform.x + platform.width / 2 - 30;
+        const gongY = platform.y - 70;
+        game.checkpoints.push(new Checkpoint(gongX, gongY));
+      }
     }
 
     // Step upwards
     const stepY = rand.nextRange(minGapY, maxGapY);
     currentY -= stepY;
+  }
+
+  // Spawn Boss in Level 4 at 600m
+  if (game.currentLevel === 4) {
+    const bossY = -600 * 14.5;
+    // Create a special boss platform
+    const bossPlat = new Platform(V_WIDTH / 2 - 100, bossY, 200, 22, 'normal');
+    game.platforms.push(bossPlat);
+    // Spawn the boss centered on the platform
+    game.boss = new Boss(bossPlat.x + bossPlat.width / 2 - 48, bossPlat.y - 96, bossPlat);
   }
 
   // 3. Special Finish Line Platform and Gate at 90% of level height (with Rainbow base)
@@ -2101,6 +2488,46 @@ function triggerQuestion(milestone) {
   });
 }
 
+function triggerBossQuestion() {
+  game.isQuestionActive = true;
+  game.isBossQuestion = true;
+  document.getElementById('question-modal').classList.remove('hidden');
+  
+  const questionSubtitle = document.querySelector('#question-card .question-subtitle');
+  if (questionSubtitle) {
+    questionSubtitle.innerText = `ตอบคำถามอัญเชิญสายฟ้าเพื่อสร้างความเสียหายแก่บอส! (ตอบถูกลดเลือดบอส 1HP, ตอบผิดลดเลือดเรา 1HP)`;
+  }
+  
+  const questionPool = CHINESE_QUESTIONS_BY_LEVEL[game.currentLevel] || CHINESE_QUESTIONS_BY_LEVEL[1];
+  let unusedQuestions = questionPool.filter(q => !game.askedQuestionIds.has(q.id));
+  
+  // Repeating pool for Level 4 boss questions
+  if (unusedQuestions.length === 0) {
+    questionPool.forEach(q => game.askedQuestionIds.delete(q.id));
+    unusedQuestions = questionPool;
+  }
+  
+  const randIdx = Math.floor(Math.random() * unusedQuestions.length);
+  currentQuestionObj = unusedQuestions[randIdx];
+  
+  game.askedQuestionIds.add(currentQuestionObj.id);
+  
+  document.getElementById('question-text').innerText = currentQuestionObj.q;
+  document.getElementById('question-feedback').innerText = "";
+  document.getElementById('question-feedback').className = "feedback-text";
+  
+  const optionsContainer = document.getElementById('question-options');
+  optionsContainer.innerHTML = "";
+  
+  currentQuestionObj.o.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = "option-btn";
+    btn.innerText = `${idx + 1}. ${opt}`;
+    btn.addEventListener('click', () => checkQuestionAnswer(idx, btn));
+    optionsContainer.appendChild(btn);
+  });
+}
+
 function checkQuestionAnswer(selectedIndex, clickedBtn) {
   // Disable all options to prevent double-click
   const buttons = document.querySelectorAll('.option-btn');
@@ -2111,25 +2538,42 @@ function checkQuestionAnswer(selectedIndex, clickedBtn) {
   if (selectedIndex === currentQuestionObj.a) {
     // Correct Answer
     clickedBtn.classList.add('correct');
-    let jadeReward = 5;
-    if (game.selectedCharacter === 2) {
-      jadeReward = 10;
-    } else if (game.selectedCharacter === 1) {
-      jadeReward = 3;
+    if (game.isBossQuestion) {
+      feedbackEl.innerText = "ถูกต้อง! 🎉 โจมตีสร้างความเสียหายแก่บอส 1 HP";
+      feedbackEl.className = "feedback-text feedback-correct";
+      if (game.boss && game.boss.alive) {
+        game.boss.takeDamage(1);
+      }
+      audio.playCollect();
+      updateHUD();
+      
+      // Resume and close modal after 1.5 seconds
+      setTimeout(() => {
+        game.isQuestionActive = false;
+        game.isBossQuestion = false;
+        document.getElementById('question-modal').classList.add('hidden');
+      }, 1500);
+    } else {
+      let jadeReward = 5;
+      if (game.selectedCharacter === 2) {
+        jadeReward = 10;
+      } else if (game.selectedCharacter === 1) {
+        jadeReward = 3;
+      }
+      feedbackEl.innerText = `ถูกต้อง! 🎉 ได้รับ +${jadeReward} หยกเขียว`;
+      feedbackEl.className = "feedback-text feedback-correct";
+      
+      game.jadeCount += jadeReward;
+      audio.playCollect();
+      updateHUD();
+      
+      // Resume and close modal after 1.5 seconds
+      setTimeout(() => {
+        game.lastQuestionClearedHeight = game.currentQuestionMilestone;
+        game.isQuestionActive = false;
+        document.getElementById('question-modal').classList.add('hidden');
+      }, 1500);
     }
-    feedbackEl.innerText = `ถูกต้อง! 🎉 ได้รับ +${jadeReward} หยกเขียว`;
-    feedbackEl.className = "feedback-text feedback-correct";
-    
-    game.jadeCount += jadeReward;
-    audio.playCollect();
-    updateHUD();
-    
-    // Resume and close modal after 1.5 seconds
-    setTimeout(() => {
-      game.lastQuestionClearedHeight = game.currentQuestionMilestone;
-      game.isQuestionActive = false;
-      document.getElementById('question-modal').classList.add('hidden');
-    }, 1500);
   } else {
     // Incorrect Answer
     clickedBtn.classList.add('incorrect');
@@ -2173,7 +2617,11 @@ function checkQuestionAnswer(selectedIndex, clickedBtn) {
         document.getElementById('game-over-screen').classList.remove('hidden');
       } else {
         // Pick another question and display
-        triggerQuestion(game.currentQuestionMilestone);
+        if (game.isBossQuestion) {
+          triggerBossQuestion();
+        } else {
+          triggerQuestion(game.currentQuestionMilestone);
+        }
       }
     }, 1800);
   }
@@ -3192,6 +3640,22 @@ function render() {
     }
   }
 
+  // Draw Boss
+  if (game.boss) {
+    if ((game.boss.alive || game.boss.dying) && game.boss.y + game.boss.height > camera.y && game.boss.y < camera.y + V_HEIGHT) {
+      game.boss.draw(ctx);
+    }
+  }
+
+  // Draw Boss Projectiles
+  if (game.bossProjectiles) {
+    for (let bp of game.bossProjectiles) {
+      if (bp.y + bp.height > camera.y && bp.y < camera.y + V_HEIGHT) {
+        bp.draw(ctx);
+      }
+    }
+  }
+
   // 6b. Draw Projectiles
   if (game.projectiles) {
     for (let proj of game.projectiles) {
@@ -3251,6 +3715,22 @@ function gameLoop(timestamp) {
       if (game.enemies) {
         for (let enemy of game.enemies) {
           enemy.update(dt);
+        }
+      }
+
+      // Update Boss
+      if (game.boss) {
+        game.boss.update(dt);
+      }
+
+      // Update Boss Projectiles
+      if (game.bossProjectiles) {
+        for (let i = game.bossProjectiles.length - 1; i >= 0; i--) {
+          const bp = game.bossProjectiles[i];
+          bp.update(dt);
+          if (!bp.alive) {
+            game.bossProjectiles.splice(i, 1);
+          }
         }
       }
 
