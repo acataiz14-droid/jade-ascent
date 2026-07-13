@@ -1878,7 +1878,7 @@ function generateLevel() {
           if (allowed) {
             // Zone 2 & 3 have slightly higher chance
             const zoneBonus = zone === 2 ? 0.08 : zone === 3 ? 0.14 : 0;
-            const spawnChance = baseChance + zoneBonus;
+            const spawnChance = (baseChance + zoneBonus) * 0.6;
             const enemyRoll = rand.next();
             if (enemyRoll < spawnChance) {
               const enemyX = platform.x + platform.width / 2 - 16;
