@@ -1141,10 +1141,13 @@ class Projectile {
 }
 
 function playerShoot() {
-  if (game.upgrades.shooting <= 0) return;
+  const isChar5Shooting = (game.selectedCharacter === 5 && game.upgrades.shooting === 0);
+  
+  if (game.upgrades.shooting <= 0 && !isChar5Shooting) return;
   if (player.shootCooldown > 0) return;
 
-  player.shootCooldown = 0.4;
+  const currentShootLevel = isChar5Shooting ? 1 : game.upgrades.shooting;
+  player.shootCooldown = isChar5Shooting ? 3.0 : 0.4;
 
   const dir = player.facingLeft ? -1 : 1;
   const projectileSpeed = 8.5;
@@ -1152,7 +1155,7 @@ function playerShoot() {
   const startX = player.facingLeft ? (player.x - 12) : (player.x + player.width - 4);
   const startY = player.y + player.height / 2 - 8;
 
-  const proj = new Projectile(startX, startY, dir * projectileSpeed, 0, game.upgrades.shooting);
+  const proj = new Projectile(startX, startY, dir * projectileSpeed, 0, currentShootLevel);
   game.projectiles.push(proj);
 
   audio.playShoot();
