@@ -1336,6 +1336,7 @@ class Enemy {
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('▼', cx, this.y - 8);
+    ctx.restore(); // Match the outer ctx.save()
   }
 }
 
@@ -3862,6 +3863,11 @@ function spawnCherryBlossomPetals() {
 }
 
 // Boot up
+window.game = game;
+window.player = player;
+window.camera = camera;
+window.respawnAtCheckpoint = respawnAtCheckpoint;
+
 window.addEventListener('load', () => {
   resizeCanvas();
   spawnCherryBlossomPetals();
