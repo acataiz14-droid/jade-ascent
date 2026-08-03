@@ -29,20 +29,23 @@ const bgImages = {
   clouds: new Image(),
   cosmic: new Image(),
   heavens: new Image(),
-  summit: new Image()
+  summit: new Image(),
+  worldwide: new Image()
 };
 bgImages.bamboo.src = 'assets/bg_bamboo.png';
 bgImages.clouds.src = 'assets/bg_clouds.png';
 bgImages.cosmic.src = 'assets/bg_cosmic.png';
 bgImages.heavens.src = 'assets/bg_heavens.png';
 bgImages.summit.src = 'assets/bg_summit.png';
+bgImages.worldwide.src = 'assets/bg_worldwide.jpg';
 
-const bgLoaded = { bamboo: false, clouds: false, cosmic: false, heavens: false, summit: false };
+const bgLoaded = { bamboo: false, clouds: false, cosmic: false, heavens: false, summit: false, worldwide: false };
 bgImages.bamboo.onload = () => bgLoaded.bamboo = true;
 bgImages.clouds.onload = () => bgLoaded.clouds = true;
 bgImages.cosmic.onload = () => bgLoaded.cosmic = true;
 bgImages.heavens.onload = () => bgLoaded.heavens = true;
 bgImages.summit.onload = () => bgLoaded.summit = true;
+bgImages.worldwide.onload = () => bgLoaded.worldwide = true;
 
 // Helper to draw rounded rectangles
 function drawRoundRect(ctx, x, y, width, height, radius, fill, stroke) {
@@ -3585,8 +3588,8 @@ function drawParallaxBackgrounds() {
         ctx.fill();
       }
     }
-  } else if (lvl === 4 || lvl === 10) {
-    // Level 4 & 10: High Heavens (⚡)
+  } else if (lvl === 4) {
+    // Level 4: High Heavens (⚡)
     if (bgLoaded.heavens) {
       const py = -camY * 0.12 % V_HEIGHT;
       ctx.drawImage(bgImages.heavens, 0, py, V_WIDTH, V_HEIGHT);
@@ -3603,6 +3606,20 @@ function drawParallaxBackgrounds() {
     // Dynamic lightning flashes on Level 4
     if (Math.random() < 0.008) {
       ctx.fillStyle = 'rgba(235, 245, 255, 0.4)';
+      ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+    }
+  } else if (lvl === 10) {
+    // Level 10: Worldwide Special (🌍)
+    if (bgLoaded.worldwide) {
+      const py = -camY * 0.12 % V_HEIGHT;
+      ctx.drawImage(bgImages.worldwide, 0, py, V_WIDTH, V_HEIGHT);
+      ctx.drawImage(bgImages.worldwide, 0, py - V_HEIGHT, V_WIDTH, V_HEIGHT);
+    } else {
+      const grad = ctx.createLinearGradient(0, 0, 0, V_HEIGHT);
+      grad.addColorStop(0, '#0d1b2a');
+      grad.addColorStop(0.5, '#1b263b');
+      grad.addColorStop(1, '#415a77');
+      ctx.fillStyle = grad;
       ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
     }
   } else if (lvl === 5) {
