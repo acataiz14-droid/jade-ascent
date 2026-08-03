@@ -12,7 +12,8 @@ const LEVELS_CONFIG = {
   3: { name: "ด่าน 3: เต๋าแห่งจักรวาล (Cosmic Tao)", heightMeters: 1000, emoji: "🌌" },
   4: { name: "ด่าน 4: แดนสวรรค์เบื้องบน (High Heavens)", heightMeters: 800, emoji: "⚡" },
   5: { name: "ด่าน 5: ยอดเขาไร้สิ้นสุด (Infinite Summit)", heightMeters: 5000, emoji: "🐉" },
-  9: { name: "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸", heightMeters: 1000, emoji: "🌸", isSpecial: true }
+  9: { name: "ด่านพิเศษ: ด่านของน้องเก้า 🌸🧸", heightMeters: 1000, emoji: "🌸", isSpecial: true },
+  10: { name: "ด่านพิเศษ: Worldwide 🌍", heightMeters: 800, emoji: "🌍", isSpecial: true }
 };
 
 let PEAK_HEIGHT = LEVELS_CONFIG[1].heightMeters * 14.5;
@@ -1423,7 +1424,10 @@ class Boss {
     this.y = y;
     this.width = 96; // 300% of 32
     this.height = 96;
-    this.vx = 0.8; // fairly slow
+    
+    // Level 10 Boss is 30% harder!
+    const isHarder = (game.currentLevel === 10);
+    this.vx = isHarder ? 1.04 : 0.8; // 30% faster movement
     this.vy = 0;
     this.grounded = true;
     this.alive = true;
@@ -1435,9 +1439,10 @@ class Boss {
     this.patrolLeft = platform ? platform.x + 8 : x - 100;
     this.patrolRight = platform ? platform.x + platform.width - 96 - 8 : x + 100;
     
-    this.hp = 10;
-    this.maxHp = 10;
-    this.shootTimer = 2.5; // shoot every 2.5 seconds
+    this.hp = isHarder ? 13 : 10; // 30% more HP (13 HP)
+    this.maxHp = this.hp;
+    this.shootInterval = isHarder ? 1.9 : 2.5; // 30% faster attack rate
+    this.shootTimer = this.shootInterval;
     this.walkCycle = 0;
     this.eyeBlink = 0;
   }
@@ -1475,10 +1480,10 @@ class Boss {
       this.vx = -Math.abs(this.vx);
     }
 
-    // Shooting: ying rob thit thang (8 directions) every 2.5 seconds
+    // Shooting: ying rob thit thang (8 directions)
     this.shootTimer -= dt;
     if (this.shootTimer <= 0) {
-      this.shootTimer = 2.5;
+      this.shootTimer = this.shootInterval;
       this.shoot8Directions();
     }
   }
@@ -1487,7 +1492,7 @@ class Boss {
     audio.playShoot();
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
-    const speed = 3.5;
+    const speed = (game.currentLevel === 10) ? 4.55 : 3.5; // 30% faster projectile speed
     for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
       const vx = Math.cos(angle) * speed;
       const vy = Math.sin(angle) * speed;
@@ -1839,9 +1844,9 @@ function generateLevel() {
     // Generate x coordinate (ensure fits inside screen boundaries)
     const pX = rand.nextRange(25, V_WIDTH - pWidth - 25);
     
-    // In Level 4, skip procedural platform generation if it is too close to the boss platform at 600m
+    // In Level 4 & 10, skip procedural platform generation if it is too close to the boss platform at 600m
     let skipProcedural = false;
-    if (game.currentLevel === 4 && Math.abs(currentY - (-600 * 14.5)) < 120) {
+    if ((game.currentLevel === 4 || game.currentLevel === 10) && Math.abs(currentY - (-600 * 14.5)) < 120) {
       skipProcedural = true;
     }
 
@@ -1928,8 +1933,8 @@ function generateLevel() {
     currentY -= stepY;
   }
 
-  // Spawn Boss in Level 4 at 600m
-  if (game.currentLevel === 4) {
+  // Spawn Boss in Level 4 & 10 at 600m
+  if (game.currentLevel === 4 || game.currentLevel === 10) {
     const bossY = -600 * 14.5;
     // Create a special boss platform
     const bossPlat = new Platform(V_WIDTH / 2 - 100, bossY, 200, 22, 'normal');
@@ -2250,6 +2255,13 @@ function winGame() {
       winDesc.innerText = "คุณสามารถปีนผ่านด่านพิเศษและทำแบบฝึกหัดคำศัพท์ของน้องเก้าได้สำเร็จ! ยอดเยี่ยมมากครับ!";
     }
     if (finalAltitude) finalAltitude.innerText = "1000m";
+  } else if (game.currentLevel === 10) {
+    if (winTitle) winTitle.innerText = "WORLDWIDE CLEAR";
+    if (winSubtitle) winSubtitle.innerText = "ผ่านด่านพิเศษ Worldwide สำเร็จ! 🌍";
+    if (winDesc) {
+      winDesc.innerText = "คุณสามารถปีนผ่านด่านพิเศษและปราบบอสสุดแกร่งพร้อมตอบคำถามคำศัพท์ประเทศและสรรพนามได้สำเร็จ! ยอดเยี่ยมมากครับ!";
+    }
+    if (finalAltitude) finalAltitude.innerText = "800m";
   } else {
     if (winTitle) winTitle.innerText = "CELESTIAL REACHED";
     if (winSubtitle) winSubtitle.innerText = "บรรลุสู่สวรรค์เก้าชั้นฟ้า! 🐉";
@@ -2266,8 +2278,8 @@ function winGame() {
 function handleLevelCleared() {
   audio.playGong();
   
-  if (game.currentLevel === 5 || game.currentLevel === 9) {
-    // Reached peak of Level 5 or Level 9! Player wins the entire game!
+  if (game.currentLevel === 5 || game.currentLevel === 9 || game.currentLevel === 10) {
+    // Reached peak of Level 5, Level 9, or Level 10! Player wins the entire game!
     winGame();
   } else {
     // Level cleared! Show the level-clear-screen modal
@@ -2393,6 +2405,22 @@ const CHINESE_QUESTIONS_BY_LEVEL = {
     { id: "4_10", q: "คำศัพท์ภาษาจีนคำว่า '紫色' (zǐsè) แปลว่าสีอะไร?", o: ["สีชมพู (Pink)", "สีม่วง (Purple)", "สีน้ำเงิน (Blue)", "สีแดง (Red)"], a: 1 },
     { id: "4_11", q: "คำศัพท์ภาษาจีนคำว่า '棕色' (zōngsè) แปลว่าสีอะไร?", o: ["สีเทา (Gray)", "สีดำ (Black)", "สีน้ำตาล (Brown)", "สีส้ม (Orange)"], a: 2 }
   ],
+  10: [ // Level 10 (Worldwide - Countries & Pronouns - Repeating Pool)
+    { id: "10_1", q: "คำศัพท์ภาษาจีนคำว่า '泰国' (Tàiguó - ไท่กั๋ว) แปลว่าอะไร?", o: ["ประเทศไทย (Thailand)", "ประเทศจีน (China)", "ประเทศญี่ปุ่น (Japan)", "ประเทศเกาหลี (South Korea)"], a: 0 },
+    { id: "10_2", q: "คำศัพท์ภาษาจีนคำว่า '中国' (Zhōngguó - จงกั๋ว) แปลว่าอะไร?", o: ["ประเทศเกาหลี (South Korea)", "ประเทศจีน (China)", "ประเทศอังกฤษ (UK)", "ประเทศอเมริกา (USA)"], a: 1 },
+    { id: "10_3", q: "คำศัพท์ภาษาจีนคำว่า '日本' (Rìběn - รื่อเปิ่น) แปลว่าอะไร?", o: ["ประเทศฝรั่งเศส (France)", "ประเทศแคนาดา (Canada)", "ประเทศญี่ปุ่น (Japan)", "ประเทศไทย (Thailand)"], a: 2 },
+    { id: "10_4", q: "คำศัพท์ภาษาจีนคำว่า '韩国' (Hánguó - หานกั๋ว) แปลว่าอะไร?", o: ["ประเทศอังกฤษ (UK)", "ประเทศอเมริกา (USA)", "ประเทศจีน (China)", "ประเทศเกาหลี (South Korea)"], a: 3 },
+    { id: "10_5", q: "คำศัพท์ภาษาจีนคำว่า '英国' (Yīngguó - อิงกั๋ว) แปลว่าอะไร?", o: ["ประเทศอังกฤษ (United Kingdom)", "ประเทศฝรั่งเศส (France)", "ประเทศแคนาดา (Canada)", "ประเทศญี่ปุ่น (Japan)"], a: 0 },
+    { id: "10_6", q: "คำศัพท์ภาษาจีนคำว่า '美国' (Měiguó - เหม่ยกั๋ว) แปลว่าอะไร?", o: ["ประเทศเกาหลี (South Korea)", "ประเทศอเมริกา (United States)", "ประเทศไทย (Thailand)", "ประเทศจีน (China)"], a: 1 },
+    { id: "10_7", q: "คำศัพท์ภาษาจีนคำว่า '加拿大' (Jiānádà - เจียนาหนาต้า) แปลว่าอะไร?", o: ["ประเทศฝรั่งเศส (France)", "ประเทศอังกฤษ (UK)", "ประเทศแคนาดา (Canada)", "ประเทศอเมริกา (USA)"], a: 2 },
+    { id: "10_8", q: "คำศัพท์ภาษาจีนคำว่า '法国' (Fǎguó - ฝ่ากั๋ว) แปลว่าอะไร?", o: ["ประเทศไทย (Thailand)", "ประเทศญี่ปุ่น (Japan)", "ประเทศจีน (China)", "ประเทศฝรั่งเศส (France)"], a: 3 },
+    { id: "10_9", q: "คำศัพท์ภาษาจีนคำว่า '他' (tā - ทา) แปลว่าอะไร?", o: ["เขา (ผู้ชาย)", "เธอ (ผู้หญิง)", "พวกเรา", "พวกเขา"], a: 0 },
+    { id: "10_10", q: "คำศัพท์ภาษาจีนคำว่า '她' (tā - ทา) แปลว่าอะไร?", o: ["เขา (ผู้ชาย)", "เธอ (ผู้หญิง)", "ฉัน", "คุณ"], a: 1 },
+    { id: "10_11", q: "คำศัพท์ภาษาจีนคำว่า '是' (shì - ซื่อ) แปลว่าอะไร?", o: ["ไม่ (No)", "ไป (Go)", "เป็น / คือ (Is/Am/Are)", "กิน (Eat)"], a: 2 },
+    { id: "10_12", q: "คำศัพท์ภาษาจีนคำว่า '哪' (nǎ - หน่า) แปลว่าอะไร?", o: ["ใคร (Who)", "อะไร (What)", "เมื่อไหร่ (When)", "ไหน / อะไร (Which/Where)"], a: 3 },
+    { id: "10_13", q: "คำศัพท์ภาษาจีนคำว่า '同学' (tóngxué - ถงเสวีย) แปลว่าอะไร?", o: ["เพื่อนร่วมชั้น (Classmate)", "คุณครู (Teacher)", "นักเรียนใหม่ (New student)", "เพื่อนสนิท (Best friend)"], a: 0 },
+    { id: "10_14", q: "คำศัพท์ภาษาจีนคำว่า '朋友' (péngyou - เผิงโหย่ว) แปลว่าอะไร?", o: ["ญาติ (Relative)", "เพื่อน (Friend)", "ครอบครัว (Family)", "พี่น้อง (Siblings)"], a: 1 }
+  ],
   5: [ // Level 5 (Hardest - times, simple grammar, pronouns sentence construction)
     { id: "5_1", q: "คำศัพท์ภาษาจีนคำว่า '现在' (xiànzài) แปลว่าอะไร?", o: ["เมื่อก่อน (Before)", "ตอนนี้ (Now)", "อนาคต (Future)", "สายแล้ว (Late)"], a: 1 },
     { id: "5_2", q: "คำศัพท์คำว่า '医生' (yīshēng) แปลว่าอะไร?", o: ["พยาบาล (Nurse)", "คุณหมอ (Doctor)", "คนไข้ (Patient)", "เภสัชกร (Pharmacist)"], a: 1 },
@@ -2446,8 +2474,8 @@ function triggerQuestion(milestone) {
   // Filter for unused questions in the current level
   let unusedQuestions = questionPool.filter(q => !game.askedQuestionIds.has(q.id));
   
-  // If we are on Level 1, Level 2, or Level 3 and all questions are used, reset asked questions for that level to loop them
-  if ((game.currentLevel === 1 || game.currentLevel === 2 || game.currentLevel === 3 || game.currentLevel === 4 || game.currentLevel === 9) && unusedQuestions.length === 0) {
+  // If we are on Level 1, Level 2, Level 3, Level 4, Level 9, or Level 10 and all questions are used, reset asked questions for that level to loop them
+  if ((game.currentLevel === 1 || game.currentLevel === 2 || game.currentLevel === 3 || game.currentLevel === 4 || game.currentLevel === 9 || game.currentLevel === 10) && unusedQuestions.length === 0) {
     questionPool.forEach(q => game.askedQuestionIds.delete(q.id));
     unusedQuestions = questionPool;
   }
@@ -3557,8 +3585,8 @@ function drawParallaxBackgrounds() {
         ctx.fill();
       }
     }
-  } else if (lvl === 4) {
-    // Level 4: High Heavens (⚡)
+  } else if (lvl === 4 || lvl === 10) {
+    // Level 4 & 10: High Heavens (⚡)
     if (bgLoaded.heavens) {
       const py = -camY * 0.12 % V_HEIGHT;
       ctx.drawImage(bgImages.heavens, 0, py, V_WIDTH, V_HEIGHT);
