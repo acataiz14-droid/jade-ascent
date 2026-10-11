@@ -144,6 +144,70 @@ export const FURNITURE_CATALOG = [
   }
 ];
 
+// --- HOTEL & INN VOCABULARY QUESTS ---
+export const HOTEL_INN_QUESTS = [
+  {
+    id: 'hotel_jiudian',
+    word: { char: '酒店', pinyin: 'jiǔdiàn', english: 'Hotel', thai: 'โรงแรม / โรงเตี๊ยม' },
+    question: 'คำว่า "โรงแรม / โรงเตี๊ยม (Hotel)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '酒店 (jiǔdiàn)', correct: true },
+      { text: '商店 (shāngdiàn)', correct: false },
+      { text: '书店 (shūdiàn)', correct: false }
+    ]
+  },
+  {
+    id: 'hotel_ruzhu',
+    word: { char: '入住', pinyin: 'rùzhù', english: 'Check in / Check into a hotel', thai: 'เช็คอิน / เข้าพักโรงแรม' },
+    question: 'เมื่อนักเดินทางมาถึงและต้องการ "เช็คอิน / เข้าพัก (Check in)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '入住 (rùzhù)', correct: true },
+      { text: '退房 (tuìfáng)', correct: false },
+      { text: '出发 (chūfā)', correct: false }
+    ]
+  },
+  {
+    id: 'hotel_yuding',
+    word: { char: '预订', pinyin: 'yùdìng', english: 'Reservation / Book', thai: 'การจอง / จองล่วงหน้า' },
+    question: 'การติดต่อล่วงหน้าเพื่อ "จองห้องพัก / การจอง (Reservation / Book)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '预订 (yùdìng)', correct: true },
+      { text: '准备 (zhǔnbèi)', correct: false },
+      { text: '约定 (yuēdìng)', correct: false }
+    ]
+  },
+  {
+    id: 'hotel_huzhao',
+    word: { char: '护照', pinyin: 'hùzhào', english: 'Passport', thai: 'หนังสือเดินทาง / พาสปอร์ต' },
+    question: 'เอกสารสำคัญใช้ยืนยันตัวตนตอนเข้าพัก "หนังสือเดินทาง / พาสปอร์ต (Passport)" ภาษาจีนคือคำใด?',
+    options: [
+      { text: '护照 (hùzhào)', correct: true },
+      { text: '照片 (zhàopiàn)', correct: false },
+      { text: '学生证 (xuéshēngzhèng)', correct: false }
+    ]
+  },
+  {
+    id: 'hotel_fangjian',
+    word: { char: '房间', pinyin: 'fángjiān', english: 'Room', thai: 'ห้องพัก / ห้อง' },
+    question: 'สถานที่พักผ่อนของผู้เข้าพัก คำว่า "ห้องพัก / ห้อง (Room)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '房间 (fángjiān)', correct: true },
+      { text: '洗手间 (xǐshǒujiān)', correct: false },
+      { text: '厨房 (chúfáng)', correct: false }
+    ]
+  },
+  {
+    id: 'hotel_fangka',
+    word: { char: '房卡', pinyin: 'fángkǎ', english: 'Room key card', thai: 'คีย์การ์ดห้องพัก' },
+    question: 'การ์ดสำหรับแตะเปิดประตูห้องพัก "คีย์การ์ด (Room key card)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '房卡 (fángkǎ)', correct: true },
+      { text: '银行卡 (yínhángkǎ)', correct: false },
+      { text: '门票 (ménpiào)', correct: false }
+    ]
+  }
+];
+
 // --- LIVING TAOIST GUESTS & RESIDENTS ---
 export const TAOIST_GUESTS = [
   {
@@ -155,18 +219,18 @@ export const TAOIST_GUESTS = [
     favoriteFurniture: 'tea_table',
     floor: 1,
     quotes: [
-      { zh: '茶很香！', py: 'chá hěn xiāng', th: 'ชาหอมมากเลย!' },
-      { zh: '好舒服。', py: 'hǎo shūfu', th: 'สบายจังเลย' },
-      { zh: '谢谢掌柜！', py: 'xièxie zhǎngguì', th: 'ขอบคุณท่านเจ้าสำนัก!' },
-      { zh: '我爱喝茶。', py: 'wǒ ài hē chá', th: 'ฉันรักการดื่มชา' }
+      { zh: '欢迎光临我们的酒店！', py: 'huānyíng guānglín wǒmen de jiǔdiàn', th: 'ยินดีต้อนรับสู่โรงแรม/โรงเตี๊ยมของเรา!' },
+      { zh: '这家酒店真漂亮。', py: 'zhè jiā jiǔdiàn zhēn piàoliang', th: 'โรงแรมนี้สวยงามจริง ๆ' },
+      { zh: '茶很香，请慢用！', py: 'chá hěn xiāng, qǐng màn yòng', th: 'ชาหอมมาก เชิญดื่มตามสบายครับ!' },
+      { zh: '谢谢掌柜！', py: 'xièxie zhǎngguì', th: 'ขอบคุณท่านเจ้าสำนัก!' }
     ],
     quest: {
-      question: 'น้องแพนด้ากระหายน้ำ อยากสั่ง "ชา" ... คำว่า "ชา" ภาษาจีนคือคำใด?',
-      word: { char: '茶', pinyin: 'chá', thai: 'ชา' },
+      question: 'น้องแพนด้าอยากต้อนรับนักเดินทางสู่ "โรงแรม" ... คำว่า "โรงแรม / โรงเตี๊ยม (Hotel)" ภาษาจีนคือคำใด?',
+      word: { char: '酒店', pinyin: 'jiǔdiàn', thai: 'โรงแรม / โรงเตี๊ยม (Hotel)' },
       options: [
-        { text: '茶 (chá)', correct: true },
-        { text: '水 (shuǐ)', correct: false },
-        { text: '米饭 (mǐfàn)', correct: false }
+        { text: '酒店 (jiǔdiàn)', correct: true },
+        { text: '商店 (shāngdiàn)', correct: false },
+        { text: '书店 (shūdiàn)', correct: false }
       ]
     }
   },
@@ -179,18 +243,18 @@ export const TAOIST_GUESTS = [
     favoriteFurniture: 'bookshelf',
     floor: 2,
     quotes: [
-      { zh: '学中文很有趣！', py: 'xué zhōngwén hěn yǒuqù', th: 'เรียนภาษาจีนสนุกจัง!' },
-      { zh: '这本书写得真好。', py: 'zhè běn shū xiě de zhēn hǎo', th: 'หนังสือเล่มนี้เขียนดีมาก' },
-      { zh: '温故而知新。', py: 'wēn gù ér zhī xīn', th: 'ทบทวนของเก่าเพื่อให้เกิดปัญญาใหม่' },
-      { zh: '汉字真美！', py: 'hànzì zhēn měi', th: 'ตัวอักษรจีนงดงามจริง ๆ!' }
+      { zh: '请问您有预订吗？', py: 'qǐngwèn nín yǒu yùdìng ma', th: 'ขอเรียนถามว่าท่านได้ทำการจองไว้ไหมครับ?' },
+      { zh: '我想预订一间房。', py: 'wǒ xiǎng yùdìng yì jiān fáng', th: 'ฉันอยากจองห้องพักสักหนึ่งห้อง' },
+      { zh: '预订成功了！', py: 'yùdìng chénggōng le', th: 'ทำการจองสำเร็จแล้ว!' },
+      { zh: '学中文很有趣！', py: 'xué zhōngwén hěn yǒuqù', th: 'เรียนภาษาจีนสนุกจัง!' }
     ],
     quest: {
-      question: 'เซียนน้อยพู่กันอยากอ่าน "หนังสือ" ... คำว่า "หนังสือ" ภาษาจีนคือคำใด?',
-      word: { char: '书', pinyin: 'shū', thai: 'หนังสือ' },
+      question: 'เซียนน้อยพู่กันตรวจสอบรายชื่อผู้เข้าพัก ... คำว่า "การจอง / จองล่วงหน้า (Reservation / Book)" ภาษาจีนคือคำใด?',
+      word: { char: '预订', pinyin: 'yùdìng', thai: 'การจอง / จองล่วงหน้า (Reservation / Book)' },
       options: [
-        { text: '书 (shū)', correct: true },
-        { text: '画 (huà)', correct: false },
-        { text: '字 (zì)', correct: false }
+        { text: '预订 (yùdìng)', correct: true },
+        { text: '准备 (zhǔnbèi)', correct: false },
+        { text: '约定 (yuēdìng)', correct: false }
       ]
     }
   },
@@ -203,18 +267,18 @@ export const TAOIST_GUESTS = [
     favoriteFurniture: 'incense',
     floor: 1,
     quotes: [
+      { zh: '我想办理入住。', py: 'wǒ xiǎng bànlǐ rùzhù', th: 'ฉันต้องการทำเรื่องเช็คอินเข้าพัก' },
+      { zh: '欢迎入住！', py: 'huānyíng rùzhù', th: 'ยินดีต้อนรับเข้าพัก!' },
       { zh: '今天天气真好！', py: 'jīntiān tiānqì zhēn hǎo', th: 'วันนี้อากาศดีมาก!' },
-      { zh: '太好玩了！', py: 'tài hǎowán le', th: 'สนุกสุด ๆ ไปเลย!' },
-      { zh: '我想吃桃子。', py: 'wǒ xiǎng chī táozi', th: 'ฉันอยากกินลูกท้อ' },
-      { zh: '高山流水！', py: 'gāoshān liúshuǐ', th: 'ขุนเขาสูง สายธารหลั่งไหล' }
+      { zh: '太好玩了！', py: 'tài hǎowán le', th: 'สนุกสุด ๆ ไปเลย!' }
     ],
     quest: {
-      question: 'วานรเมฆาอยากกิน "แอปเปิ้ล" ... คำว่า "แอปเปิ้ล" ภาษาจีนคือคำใด?',
-      word: { char: '苹果', pinyin: 'píngguǒ', thai: 'แอปเปิ้ล' },
+      question: 'วานรเมฆาเพิ่งเดินทางมาถึงและอยาก "เช็คอินเข้าพัก" ... คำว่า "เช็คอิน / เข้าพัก (Check in)" ภาษาจีนคือคำใด?',
+      word: { char: '入住', pinyin: 'rùzhù', thai: 'เช็คอิน / เข้าพัก (Check in)' },
       options: [
-        { text: '苹果 (píngguǒ)', correct: true },
-        { text: '香蕉 (xiāngjiāo)', correct: false },
-        { text: '西瓜 (xīguā)', correct: false }
+        { text: '入住 (rùzhù)', correct: true },
+        { text: '退房 (tuìfáng)', correct: false },
+        { text: '出发 (chūfā)', correct: false }
       ]
     }
   },
@@ -227,17 +291,18 @@ export const TAOIST_GUESTS = [
     favoriteFurniture: 'cloud_bed',
     floor: 2,
     quotes: [
-      { zh: '心静自然凉。', py: 'xīn jìng zìrán liáng', th: 'ใจสงบ ย่อมเย็นสบาย' },
-      { zh: '道法自然。', py: 'dào fǎ zìrán', th: 'เต๋าคือวิถีแห่งธรรมชาติ' },
-      { zh: '慢一点，走得更远。', py: 'màn yīdiǎn, zǒu de gèng yuǎn', th: 'ช้าลงนิด ย่อมไปได้ไกลกว่า' }
+      { zh: '请出示您的护照。', py: 'qǐng chūshì nín de hùzhào', th: 'โปรดแสดงหนังสือเดินทาง/พาสปอร์ตของท่าน' },
+      { zh: '这是我的护照。', py: 'zhè shì wǒ de hùzhào', th: 'นี่คือหนังสือเดินทางของฉัน' },
+      { zh: '随身带好护照。', py: 'suíshēn dài hǎo hùzhào', th: 'พกพาหนังสือเดินทางติดตัวไว้ให้ดี' },
+      { zh: '心静自然凉。', py: 'xīn jìng zìrán liáng', th: 'ใจสงบ ย่อมเย็นสบาย' }
     ],
     quest: {
-      question: 'ปู่เต่าอยากทักทายตอนพบกัน ... คำว่า "สวัสดี" ในภาษาจีนคือคำใด?',
-      word: { char: '你好', pinyin: 'nǐ hǎo', thai: 'สวัสดี' },
+      question: 'ปู่เต่าขอตรวจสอบเอกสารระบุตัวตนก่อนเข้าพัก ... คำว่า "หนังสือเดินทาง / พาสปอร์ต (Passport)" ภาษาจีนคือคำใด?',
+      word: { char: '护照', pinyin: 'hùzhào', thai: 'หนังสือเดินทาง / พาสปอร์ต (Passport)' },
       options: [
-        { text: '你好 (nǐ hǎo)', correct: true },
-        { text: '再见 (zàijiàn)', correct: false },
-        { text: '对不起 (duìbuqǐ)', correct: false }
+        { text: '护照 (hùzhào)', correct: true },
+        { text: '照片 (zhàopiàn)', correct: false },
+        { text: '学生证 (xuéshēngzhèng)', correct: false }
       ]
     }
   },
@@ -250,17 +315,18 @@ export const TAOIST_GUESTS = [
     favoriteFurniture: 'zither',
     floor: 3,
     quotes: [
+      { zh: '房间很干净整洁。', py: 'fángjiān hěn gānjìng zhěngjié', th: 'ห้องพักสะอาดและเป็นระเบียบเรียบร้อยมาก' },
+      { zh: '您的房间在二楼。', py: 'nín de fángjiān zài èr lóu', th: 'ห้องพักของท่านอยู่ที่ชั้นสอง' },
       { zh: '月亮真漂亮。', py: 'yuèliang zhēn piàoliang', th: 'ดวงจันทร์สวยงามจริง ๆ' },
-      { zh: '琴声悠扬。', py: 'qín shēng yōuyáng', th: 'เสียงพิณไพเราะก้องกังวาน' },
-      { zh: '祝福大家平安。', py: 'zhùfú dàjiā píng\'ān', th: 'ขออวยพรให้ทุกคนสงบสุขปลอดภัย' }
+      { zh: '琴声悠扬。', py: 'qín shēng yōuyáng', th: 'เสียงพิณไพเราะก้องกังวาน' }
     ],
     quest: {
-      question: 'แม่นางกระต่ายชวนดู "ดวงจันทร์" ... คำว่า "ดวงจันทร์" ภาษาจีนคือคำใด?',
-      word: { char: '月亮', pinyin: 'yuèliang', thai: 'ดวงจันทร์' },
+      question: 'แม่นางกระต่ายชวนนักเดินทางขึ้นไปพักผ่อนใน "ห้องพัก" ... คำว่า "ห้องพัก / ห้อง (Room)" ภาษาจีนคือคำใด?',
+      word: { char: '房间', pinyin: 'fángjiān', thai: 'ห้องพัก / ห้อง (Room)' },
       options: [
-        { text: '月亮 (yuèliang)', correct: true },
-        { text: '太阳 (tàiyáng)', correct: false },
-        { text: '星星 (xīngxing)', correct: false }
+        { text: '房间 (fángjiān)', correct: true },
+        { text: '洗手间 (xǐshǒujiān)', correct: false },
+        { text: '厨房 (chúfáng)', correct: false }
       ]
     }
   },
@@ -273,17 +339,18 @@ export const TAOIST_GUESTS = [
     favoriteFurniture: 'lantern',
     floor: 3,
     quotes: [
-      { zh: '大家一起玩吧！', py: 'dàjiā yìqǐ wán ba', th: 'ทุกคนมาเล่นด้วยกันเถอะ!' },
-      { zh: '红灯笼很漂亮。', py: 'hóng dēnglong hěn piàoliang', th: 'โคมไฟแดงสวยจังเลย' },
+      { zh: '这是您的房卡。', py: 'zhè shì nín de fángkǎ', th: 'นี่คือคีย์การ์ดห้องพักของท่าน' },
+      { zh: '请拿好房卡。', py: 'qǐng ná hǎo fángkǎ', th: 'โปรดถือคีย์การ์ดไว้ให้ดีนะคะ' },
+      { zh: '刷房卡就能开门。', py: 'shuā fángkǎ jiù néng kāi mén', th: 'แตะคีย์การ์ดก็เปิดประตูได้เลย' },
       { zh: '今天真开心！', py: 'jīntiān zhēn kāixīn', th: 'วันนี้มีความสุขจัง!' }
     ],
     quest: {
-      question: 'จิ้งจอกน้อยชี้ไปที่ "โคมไฟ" ... คำว่า "โคมไฟ" ในภาษาจีนคือคำใด?',
-      word: { char: '灯', pinyin: 'dēng', thai: 'โคมไฟ / ตะเกียง' },
+      question: 'จิ้งจอกน้อยยื่นสิ่งนี้ให้แขกสำหรับแตะเปิดประตูห้อง ... คำว่า "คีย์การ์ดห้องพัก (Room key card)" ภาษาจีนคือคำใด?',
+      word: { char: '房卡', pinyin: 'fángkǎ', thai: 'คีย์การ์ดห้องพัก (Room key card)' },
       options: [
-        { text: '灯 (dēng)', correct: true },
-        { text: '门 (mén)', correct: false },
-        { text: '窗 (chuāng)', correct: false }
+        { text: '房卡 (fángkǎ)', correct: true },
+        { text: '银行卡 (yínhángkǎ)', correct: false },
+        { text: '门票 (ménpiào)', correct: false }
       ]
     }
   }
@@ -538,11 +605,19 @@ export class SanctuaryManager {
     const candidates = TAOIST_GUESTS.filter(g => g.floor <= unlockedFloors);
     const chosen = candidates.slice(0, capacity);
 
-    this.guestState = chosen.map((g, idx) => ({
-      ...g,
-      quoteIndex: idx % g.quotes.length,
-      hasQuest: idx === 0 // Start first guest with a friendly quest!
-    }));
+    this.guestState = chosen.map((g, idx) => {
+      const defaultQuest = HOTEL_INN_QUESTS[idx % HOTEL_INN_QUESTS.length];
+      return {
+        ...g,
+        quoteIndex: idx % g.quotes.length,
+        quest: g.quest || {
+          question: `${g.name}: "${defaultQuest.question}"`,
+          word: defaultQuest.word,
+          options: defaultQuest.options
+        },
+        hasQuest: idx === 0 // Start first guest with a friendly quest!
+      };
+    });
   }
 
   maybeSpawnQuest() {
@@ -550,6 +625,12 @@ export class SanctuaryManager {
     const available = this.guestState.filter(g => !g.hasQuest);
     if (available.length > 0) {
       const pick = available[Math.floor(Math.random() * available.length)];
+      const qConfig = HOTEL_INN_QUESTS[Math.floor(Math.random() * HOTEL_INN_QUESTS.length)];
+      pick.quest = {
+        question: `${pick.name}: "${qConfig.question}"`,
+        word: qConfig.word,
+        options: qConfig.options
+      };
       pick.hasQuest = true;
       if (this.activeTab === 'inn') {
         this.render();
@@ -1142,6 +1223,7 @@ export class SanctuaryManager {
   renderArchiveTab(container, s) {
     const topics = [
       { id: 'all', title: 'ทั้งหมด' },
+      { id: 'hotel_inn', title: '🏨 โรงแรม & โรงเตี๊ยม' },
       { id: 'hsk1_4', title: 'HSK1 บท 4' },
       { id: 'kitchen', title: 'สิ่งของในครัว' },
       { id: 'fruits', title: 'ผลไม้' },
@@ -1218,3 +1300,4 @@ export class SanctuaryManager {
 }
 
 export const sanctuaryManager = new SanctuaryManager();
+window.sanctuaryManager = sanctuaryManager;
