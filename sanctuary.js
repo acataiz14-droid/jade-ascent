@@ -6,6 +6,7 @@
 
 import { profileManager } from './auth.js';
 import { ARENA_TOPICS } from './arena.js';
+import { TaoistInn3D } from './sanctuary-3d.js';
 
 // --- INN PROGRESSION LEVELS (5 TIERS) ---
 export const INN_LEVELS = [
@@ -351,6 +352,7 @@ export class SanctuaryManager {
     // Active guest state for the living dollhouse
     this.guestState = [];
     this.currentActiveQuest = null;
+    this.inn3D = null;
   }
 
   init(onExit) {
@@ -380,6 +382,10 @@ export class SanctuaryManager {
     if (this.questTimer) {
       clearInterval(this.questTimer);
       this.questTimer = null;
+    }
+    if (this.inn3D) {
+      this.inn3D.dispose();
+      this.inn3D = null;
     }
   }
 
@@ -723,6 +729,12 @@ export class SanctuaryManager {
     const container = document.getElementById('sanctuary-tab-content');
     if (!container) return;
 
+    // Dispose 3D scene if leaving inn tab
+    if (this.activeTab !== 'inn' && this.inn3D) {
+      this.inn3D.dispose();
+      this.inn3D = null;
+    }
+
     if (this.activeTab === 'inn') {
       this.renderInnTab(container, sanctuary, profile);
     } else if (this.activeTab === 'furnishing') {
@@ -736,53 +748,18 @@ export class SanctuaryManager {
     }
   }
 
-  // --- TAB 1: LIVING TAOIST INN (COZY DOLLHOUSE CROSS-SECTION) ---
+  // --- TAB 1: LIVING TAOIST INN (2.5D ISOMETRIC 3D SIMULATION) ---
   renderInnTab(container, s, p) {
+    if (this.inn3D) {
+      this.inn3D.dispose();
+      this.inn3D = null;
+    }
+
     const currentCfg = INN_LEVELS.find(l => l.level === s.innLevel) || INN_LEVELS[0];
     const nextCfg = INN_LEVELS.find(l => l.level === s.innLevel + 1);
     const pending = this.calculatePendingJade();
     const { ratePerMin } = this.calculateProductionRate();
     const activePetCfg = MYTHICAL_PETS.find(pet => pet.id === s.activePet) || MYTHICAL_PETS[0];
-
-    // Separate active guests by floor
-    const floor1Guests = this.guestState.filter(g => g.floor === 1);
-    const floor2Guests = this.guestState.filter(g => g.floor === 2);
-    const floor3Guests = this.guestState.filter(g => g.floor === 3);
-
-    // Furniture icons by grade
-    const getFurnIcon = (id) => {
-      const item = FURNITURE_CATALOG.find(f => f.id === id);
-      const grade = (s.furniture && s.furniture[id]) || 0;
-      if (grade === 0) return `<div class="furn-unbuilt" title="${item?.name}: ยังไม่ได้ติดตั้ง (ไปที่แท็บ 'จัดเครื่องเรือน')">➕</div>`;
-      const gCfg = item.grades.find(g => g.tier === grade) || item.grades[0];
-      return `<div class="furn-placed" title="${gCfg.name} (Tier ${grade})">${gCfg.icon}</div>`;
-    };
-
-    const renderGuestsForFloor = (guests) => {
-      if (!guests || guests.length === 0) return '';
-      return guests.map(g => {
-        const q = g.quotes[g.quoteIndex % g.quotes.length];
-        return `
-          <div class="guest-actor ${g.hasQuest ? 'has-quest' : ''}" data-guest-id="${g.id}">
-            <div class="guest-speech-bubble" data-guest-id="${g.id}" title="คลิกเพื่อฟังเสียงอ่าน">
-              <div class="bubble-zh">${q.zh}</div>
-              <div class="bubble-py">${q.py}</div>
-              <div class="bubble-th">"${q.th}"</div>
-              <span class="bubble-audio-icon">🔊</span>
-            </div>
-            ${g.hasQuest ? `
-              <div class="guest-quest-pill pulse-glow" data-guest-id="${g.id}">
-                <span>❓ คำขอของแขก</span>
-              </div>
-            ` : ''}
-            <div class="guest-actor-body" data-guest-id="${g.id}">
-              <span class="guest-actor-avatar">${g.avatar}</span>
-              <span class="guest-actor-name">${g.name}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-    };
 
     container.innerHTML = `
       <div class="living-inn-wrapper">
@@ -811,78 +788,38 @@ export class SanctuaryManager {
           </div>
         </div>
 
-        <!-- Dollhouse Inn Cross-Section View -->
-        <div class="dollhouse-inn-container">
-          <!-- Roof with Cornices and Hanging Lanterns -->
-          <div class="dollhouse-roof">
-            <span class="roof-lantern left">🏮</span>
-            <div class="roof-ridge-sign">🏯 โรงเตี๊ยมเซียนเต๋า (${currentCfg.name.split('(')[0]})</div>
-            <span class="roof-lantern right">🏮</span>
+        <!-- 2.5D Isometric Taoist Inn 3D Simulation Viewport -->
+        <div class="inn-3d-viewport-container" id="inn-3d-viewport">
+          <canvas id="inn-3d-canvas" class="inn-3d-canvas"></canvas>
+          <div id="inn-3d-overlays" class="inn-3d-overlays"></div>
+
+          <!-- Top-Left Title Badge -->
+          <div class="inn-3d-title-badge">
+            <span class="badge-icon">🏯</span>
+            <div class="badge-texts">
+              <span class="badge-inn-name">โรงเตี๊ยมเซียนเต๋า (${currentCfg.name.split('(')[0]})</span>
+              <span class="badge-mode-tag">✨ 2.5D Isometric World</span>
+            </div>
           </div>
 
-          <!-- Building Floors -->
-          <div class="dollhouse-building">
-            <!-- Floor 3 (Unlocked at Level 4+) -->
-            ${s.innLevel >= 4 ? `
-              <div class="dollhouse-floor floor-3">
-                <div class="floor-badge">ชั้น 3: ห้องสมาธิ & พิณเมฆา (Zen & Music Chamber)</div>
-                <div class="floor-room">
-                  <div class="furn-slot-wrap">${getFurnIcon('zither')}</div>
-                  <div class="furn-slot-wrap">${getFurnIcon('cloud_bed')}</div>
-                  <div class="floor-guests-row">${renderGuestsForFloor(floor3Guests)}</div>
-                </div>
-              </div>
-            ` : `
-              <div class="dollhouse-floor floor-locked">
-                <div class="floor-locked-msg">
-                  <span>🔒 ชั้น 3: ปลดล็อกเมื่อโรงเตี๊ยมถึง Level 4 (สองชั้นริมสระบัว)</span>
-                </div>
-              </div>
-            `}
-
-            <!-- Floor 2 (Unlocked at Level 2+) -->
-            ${s.innLevel >= 2 ? `
-              <div class="dollhouse-floor floor-2">
-                <div class="floor-badge">ชั้น 2: หอตำรา & พู่กันจีน (Scripture & Study Loft)</div>
-                <div class="floor-room">
-                  <div class="furn-slot-wrap">${getFurnIcon('bookshelf')}</div>
-                  <div class="furn-slot-wrap">${getFurnIcon('lantern')}</div>
-                  <div class="floor-guests-row">${renderGuestsForFloor(floor2Guests)}</div>
-                </div>
-              </div>
-            ` : `
-              <div class="dollhouse-floor floor-locked">
-                <div class="floor-locked-msg">
-                  <span>🔒 ชั้น 2: ปลดล็อกเมื่อโรงเตี๊ยมถึง Level 2 (โรงเตี๊ยมไม้โบราณ)</span>
-                </div>
-              </div>
-            `}
-
-            <!-- Floor 1: Ground Tea Lounge (Always Unlocked) -->
-            <div class="dollhouse-floor floor-1">
-              <div class="floor-badge">ชั้น 1: โถงน้ำชาเซียน (Tea Lounge & Reception)</div>
-              <div class="floor-room">
-                <div class="furn-slot-wrap">${getFurnIcon('tea_table')}</div>
-                <div class="furn-slot-wrap">${getFurnIcon('incense')}</div>
-                <div class="floor-guests-row">${renderGuestsForFloor(floor1Guests)}</div>
-              </div>
+          <!-- Camera Rail Overlay Controls (Cozy Nest style) -->
+          <div class="inn-3d-cam-rail">
+            <div class="cam-rail-group">
+              <button id="cam-btn-f1" class="cam-rail-btn" title="โฟกัสชั้น 1 (โถงน้ำชา)">1F โถงน้ำชา</button>
+              ${s.innLevel >= 2 ? `<button id="cam-btn-f2" class="cam-rail-btn" title="โฟกัสชั้น 2 (หอตำรา)">2F หอตำรา</button>` : ''}
+              ${s.innLevel >= 4 ? `<button id="cam-btn-f3" class="cam-rail-btn" title="โฟกัสชั้น 3 (พิณเมฆา)">3F พิณเมฆา</button>` : ''}
+              <button id="cam-btn-all" class="cam-rail-btn active" title="มุมมองทั้งโรงเตี๊ยม">👁️ ทั้งหมด</button>
             </div>
-
-            <!-- Courtyard Garden & Lotus Pond -->
-            <div class="dollhouse-courtyard">
-              <div class="courtyard-badge">ลานหน้าโรงเตี๊ยม & สวนริมสระบัว</div>
-              <div class="courtyard-ground">
-                <div class="courtyard-scenery-item" title="ต้นท้อสวรรค์พันปี">🌸</div>
-                <div class="courtyard-scenery-item" title="สระบัวมังกรหยก">🪷</div>
-                <div class="courtyard-pet-actor" id="pet-living-actor" title="แตะเพื่อลูบหัวและเล่นกับสัตว์เลี้ยง">
-                  <span class="pet-living-avatar">${activePetCfg.emoji}</span>
-                  <div class="pet-living-info">
-                    <span class="pet-living-name">${activePetCfg.name}</span>
-                    <span class="pet-living-bubble">🐾 เดินเล่นอย่างมีความสุข</span>
-                  </div>
-                </div>
-              </div>
+            <div class="cam-rail-group">
+              <button id="cam-btn-zoomin" class="cam-rail-btn icon-only" title="ซูมเข้า">➕</button>
+              <button id="cam-btn-zoomout" class="cam-rail-btn icon-only" title="ซูมออก">➖</button>
+              <button id="cam-btn-reset" class="cam-rail-btn icon-only" title="รีเซ็ตมุมมอง">🔄</button>
             </div>
+          </div>
+
+          <!-- Bottom Interaction Hint -->
+          <div class="inn-3d-hint-pill">
+            <span>🖱️ ลากเมาส์/นิ้วเพื่อหมุน • ซูมเข้าออกได้ • แตะที่แขกเซียนเพื่อฟังเสียงหรือรับภารกิจ 📜</span>
           </div>
         </div>
 
@@ -917,7 +854,7 @@ export class SanctuaryManager {
       </div>
     `;
 
-    // Event Bindings
+    // Event Bindings for Harvest & Upgrade
     const harvestBtn = document.getElementById('btn-harvest-jade');
     if (harvestBtn) {
       harvestBtn.onclick = () => {
@@ -941,58 +878,62 @@ export class SanctuaryManager {
       };
     }
 
-    // Guest interaction clicks
-    container.querySelectorAll('.guest-actor').forEach(actor => {
-      actor.onclick = (e) => {
-        const gid = actor.getAttribute('data-guest-id');
-        const guest = this.guestState.find(g => g.id === gid);
-        if (!guest) return;
+    // Initialize 2.5D Isometric 3D Living Inn
+    requestAnimationFrame(() => {
+      const vpContainer = document.getElementById('inn-3d-viewport');
+      const vpCanvas = document.getElementById('inn-3d-canvas');
+      const vpOverlays = document.getElementById('inn-3d-overlays');
 
-        // If quest available, open quest modal
-        if (guest.hasQuest) {
-          this.openGuestQuestModal(guest);
-          return;
-        }
+      if (vpContainer && vpCanvas && vpOverlays) {
+        this.inn3D = new TaoistInn3D({
+          container: vpContainer,
+          canvas: vpCanvas,
+          overlays: vpOverlays,
+          sanctuaryData: s,
+          guestState: this.guestState,
+          activePet: activePetCfg,
+          furnitureCatalog: FURNITURE_CATALOG,
+          onSpeakChinese: (zh) => this.speakChinese(zh),
+          onOpenQuest: (guest) => this.openGuestQuestModal(guest),
+          onGuestClick: (guest) => {
+            // Reward +1 jade on normal guest chat
+            profileManager.addJade(1);
+            const jadeEl = document.getElementById('sanctuary-jade-display');
+            if (jadeEl) jadeEl.textContent = this.getProfile().jade;
+          },
+          onPetClick: () => {
+            // Pet interaction tip
+            profileManager.addJade(1);
+            const jadeEl = document.getElementById('sanctuary-jade-display');
+            if (jadeEl) jadeEl.textContent = this.getProfile().jade;
+          }
+        });
 
-        // Normal interaction: bounce, speak Chinese quote, give small tip!
-        actor.classList.add('guest-bounce');
-        setTimeout(() => actor.classList.remove('guest-bounce'), 450);
+        // Camera Rail Buttons
+        const setCamActive = (activeId) => {
+          ['cam-btn-f1', 'cam-btn-f2', 'cam-btn-f3', 'cam-btn-all'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('active', id === activeId);
+          });
+        };
 
-        const q = guest.quotes[guest.quoteIndex % guest.quotes.length];
-        this.speakChinese(q.zh);
+        const btnF1 = document.getElementById('cam-btn-f1');
+        const btnF2 = document.getElementById('cam-btn-f2');
+        const btnF3 = document.getElementById('cam-btn-f3');
+        const btnAll = document.getElementById('cam-btn-all');
+        const btnZoomIn = document.getElementById('cam-btn-zoomin');
+        const btnZoomOut = document.getElementById('cam-btn-zoomout');
+        const btnReset = document.getElementById('cam-btn-reset');
 
-        // Advance quote
-        guest.quoteIndex++;
-        const bubbleZh = actor.querySelector('.bubble-zh');
-        const bubblePy = actor.querySelector('.bubble-py');
-        const bubbleTh = actor.querySelector('.bubble-th');
-        const nextQ = guest.quotes[guest.quoteIndex % guest.quotes.length];
-        if (bubbleZh) bubbleZh.textContent = nextQ.zh;
-        if (bubblePy) bubblePy.textContent = nextQ.py;
-        if (bubbleTh) bubbleTh.textContent = `"${nextQ.th}"`;
-
-        // Small gratitude tip (+1 Jade)
-        profileManager.addJade(1);
-        const jadeEl = document.getElementById('sanctuary-jade-display');
-        if (jadeEl) jadeEl.textContent = this.getProfile().jade;
-      };
+        if (btnF1) btnF1.onclick = () => { this.inn3D?.focusFloor(1); setCamActive('cam-btn-f1'); };
+        if (btnF2) btnF2.onclick = () => { this.inn3D?.focusFloor(2); setCamActive('cam-btn-f2'); };
+        if (btnF3) btnF3.onclick = () => { this.inn3D?.focusFloor(3); setCamActive('cam-btn-f3'); };
+        if (btnAll) btnAll.onclick = () => { this.inn3D?.resetView(); setCamActive('cam-btn-all'); };
+        if (btnZoomIn) btnZoomIn.onclick = () => this.inn3D?.zoomIn();
+        if (btnZoomOut) btnZoomOut.onclick = () => this.inn3D?.zoomOut();
+        if (btnReset) btnReset.onclick = () => { this.inn3D?.resetView(); setCamActive('cam-btn-all'); };
+      }
     });
-
-    // Pet living actor click
-    const petActor = document.getElementById('pet-living-actor');
-    if (petActor) {
-      petActor.onclick = () => {
-        petActor.classList.add('guest-bounce');
-        setTimeout(() => petActor.classList.remove('guest-bounce'), 450);
-        const bubble = petActor.querySelector('.pet-living-bubble');
-        if (bubble) {
-          bubble.textContent = '❤️ รักท่านเจ้าสำนักที่สุดเลย!';
-          setTimeout(() => {
-            bubble.textContent = '🐾 เดินเล่นอย่างมีความสุข';
-          }, 2500);
-        }
-      };
-    }
   }
 
   // --- TAB 2: CHINESE ANTIQUE FURNISHINGS ---

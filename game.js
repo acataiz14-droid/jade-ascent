@@ -6543,6 +6543,15 @@ if (btnSanctuaryBack) {
   btnSanctuaryBack.addEventListener('click', exitSanctuaryMode);
 }
 
+// Deep linking to modes via URL hash
+window.addEventListener('load', () => {
+  if (location.hash === '#sanctuary') {
+    setTimeout(() => {
+      startSanctuaryMode();
+    }, 200);
+  }
+});
+
 // --- PROFILE MANAGER & GOOGLE SIGN-IN UI CONTROLLER ---
 let selectedNewStudentAvatar = '🐼';
 
