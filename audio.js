@@ -16,6 +16,31 @@ class AudioEngine {
       3: [196.00, 220.00, 261.63, 293.66, 392.00, 440.00]  // Yu scale (Low G3, A3, C4, D4, G4, A4 - deep space)
     };
     this.bgmSequenceStep = 0;
+
+    // Real Claybound audio assets
+    this.clayAudio = {
+      jump: new Audio('assets/claybound/jump-gY1Z4E5y.wav'),
+      collect: new Audio('assets/claybound/coin-pickup-d4kv-Dau.wav'),
+      stomp: new Audio('assets/claybound/enemy-head-impact-BL9Yhh1v.wav'),
+      collapse: new Audio('assets/claybound/ledge-collapse-C7RKcUyF.wav'),
+      checkpoint: new Audio('assets/claybound/checkpoint-flag-BF5PobUf.wav'),
+      click: new Audio('assets/claybound/switch-press-BRz_CuqN.wav'),
+      victory: new Audio('assets/claybound/flower-victory-4bT9WopA.wav'),
+      bell: new Audio('assets/claybound/finish-bell-1vPK9VCS.wav'),
+      fall: new Audio('assets/claybound/fall-death-zzpRFwdL.wav')
+    };
+  }
+
+  playClay(key, volume = 0.6) {
+    if (this.muted) return;
+    try {
+      const a = this.clayAudio[key];
+      if (a) {
+        a.currentTime = 0;
+        a.volume = volume;
+        a.play().catch(() => {});
+      }
+    } catch (e) {}
   }
 
   init() {
@@ -194,6 +219,7 @@ class AudioEngine {
   // --- SOUND EFFECTS ---
 
   playJump() {
+    this.playClay('jump', 0.4);
     // Jump sound is a quick upward double-pluck of Guzheng notes
     const scale = this.pentatonicScales[this.currentZone];
     // Select a note depending on current zone
@@ -202,7 +228,83 @@ class AudioEngine {
     this.pluckGuzheng(note * 1.5, 0.06, 0.25); // quick fifth harmonic pluck
   }
 
+  playShoot() {
+    if (!this.ctx || this.muted) return;
+    
+    // A crisp, swift projectile sound: Guzheng high pluck followed by a quick pitch sweep
+    const now = this.ctx.currentTime;
+    
+    // High Guzheng note
+    const scale = this.pentatonicScales[this.currentZone];
+    const freq = scale[scale.length - 1] * 1.5; // very high note
+    this.pluckGuzheng(freq, 0, 0.35);
+
+    // SWOOSH sweep
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15); // swift upward slide
+    
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.15, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+    
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(2000, now);
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterVolume);
+    
+    osc.start(now);
+    osc.stop(now + 0.2);
+  }
+
+  playSlide() {
+    if (!this.ctx || this.muted) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(140, now + 0.18);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+    osc.connect(gain);
+    gain.connect(this.masterVolume);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  }
+
+  playDoubleJump() {
+    if (!this.ctx || this.muted) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(520, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc.connect(gain);
+    gain.connect(this.masterVolume);
+    osc.start(now);
+    osc.stop(now + 0.16);
+  }
+
+  playFever() {
+    if (!this.ctx || this.muted) return;
+    const scale = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+    scale.forEach((freq, idx) => {
+      this.pluckGuzheng(freq, idx * 0.08, 0.45);
+    });
+  }
+
   playCollect() {
+    this.playClay('collect', 0.6);
     if (!this.ctx || this.muted) return;
     
     // Crisp jade shard chime sound (two high overlapping sine waves)
@@ -229,6 +331,7 @@ class AudioEngine {
   }
 
   playFall() {
+    this.playClay('fall', 0.6);
     if (!this.ctx || this.muted) return;
     
     // Sliding downward pitch sweep (despair of falling)
@@ -251,6 +354,7 @@ class AudioEngine {
   }
 
   playDamage() {
+    this.playClay('collapse', 0.6);
     if (!this.ctx || this.muted) return;
 
     // A low detuned buzzer sound for damage
@@ -285,6 +389,7 @@ class AudioEngine {
   }
 
   playDefeat() {
+    this.playClay('fall', 0.75);
     if (!this.ctx || this.muted) return;
     
     // Play a sad descending pentatonic melody
@@ -297,6 +402,8 @@ class AudioEngine {
   }
 
   playWin() {
+    this.playClay('victory', 0.85);
+    this.playClay('bell', 0.7);
     if (!this.ctx || this.muted) return;
     
     // Play a glorious pentatonic ascending flourish
@@ -307,6 +414,23 @@ class AudioEngine {
       // Stagger plucks
       this.pluckGuzheng(freq, idx * 0.12, 0.5);
     });
+  }
+
+  playStomp() {
+    this.playClay('stomp', 0.85);
+    this.playJump();
+  }
+
+  playCheckpoint() {
+    this.playClay('checkpoint', 0.75);
+  }
+
+  playCollapse() {
+    this.playClay('collapse', 0.7);
+  }
+
+  playClick() {
+    this.playClay('click', 0.55);
   }
 
   // --- BACKGROUND MUSIC ENGINE ---

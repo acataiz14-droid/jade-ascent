@@ -7,9 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && npx vercel --prod ./dist --yes"
+    "deploy": "npm run build && npx vercel --prod ./dist --yes",
+    "deploy:watch": "node deploy-watch.js",
+    "deploy:now": "npm run build && node -e \"const FtpDeploy=require('ftp-deploy');const f=new FtpDeploy();f.deploy({user:'u138548303.jadeasc.xn--100-mmlyaah4a1c9a0ezbc69a.com',password:'Tine14022540*',host:'147.93.80.21',port:21,localRoot:'./dist',remoteRoot:'/public_html',include:['*','**/*'],deleteRemote:false,forcePasv:true}).then(()=>console.log('✅ Deploy สำเร็จ!')).catch(e=>console.error('❌',e.message))\""
   },
   "devDependencies": {
+    "chokidar": "^5.0.0",
+    "ftp-deploy": "^2.4.7",
     "vite": "^5.0.0"
   }
 }

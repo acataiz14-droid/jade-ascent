@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Jade Ascent: Don't Look Down (Chinese Theme)</title>
-  <!-- Google Fonts for premium typography -->
+  <!-- Google Fonts for premium typography: Noto Sans Thai (readability), Outfit (modern UI), Noto Sans SC (Chinese Hanzi), Cinzel (Classical title) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Noto+Sans+Thai:wght@400;600;800&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,6 +17,24 @@
   <!-- Background Music Controller Toggle -->
   <div id="audio-control" class="audio-control" title="Toggle Sound">
     <span class="audio-icon">🔇</span>
+  </div>
+
+  <!-- Top User Profile Bar -->
+  <div id="user-profile-bar" class="user-profile-bar">
+    <div class="user-profile-pill" id="btn-open-profile" title="คลิกเพื่อสลับโปรไฟล์ / แก้ไขข้อมูลนักเรียน">
+      <div class="user-avatar-wrap" id="user-avatar-display">
+        <span class="avatar-emoji">🐼</span>
+      </div>
+      <div class="user-info-wrap">
+        <span class="user-name" id="user-name-display">นักเรียนคนเก่ง</span>
+        <span class="user-type-tag" id="user-type-display">🏫 นักเรียน</span>
+      </div>
+      <div class="user-jade-pill">
+        <span class="jade-gem">🟢</span>
+        <span id="user-jade-display">0</span>
+      </div>
+      <button class="btn-profile-switch" type="button">👤 สลับบัญชี</button>
+    </div>
   </div>
 
   <!-- Main Menu Overlay -->
@@ -35,24 +53,76 @@
       </p>
 
       <div class="instructions-card">
-        <h3>How to Play / วิธีเล่น</h3>
+        <h3>How to Play / วิธีการควบคุม</h3>
         <div class="controls-list">
-          <div><kbd>A</kbd> / <kbd>D</kbd> or <kbd>←</kbd> / <kbd>→</kbd> : Move Left/Right (เดินซ้าย/ขวา)</div>
-          <div><kbd>Spacebar</kbd> / <kbd>W</kbd> / <kbd>↑</kbd> : Jump (กระโดด)</div>
-          <div><kbd>R</kbd> : Teleport to Checkpoint (กลับจุดเซฟ)</div>
-          <div><kbd>E</kbd> / <kbd>Shop Button</kbd> : Open Upgrades Shop (เปิดร้านค้า)</div>
+          <div><strong>🏔️ โหมดปีนเขา (Tower Climb):</strong> <kbd>A</kbd>/<kbd>D</kbd> เดิน, <kbd>Space</kbd>/<kbd>W</kbd> กระโดด, <kbd>E</kbd> ร้านค้า</div>
+          <div><strong>🏃 โหมดวิ่งสปีด (Jade Runner):</strong> <kbd>Space</kbd>/<kbd>W</kbd> กระโดด, <kbd>S</kbd>/<kbd>↓</kbd> สไลด์, <kbd>J</kbd>/<kbd>F</kbd> ยิงพลัง</div>
+          <div><strong>⚔️ โหมดประลองสังเวียน (Jade Arena):</strong> <kbd>WASD</kbd> (P1 แดง), <kbd>ลูกศร</kbd> (P2 น้ำเงิน), จอยทัชสกรีน 4 มุมสำหรับ 1-4 ผู้เล่น!</div>
         </div>
       </div>
 
-      <button id="btn-start" class="btn btn-primary btn-large">
-        <span>START ASCENT / เริ่มการปีน</span>
-      </button>
+      <div class="mode-select-grid">
+        <!-- Mode 1: Tower Climb -->
+        <div class="mode-card mode-tower">
+          <div class="mode-badge">MODE 1 🏔️</div>
+          <div class="mode-icon">🧗‍♂️</div>
+          <h3 class="mode-title">TOWER CLIMB</h3>
+          <p class="mode-subtitle">ไต่เขาหยกศักดิ์สิทธิ์ (15 ด่าน)</p>
+          <p class="mode-desc">โหมดคลาสสิกแนวดิ่ง กระโดดปีนป่าย หลบกับดัก สู้บอส และตอบคำถามภาษาจีน</p>
+          <button id="btn-start" class="btn btn-primary mode-btn">
+            <span>START ASCENT / เริ่มปีน ➔</span>
+          </button>
+        </div>
+
+        <!-- Mode 2: Jade Runner -->
+        <div class="mode-card mode-runner">
+          <div class="mode-badge">MODE 2 ⚡</div>
+          <div class="mode-icon">🏃💨</div>
+          <h3 class="mode-title">JADE RUNNER</h3>
+          <p class="mode-subtitle">วิ่งตะลุยด่าน (Cookie Run Style)</p>
+          <p class="mode-desc">วิ่งอัตโนมัติความเร็วสูง ดับเบิ้ลจัมป์ สไลด์ลอดสิ่งกีดขวาง ยิงศัตรู และสะสมอักษรจีนเข้าสู่ FEVER TIME!</p>
+          <button id="btn-start-runner" class="btn btn-secondary mode-btn btn-runner-cta">
+            <span>START RUNNER / เริ่มวิ่ง ➔</span>
+          </button>
+        </div>
+
+        <!-- Mode 3: Jade Arena (1-4 Players) -->
+        <div class="mode-card mode-arena">
+          <div class="mode-badge party-badge">NEW PARTY ⚔️</div>
+          <div class="mode-icon">🎮⚔️</div>
+          <h3 class="mode-title">JADE ARENA</h3>
+          <p class="mode-subtitle">สังเวียนคำศัพท์ภาษาจีน (1-4 Players)</p>
+          <p class="mode-desc">อ่านโจทย์ภาษาอังกฤษ (Eng) แล้วรีบวิ่งไปเหยียบตัวอักษรจีน (Hanzi) ที่ถูกต้องเพื่อยึดแท่น ชิงแต้ม และแย่งแท่นจากคู่ต่อสู้! (แข่ง 1-4 คน หรือสู้กับบอท AI)</p>
+          <button id="btn-start-arena" class="btn btn-secondary mode-btn btn-arena-cta">
+            <span>START ARENA / สังเวียนประลอง ➔</span>
+          </button>
+        </div>
+
+        <!-- Mode 4: Taoist Sanctuary (โรงเตี๊ยมคำศัพท์ & สวนสัตว์เซียน) -->
+        <div class="mode-card mode-sanctuary">
+          <div class="mode-badge sanctuary-badge">IDLE & GARDEN 🏮</div>
+          <div class="mode-icon">🏮🍵</div>
+          <h3 class="mode-title">TAOIST SANCTUARY</h3>
+          <p class="mode-subtitle">โรงเตี๊ยมคำศัพท์ & สวนสัตว์เซียน</p>
+          <p class="mode-desc">นำหยกเขียวมาขยายโรงเตี๊ยม รับหยกอัตโนมัติ เลี้ยงสัตว์วิเศษ (แพนด้า/นกกระเรียน/กิเลน) และเปิดคลังตำราสะสมคำศัพท์!</p>
+          <button id="btn-start-sanctuary" class="btn btn-secondary mode-btn btn-sanctuary-cta">
+            <span>ENTER SANCTUARY / หุบเขาเซียน ➔</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Level Selection Screen -->
   <div id="level-select-screen" class="overlay hidden">
     <div class="menu-content glass-panel gold-border level-select-panel">
+      <!-- Top Action Bar -->
+      <div class="screen-header-actions" style="display: flex; justify-content: flex-start; width: 100%; margin-bottom: 12px;">
+        <button id="btn-level-select-back" class="btn btn-secondary btn-back-pill" type="button" title="ย้อนกลับไปหน้าหลัก">
+          <span>⬅️ ย้อนกลับเมนูหลัก</span>
+        </button>
+      </div>
+
       <h1 class="congrats-title">SELECT YOUR PATH</h1>
       <h2 class="congrats-subtitle">เลือกด่านที่ต้องการปีน 🏔️</h2>
       <p class="congrats-desc" style="margin-bottom: 20px;">
@@ -120,7 +190,7 @@
           <p class="level-name">ยอดเขาไร้สิ้นสุด</p>
           <p class="level-name-en">Infinite Summit</p>
           <div class="level-info">
-            <span class="level-height">🏔️ 5,000m</span>
+            <span class="level-height">🏔️ 1,200m (มีบอส 2 ตัว ⚡)</span>
             <span class="level-difficulty diff-5">★★★★★</span>
           </div>
           <button class="btn btn-secondary btn-select-level" data-level="5">เริ่มด่านนี้</button>
@@ -154,6 +224,91 @@
           </div>
           <button class="btn btn-secondary btn-select-level" style="background: rgba(59, 130, 246, 0.2); border-color: #60a5fa;" data-level="10">เริ่มด่านนี้</button>
         </div>
+
+        <!-- Level 11: Electric Appliances -->
+        <div class="level-card" style="border-color: rgba(234, 179, 8, 0.4);" data-level="11">
+          <div class="level-emoji">⚡</div>
+          <h3>เครื่องใช้ไฟฟ้า ⚡🔌</h3>
+          <p class="level-name">คำศัพท์เครื่องใช้ไฟฟ้า</p>
+          <p class="level-name-en">Electric Appliances</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 800m (มีบอส ⚡)</span>
+            <span class="level-difficulty diff-4" style="color: #eab308;">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" style="background: rgba(234, 179, 8, 0.2); border-color: #eab308;" data-level="11">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 12: Daily Life -->
+        <div class="level-card" style="border-color: rgba(251, 146, 60, 0.4);" data-level="12">
+          <div class="level-emoji">🌅</div>
+          <h3>ชีวิตประจำวัน 🌅🏠</h3>
+          <p class="level-name">คำศัพท์ชีวิตประจำวัน</p>
+          <p class="level-name-en">Daily Life</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 800m (มีบอสผู้ปกครอง 👨‍👩‍👧)</span>
+            <span class="level-difficulty diff-4" style="color: #fb923c;">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" style="background: rgba(251, 146, 60, 0.2); border-color: #fb923c;" data-level="12">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 13: Hobbies -->
+        <div class="level-card" style="border-color: rgba(168, 85, 247, 0.4);" data-level="13">
+          <div class="level-emoji">🎨</div>
+          <h3>งานอดิเรก 🎨⚽🎮</h3>
+          <p class="level-name">คำศัพท์งานอดิเรก (ไม่มีบอส)</p>
+          <p class="level-name-en">Hobbies Special</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 800m (ขั้นซับซ้อนท้าทาย 🎨⚽)</span>
+            <span class="level-difficulty diff-4" style="color: #c084fc;">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" style="background: rgba(168, 85, 247, 0.2); border-color: #c084fc;" data-level="13">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 14: HSK1 - Lesson 3 -->
+        <div class="level-card" style="border-color: rgba(239, 68, 68, 0.45);" data-level="14">
+          <div class="level-emoji">📜</div>
+          <h3>HSK1 - บท 3 📜👨‍🏫🇨🇳</h3>
+          <p class="level-name">คำศัพท์บทที่ 3 (มีบอสอาจารย์ใหญ่)</p>
+          <p class="level-name-en">HSK1 Lesson 3</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 800m (บอสอาจารย์ใหญ่ 👨‍🏫 / แท่นหนาม ⚠️)</span>
+            <span class="level-difficulty diff-4" style="color: #f87171;">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" style="background: rgba(239, 68, 68, 0.2); border-color: #f87171;" data-level="14">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 15: Special Objects -->
+        <div class="level-card" style="border-color: rgba(14, 165, 233, 0.45);" data-level="15">
+          <div class="level-emoji">📱</div>
+          <h3>คำศัพท์เฉพาะกิจ 📱🪑💻</h3>
+          <p class="level-name">คำศัพท์สิ่งของเฉพาะกิจ (ไม่มีบอส)</p>
+          <p class="level-name-en">Special Objects</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 2000m (ขั้นซับซ้อนท้าทาย 📱🪑)</span>
+            <span class="level-difficulty diff-4" style="color: #38bdf8;">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" style="background: rgba(14, 165, 233, 0.2); border-color: #38bdf8;" data-level="15">เริ่มด่านนี้</button>
+        </div>
+
+        <!-- Level 16: HSK1 - Lesson 4 -->
+        <div class="level-card" style="border-color: rgba(245, 158, 11, 0.45);" data-level="16">
+          <div class="level-emoji">👨‍👩‍👧</div>
+          <h3>HSK1 - บท 4 👨‍👩‍👧🏠</h3>
+          <p class="level-name">คำศัพท์บทที่ 4 (มีบอสอาจารย์ใหญ่)</p>
+          <p class="level-name-en">HSK1 Lesson 4</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 800m (บอสอาจารย์ใหญ่ 👨‍🏫 / แท่นหนาม ⚠️)</span>
+            <span class="level-difficulty diff-4" style="color: #fbbf24;">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" style="background: rgba(245, 158, 11, 0.2); border-color: #fbbf24;" data-level="16">เริ่มด่านนี้</button>
+        </div>
+      </div>
+
+      <!-- Bottom Back Action -->
+      <div style="margin-top: 24px; margin-bottom: 8px; width: 100%; display: flex; justify-content: center;">
+        <button id="btn-level-select-back-bottom" class="btn btn-secondary" type="button" style="padding: 10px 28px; font-size: 1rem;">
+          <span>⬅️ ย้อนกลับเมนูหลัก</span>
+        </button>
       </div>
     </div>
   </div>
@@ -161,6 +316,13 @@
   <!-- Character Selection Screen -->
   <div id="char-select-screen" class="overlay hidden">
     <div class="menu-content glass-panel gold-border char-select-panel">
+      <!-- Top Action Bar -->
+      <div class="screen-header-actions" style="display: flex; justify-content: flex-start; width: 100%; margin-bottom: 12px;">
+        <button id="btn-char-select-back" class="btn btn-secondary btn-back-pill" type="button" title="ย้อนกลับไปเลือกด่าน">
+          <span>⬅️ ย้อนกลับเลือกด่าน</span>
+        </button>
+      </div>
+
       <h1 class="congrats-title">SELECT YOUR SEEKER</h1>
       <h2 class="congrats-subtitle">เลือกตัวละครผู้แสวงธรรม ☯️</h2>
       <p class="congrats-desc" style="margin-bottom: 20px;">
@@ -217,6 +379,23 @@
           <p class="char-ability">เหยียบแท่นเมฆกระดาษแล้วเมฆไม่สลายไป<br><span style="font-size:0.85em; opacity:0.95; color:#22d3ee; display:block; margin-top:4px;">✨ ซื้อของในร้านค้าถูกลง 20% (ปัดเศษลง)</span><span style="font-size:0.85em; opacity:0.95; color:#eab308; display:block; margin-top:4px;">🔮 มีสกิลยิงกระสุนหยกขั้นแรกตั้งแต่เริ่ม (คูลดาวน์ 3s)</span></p>
           <button class="btn btn-secondary btn-select-char" data-char="5">เลือกตัวละคร</button>
         </div>
+
+        <!-- Char 6: เซียนน้อยพู่กันจีน (Ink Sage) -->
+        <div class="char-card" data-char="6">
+          <div class="char-icon">
+            <canvas id="char-canvas-6" width="90" height="90"></canvas>
+          </div>
+          <h3>เซียนน้อยพู่กันจีน (Ink Sage) 🖌️📜</h3>
+          <p class="char-ability">แอนิเมชันการ์ตูนสีน้ำ + สปริง Squash & Stretch!<br><span style="font-size:0.85em; opacity:0.95; color:#38bdf8; display:block; margin-top:4px;">🖌️ สปริงพู่กันยักษ์: กระโดดสูงขึ้น 14% + หมึกจีนฟุ้งกระจาย</span><span style="font-size:0.85em; opacity:0.95; color:#facc15; display:block; margin-top:4px;">❤️ เริ่มต้นด้วย 6 หัวใจ + ลายเส้นแอนิเมชันสไตล์ ClaudeAnimationBase</span></p>
+          <button class="btn btn-secondary btn-select-char" data-char="6">เลือกตัวละคร</button>
+        </div>
+      </div>
+
+      <!-- Bottom Back Action -->
+      <div style="margin-top: 24px; margin-bottom: 8px; width: 100%; display: flex; justify-content: center;">
+        <button id="btn-char-select-back-bottom" class="btn btn-secondary" type="button" style="padding: 10px 28px; font-size: 1rem;">
+          <span>⬅️ ย้อนกลับเลือกด่าน</span>
+        </button>
       </div>
     </div>
   </div>
@@ -226,7 +405,7 @@
     <!-- Left: Jade Shards & Health -->
     <div class="hud-left-group">
       <div class="hud-item jade-counter">
-        <div class="hud-icon">🟢</div>
+        <div class="hud-icon"><img src="assets/claybound/bead-BuU2NiVW.webp" class="hud-clay-bead" alt="Jade"></div>
         <div class="hud-label-val">
           <span class="hud-label">JADE SHARDS</span>
           <span id="jade-count" class="hud-value">0</span>
@@ -438,6 +617,415 @@
       <div class="question-status">
         <span id="question-feedback" class="feedback-text"></span>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== RUNNER MODE UI ==================== -->
+  <!-- Runner Mode HUD -->
+  <header id="runner-hud" class="runner-hud hidden">
+    <div class="runner-hud-left">
+      <div class="runner-hud-badge">
+        <span class="runner-hud-icon">🏃</span>
+        <span id="runner-dist-val" class="runner-hud-num">0m</span>
+      </div>
+      <div class="runner-hud-badge">
+        <span class="runner-hud-icon">🟢</span>
+        <span id="runner-jade-val" class="runner-hud-num">0</span>
+      </div>
+      <div class="runner-hud-badge runner-hp-badge">
+        <span id="runner-hp-val">❤️❤️❤️</span>
+      </div>
+    </div>
+
+    <div class="runner-hud-center">
+      <div class="fever-words-container">
+        <span class="fever-title">FEVER:</span>
+        <span class="fever-letter" id="runner-letter-0">风</span>
+        <span class="fever-letter" id="runner-letter-1">火</span>
+        <span class="fever-letter" id="runner-letter-2">雷</span>
+        <span class="fever-letter" id="runner-letter-3">龙</span>
+        <span class="fever-letter" id="runner-letter-4">玉</span>
+      </div>
+    </div>
+
+    <div class="runner-hud-right">
+      <button id="btn-runner-pause" class="btn-hud-small" title="Pause Game">⏸️</button>
+      <button id="btn-runner-exit" class="btn-hud-small" title="Exit to Menu">🏠</button>
+    </div>
+  </header>
+
+  <!-- Runner Damage Flash -->
+  <div id="runner-damage-flash" class="runner-damage-flash"></div>
+
+  <!-- Runner Mobile Touch Controls -->
+  <div id="runner-mobile-controls" class="runner-mobile-controls hidden">
+    <div class="runner-controls-left">
+      <button id="runner-btn-slide" class="runner-touch-btn slide-touch-btn">
+        <span>⬇️ SLIDE</span>
+      </button>
+    </div>
+    <div class="runner-controls-right">
+      <button id="runner-btn-shoot" class="runner-touch-btn shoot-touch-btn">
+        <span>⚡ ATTACK</span>
+      </button>
+      <button id="runner-btn-jump" class="runner-touch-btn jump-touch-btn">
+        <span>⬆️ JUMP</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Runner Game Over Overlay -->
+  <div id="runner-game-over" class="overlay hidden">
+    <div class="menu-content glass-panel" style="max-width: 460px;">
+      <h1 class="congrats-title crimson-text">RUN FINISHED</h1>
+      <h2 class="congrats-subtitle">การวิ่งสิ้นสุดลงแล้ว! 💨</h2>
+      
+      <div class="stat-box">
+        <p>ระยะทางที่ทำได้: <strong class="gold-text" id="runner-final-dist">0m</strong></p>
+        <p>หยกเขียวที่เก็บได้: <strong class="jade-text" id="runner-final-jade">0 🟢</strong></p>
+        <p>คะแนนรวม: <strong class="gold-text" id="runner-final-score">0</strong></p>
+      </div>
+
+      <div style="display: flex; gap: 12px; width: 100%;">
+        <button id="btn-runner-restart" class="btn btn-primary" style="flex: 1;">
+          <span>RUN AGAIN / วิ่งอีกรอบ 🔄</span>
+        </button>
+        <button id="btn-runner-menu" class="btn btn-secondary" style="flex: 1;">
+          <span>MAIN MENU / หน้าหลัก 🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jade Arena Lobby / Settings Modal -->
+  <div id="arena-lobby-modal" class="overlay hidden">
+    <div class="menu-content glass-panel" style="max-width: 540px;">
+      <h1 class="congrats-title gold-text">⚔️ JADE ARENA ⚔️</h1>
+      <h2 class="congrats-subtitle">สังเวียนประลองยึดแท่นหยก (1-4 Players)</h2>
+      
+      <!-- Setting 0: Game Mode (Battle vs Adventure) -->
+      <div class="arena-setting-group" id="arena-gamemode-group">
+        <label class="arena-setting-label">🕹️ โหมดการเล่น (Game Mode):</label>
+        <div class="arena-btn-grid" id="arena-gamemode-options">
+          <button class="arena-opt-btn active" data-mode="battle">⚔️ ประลองยึดแท่น (Battle)</button>
+          <button class="arena-opt-btn" data-mode="adventure">🗺️ ผจญภัยตะลุยด่าน (Adventure)</button>
+        </div>
+        <div id="arena-gamemode-desc" style="font-size: 0.85rem; color: #475569; margin-top: 6px; padding: 6px 10px; background: rgba(255,255,255,0.7); border-radius: 8px; border: 1px solid #e2e8f0;">
+          ⚔️ <strong>ประลองยึดแท่น:</strong> แข่งขันยึดแท่นสีและชิงคะแนนกับผู้เล่นหรือบอทในสังเวียน
+        </div>
+      </div>
+
+      <!-- Setting 1: Player Count & Bots -->
+      <div class="arena-setting-group" id="arena-players-group">
+        <label class="arena-setting-label">🎮 ผู้เล่นและการแข่งขัน (Players & Bots):</label>
+        <div class="arena-btn-grid" id="arena-players-options">
+          <button class="arena-opt-btn active" data-players="2" data-bots="1">👤 1P vs 1 Bot</button>
+          <button class="arena-opt-btn" data-players="4" data-bots="3">👤 1P vs 3 Bots</button>
+          <button class="arena-opt-btn" data-players="2" data-bots="0">👥 2 Players (1v1)</button>
+          <button class="arena-opt-btn" data-players="4" data-bots="0">👨‍👩‍👧‍👦 4 Players (FFA)</button>
+        </div>
+      </div>
+
+      <!-- Setting 1.5: Player & Character Assignment -->
+      <div class="arena-setting-group" id="arena-roster-group">
+        <label class="arena-setting-label">👥 เลือกผู้เล่นและตัวละคร (Assign Players & Characters):</label>
+        <div id="arena-roster-container" class="arena-roster-grid">
+          <!-- Dynamically populated by JS based on human/bot count -->
+        </div>
+      </div>
+
+      <!-- Setting 2: Bot Difficulty (ระดับความยากของบอท) -->
+      <div class="arena-setting-group" id="arena-bot-difficulty-group">
+        <label class="arena-setting-label">🤖 ระดับความยากของบอท (Bot Difficulty):</label>
+        <div class="arena-btn-grid" id="arena-bot-difficulty-options">
+          <button class="arena-opt-btn" data-bot-difficulty="very_easy">🌱 ง่ายมาก (เดินช้า)</button>
+          <button class="arena-opt-btn" data-bot-difficulty="easy">🌿 ง่าย</button>
+          <button class="arena-opt-btn" data-bot-difficulty="medium">⚔️ ปานกลาง</button>
+          <button class="arena-opt-btn active" data-bot-difficulty="hard">🔥 ยาก (ความเร็วปกติ)</button>
+        </div>
+      </div>
+
+      <!-- Setting 3: Vocab Topic (เลือกด่าน / หมวดคำศัพท์ตามโหมด Climb) -->
+      <div class="arena-setting-group">
+        <label class="arena-setting-label">📚 เลือกด่าน / หมวดคำศัพท์ (Topic Selection):</label>
+        <div class="arena-topic-container" id="arena-topic-options">
+          <button class="arena-topic-btn active" data-topic="hsk1_4">
+            <span class="arena-topic-btn-title">👨‍👩‍👧 HSK 1 - บท 4 (ครอบครัว)</span>
+            <span class="arena-topic-btn-desc">家, 口, 人, 有, 女儿, 几, 岁, 了, 今年, 多大</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="hsk1_5">
+            <span class="arena-topic-btn-title">🍜 HSK 1 - บท 5</span>
+            <span class="arena-topic-btn-desc">会, 说, 妈妈, 菜, 很, 好吃, 做, 写, 汉字, 怎么, 读</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="kitchen">
+            <span class="arena-topic-btn-title">🍳 สิ่งของในห้องครัว</span>
+            <span class="arena-topic-btn-desc">冰箱, 微波炉, 盘子, 碗, 勺子, 叉子, 筷子, 杯子</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="fruits">
+            <span class="arena-topic-btn-title">🎋 ด่าน 1: ผลไม้ (Fruits)</span>
+            <span class="arena-topic-btn-desc">苹果, 香蕉, 葡萄, 西瓜, 草莓, 芒果, 橙子...</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="animals">
+            <span class="arena-topic-btn-title">☁️ ด่าน 2: สัตว์ (Animals)</span>
+            <span class="arena-topic-btn-desc">狗, 猫, 兔子, 牛, 鸡, 鱼, 羊, 鸟, 鸭子, 马</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="body">
+            <span class="arena-topic-btn-title">🌌 ด่าน 3: อวัยวะ (Body Parts)</span>
+            <span class="arena-topic-btn-desc">头, 眼睛, 耳朵, 鼻子, 嘴, 手, 脚, 头发...</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="colors">
+            <span class="arena-topic-btn-title">⚡ ด่าน 4: สีสัน (Colors)</span>
+            <span class="arena-topic-btn-desc">红色, 蓝色, 绿色, 黄色, 黑色, 白色, 橙色...</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="nongkao">
+            <span class="arena-topic-btn-title">🌸 ด่านของน้องเก้า</span>
+            <span class="arena-topic-btn-desc">爱, 泰国, 水, 来, 二, 三, 六, 九, 妹, 跑</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="worldwide">
+            <span class="arena-topic-btn-title">🌍 Worldwide: ประเทศ & บุคคล</span>
+            <span class="arena-topic-btn-desc">泰国, 中国, 日本, 韩国, 英国, 美国, 加拿大...</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="appliances">
+            <span class="arena-topic-btn-title">⚡🔌 เครื่องใช้ไฟฟ้า (Appliances)</span>
+            <span class="arena-topic-btn-desc">手机, 电脑, 电视, 冰箱, 风扇, 空调, 灯...</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="dailylife">
+            <span class="arena-topic-btn-title">🌅 ชีวิตประจำวัน (Daily Life)</span>
+            <span class="arena-topic-btn-desc">起床, 刷牙, 洗澡, 睡觉, 吃早饭, 去学校, 回家...</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="hobbies">
+            <span class="arena-topic-btn-title">🎨 งานอดิเรก (Hobbies)</span>
+            <span class="arena-topic-btn-desc">看书, 看电视, 画画, 游泳, 踢足球, 听音乐...</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="hsk1_3">
+            <span class="arena-topic-btn-title">📜 HSK 1 - บท 3</span>
+            <span class="arena-topic-btn-desc">叫, 什么, 名字, 我, 是, 老师, 吗, 学生, 人, 中国</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="special_objects">
+            <span class="arena-topic-btn-title">📱 คำศัพท์เฉพาะกิจ (Special Objects)</span>
+            <span class="arena-topic-btn-desc">门, 窗户, 灯, 枕头, 床, 被子, 水杯, 桌子...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Setting 4: Duration -->
+      <div class="arena-setting-group" id="arena-duration-group">
+        <label class="arena-setting-label">⏱️ เวลาแข่งขัน (Duration):</label>
+        <div class="arena-btn-grid" id="arena-duration-options">
+          <button class="arena-opt-btn" data-duration="30">30 วิ (เร็ว)</button>
+          <button class="arena-opt-btn active" data-duration="60">60 วิ (มาตรฐาน)</button>
+          <button class="arena-opt-btn" data-duration="90">90 วิ (จุใจ)</button>
+          <button class="arena-opt-btn" data-duration="endless">♾️ ไม่จำกัดเวลา</button>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div style="display: flex; gap: 12px; width: 100%; margin-top: 18px;">
+        <button id="btn-arena-launch" class="btn btn-primary" style="flex: 2;">
+          <span>🚀 ENTER ARENA / เริ่มการประลอง ➔</span>
+        </button>
+        <button id="btn-arena-cancel" class="btn btn-secondary" style="flex: 1;">
+          <span>BACK / กลับ ✖</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jade Arena In-Game Top Bar Controls -->
+  <div id="arena-hud-bar" class="arena-hud-bar hidden">
+    <button id="btn-arena-exit-quick" class="arena-quick-btn" title="Exit Arena">
+      <span>🏠 ออก</span>
+    </button>
+  </div>
+
+  <!-- Arena Match Finished Overlay -->
+  <div id="arena-game-over-modal" class="overlay hidden">
+    <div class="menu-content glass-panel" style="max-width: 500px;">
+      <h1 class="congrats-title gold-text" id="arena-game-over-title">🏆 MATCH FINISHED! 🏆</h1>
+      <h2 id="arena-winner-title" class="congrats-subtitle">P1 RED WINS! 🎉</h2>
+      
+      <div id="arena-podium-results" class="arena-podium-box">
+        <!-- Injected via JS -->
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 18px;">
+        <button id="btn-arena-play-again" class="btn btn-primary">
+          <span>PLAY AGAIN / แข่งอีกรอบ 🔄</span>
+        </button>
+        <button id="btn-arena-change-settings" class="btn btn-secondary">
+          <span>SETTINGS / ตั้งค่าใหม่ ⚙️</span>
+        </button>
+        <button id="btn-arena-to-menu" class="btn btn-danger">
+          <span>MAIN MENU / หน้าหลัก 🏠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile & Google Login Modal -->
+  <div id="profile-modal" class="overlay hidden">
+    <div class="menu-content glass-panel profile-panel">
+      <div class="profile-modal-header">
+        <h2 class="profile-modal-title">👤 บัญชีผู้เล่น & บันทึกความก้าวหน้า</h2>
+        <button id="btn-close-profile" class="btn-close-x" title="ปิด">✖</button>
+      </div>
+
+      <!-- Current Profile Card -->
+      <div class="current-profile-card">
+        <div class="current-avatar-big" id="current-profile-avatar">🐼</div>
+        <div class="current-profile-info">
+          <div class="current-name" id="current-profile-name">นักเรียนคนเก่ง</div>
+          <div class="current-meta" id="current-profile-meta">โหมดโปรไฟล์ในห้องเรียน • หยกสะสม 0 🟢</div>
+        </div>
+        <div class="current-profile-actions">
+          <button id="btn-edit-current-profile" class="btn-sm-action" type="button" title="แก้ไขชื่อและเปลี่ยนรูปโปรไฟล์">✏️ แก้ไขชื่อ</button>
+          <button id="btn-export-save" class="btn-sm-action" type="button" title="ดาวน์โหลดไฟล์สำรองข้อมูลเซฟ">📥 สำรองไฟล์เซฟ</button>
+        </div>
+      </div>
+
+      <!-- Student Profiles in Classroom -->
+      <div class="profile-section">
+        <div class="section-title-row">
+          <h3>🏫 โปรไฟล์นักเรียนในเครื่องนี้ (Student Profiles)</h3>
+          <button id="btn-toggle-add-student" class="btn-link-action" type="button">➕ เพิ่มนักเรียนใหม่</button>
+        </div>
+        <p class="section-subtitle">คลิกสลับโปรไฟล์ หรือกดปุ่ม ✏️ เพื่อแก้ไขชื่อและเปลี่ยนรูปโปรไฟล์ได้ตลอดเวลา</p>
+
+        <!-- New Student Form -->
+        <div id="add-student-form" class="add-student-box hidden">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-weight: 700; font-size: 0.85rem; color: #334155;">ชื่อนักเรียน (หรือชื่อเล่น):</label>
+            <input type="text" id="input-new-student-name" placeholder="เช่น ด.ช. เก้า, น้องหลิน" maxlength="25" style="padding: 8px 12px; border-radius: 10px; border: 2px solid #cbd5e1; font-family: var(--font-body); font-size: 1rem;">
+            
+            <label style="font-weight: 700; font-size: 0.85rem; color: #334155; margin-top: 4px;">เลือกรูปประจำตัว:</label>
+            <div class="avatar-select-grid" id="avatar-select-options">
+              <!-- Injected via JS -->
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <button id="btn-confirm-add-student" class="btn btn-primary" style="flex: 2; padding: 8px;">
+                <span>บันทึกและสลับโปรไฟล์ ➔</span>
+              </button>
+              <button id="btn-cancel-add-student" class="btn btn-secondary" style="flex: 1; padding: 8px;">
+                <span>ยกเลิก</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profiles List -->
+        <div class="profiles-list-grid" id="profiles-list-container">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Section 3: Save Backup & Restore -->
+      <div class="profile-section" style="border-bottom: none; margin-bottom: 0;">
+        <h3>💾 จัดการข้อมูลสำรอง (Backup & Restore)</h3>
+        <div style="display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap;">
+          <button id="btn-import-save" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 14px;">
+            📤 กู้คืนไฟล์เซฟ (Import JSON)
+          </button>
+          <input type="file" id="file-import-save" accept=".json" style="display: none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Profile Modal (Rename & Pick from 25 Avatars) -->
+  <div id="edit-profile-modal" class="overlay hidden" style="z-index: 100;">
+    <div class="menu-content glass-panel" style="max-width: 500px; width: 92vw; padding: 22px;">
+      <div class="profile-modal-header" style="margin-bottom: 14px;">
+        <h2 class="profile-modal-title" style="font-size: 1.18rem;">✏️ แก้ไขโปรไฟล์นักเรียน</h2>
+        <button id="btn-close-edit-profile" class="btn-close-x" type="button" title="ปิด">✖</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+        <input type="hidden" id="input-edit-target-id" value="">
+
+        <label style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">ชื่อนักเรียน (หรือชื่อเล่น):</label>
+        <input type="text" id="input-edit-profile-name" maxlength="25" placeholder="พิมพ์ชื่อนักเรียนใหม่..." style="padding: 10px 14px; border-radius: 10px; border: 2px solid #cbd5e1; font-family: var(--font-body); font-size: 1rem; width: 100%;">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+          <label style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">เลือกรูปประจำตัว (25 แบบยอดนิยม):</label>
+          <span style="font-size: 0.78rem; font-weight: 700; color: #0284c7;" id="edit-avatar-current-preview"></span>
+        </div>
+        <div class="avatar-select-grid" id="edit-avatar-select-options">
+          <!-- Injected via JS -->
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 8px;">
+          <button id="btn-confirm-edit-profile" class="btn btn-primary" type="button" style="flex: 2; padding: 10px; font-size: 0.95rem;">
+            <span>💾 บันทึกข้อมูล</span>
+          </button>
+          <button id="btn-cancel-edit-profile" class="btn btn-secondary" type="button" style="flex: 1; padding: 10px; font-size: 0.95rem;">
+            <span>ยกเลิก</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taoist Sanctuary Screen Overlay -->
+  <div id="sanctuary-screen" class="overlay hidden">
+    <div class="menu-content glass-panel sanctuary-panel">
+      <!-- Sanctuary Header -->
+      <div class="sanctuary-header-bar">
+        <div class="sanctuary-title-group">
+          <h1 class="sanctuary-title">🏮 หุบเขาเซียนเต๋า (Taoist Sanctuary)</h1>
+          <p class="sanctuary-subtitle">โรงเตี๊ยมคำศัพท์ • สวนสัตว์วิเศษ • คลังตำราฮั่นจื้อ</p>
+        </div>
+        <div class="sanctuary-top-actions">
+          <div class="sanctuary-jade-pill">
+            <span>🟢</span>
+            <span id="sanctuary-jade-display">0</span>
+          </div>
+          <button id="btn-sanctuary-back" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.88rem;">
+            <span>⬅️ เมนูหลัก</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Pet Banner -->
+      <div class="sanctuary-pet-bar" id="sanctuary-active-pet-display">
+        🐼 <strong>ลูกแพนด้าน้อย</strong> (เพิ่มแต้มหยกที่ได้รับ +25%)
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="sanctuary-nav-tabs">
+        <button class="sanctuary-nav-btn active" data-tab="inn">🍵 โรงเตี๊ยมมีชีวิต (Living Inn)</button>
+        <button class="sanctuary-nav-btn" data-tab="furnishing">🪑 จัดเครื่องเรือน (Furnishings)</button>
+        <button class="sanctuary-nav-btn" data-tab="pets">🐾 สัตว์เลี้ยงเซียน (Mythical Pets)</button>
+        <button class="sanctuary-nav-btn" data-tab="garden">🎋 สวนเซียน & สระบัว (Zen Garden)</button>
+        <button class="sanctuary-nav-btn" data-tab="archive">📜 คลังตำราฮั่นจื้อ (Hanzi Archive)</button>
+      </div>
+
+      <!-- Dynamic Tab Content -->
+      <div class="sanctuary-tab-content" id="sanctuary-tab-content">
+        <!-- Rendered by sanctuary.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Sanctuary Guest Vocab Quest Modal -->
+  <div id="sanctuary-quest-modal" class="overlay hidden" style="z-index: 120;">
+    <div class="menu-content glass-panel quest-modal-box">
+      <div class="quest-header">
+        <div class="quest-guest-avatar" id="quest-guest-avatar">🐼</div>
+        <div class="quest-header-text">
+          <h3 class="quest-guest-title">คำขอร้องของแขกเซียน</h3>
+          <p class="quest-guest-sub" id="quest-guest-name">น้องแพนด้าจอมขยัน</p>
+        </div>
+      </div>
+      <div class="quest-question-box" id="quest-question-text">
+        น้องแพนด้ากระหายน้ำ อยากสั่ง "ชา" ... คำว่า "ชา" ภาษาจีนคือคำใด?
+      </div>
+      <div class="quest-options-grid" id="quest-options-container">
+        <!-- Injected via JS -->
+      </div>
+      <button id="btn-close-quest-modal" class="btn btn-secondary" style="margin-top: 14px; width: 100%;">
+        <span>ไว้คราวหน้านะ (ปิด)</span>
+      </button>
     </div>
   </div>
 
