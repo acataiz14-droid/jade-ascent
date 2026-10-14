@@ -2522,7 +2522,35 @@ body.is-touch-device .mobile-controls-container.hidden-desktop {
   z-index: 50;
   display: flex;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   pointer-events: auto;
+}
+
+.dashboard-link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+  color: #0f172a;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.88rem;
+  text-decoration: none;
+  padding: 9px 16px;
+  border-radius: 30px;
+  border: 2px solid var(--border-pencil);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.dashboard-link-pill:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #fde68a, #f59e0b);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
 }
 
 .user-profile-pill {

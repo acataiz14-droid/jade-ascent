@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jade Ascent — ระบบรีวิวพัฒนาการนักเรียน (สำหรับผู้ปกครอง & แอดมิน)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Kanit:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="stylesheet" href="./dashboard.css" />
+</head>
+<body>
+  <!-- Background Ambience -->
+  <div class="bg-decoration">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+  </div>
+
+  <!-- ================= AUTHENTICATION GATE (REQUIRED BEFORE VIEWING DASHBOARD) ================= -->
+  <div id="auth-gate" class="auth-gate-wrapper">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-emblem">玉</div>
+        <div>
+          <span class="brand-sub">JADE ASCENT ACADEMY</span>
+          <h1 class="brand-title">ระบบรายงานและรีวิวพัฒนาการนักเรียน</h1>
+          <p class="brand-desc">สำหรับผู้ปกครองเพื่อติดตามผลการเรียนภาษาจีน และสำหรับครูแอดมินเพื่อบันทึกพัฒนาการ</p>
+        </div>
+      </div>
+
+      <!-- Role Switch Tabs -->
+      <div class="auth-tabs" role="tablist">
+        <button id="tab-parent-btn" class="auth-tab active" data-tab="parent" type="button">
+          👨‍👩‍👧 สำหรับผู้ปกครอง (Gmail)
+        </button>
+        <button id="tab-admin-btn" class="auth-tab" data-tab="admin" type="button">
+          👑 สำหรับแอดมิน (ครูผู้สอน)
+        </button>
+      </div>
+
+      <!-- TAB 1: PARENT GMAIL LOGIN -->
+      <div id="panel-parent-auth" class="auth-panel">
+        <div class="auth-notice">
+          <span class="notice-icon">🔒</span>
+          <div>
+            <strong>สำหรับผู้ปกครองนักเรียน:</strong>
+            <p>กรุณาเข้าสู่ระบบด้วยบัญชี <strong>Gmail (@gmail.com)</strong> ก่อนเข้าชมผลการประเมินและรีวิวพัฒนาการของบุตรหลาน</p>
+          </div>
+        </div>
+
+        <!-- Google Official Sign-In Button Container -->
+        <div id="google-gsi-wrapper" class="gsi-container">
+          <div id="dashboard-google-btn"></div>
+        </div>
+
+        <div class="auth-divider">
+          <span>ยืนยันเข้าสู่ระบบด้วย Gmail ของผู้ปกครอง</span>
+        </div>
+
+        <form id="parent-gmail-form" class="auth-form">
+          <div class="form-group">
+            <label for="parent-name-input">ชื่อผู้ปกครอง (หรือระบุว่าเป็นผู้ปกครองของน้อง...)</label>
+            <input
+              type="text"
+              id="parent-name-input"
+              placeholder="เช่น คุณแม่น้องแพนด้า / ผู้ปกครองน้องภูมิ"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="parent-gmail-input">อีเมล Gmail ของผู้ปกครอง <span class="req">*ต้องเป็น @gmail.com</span></label>
+            <div class="gmail-input-wrap">
+              <span class="gmail-icon">✉️</span>
+              <input
+                type="email"
+                id="parent-gmail-input"
+                placeholder="yourname@gmail.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div id="parent-auth-error" class="auth-error hidden"></div>
+
+          <button type="submit" id="parent-login-submit" class="btn-primary btn-gmail">
+            <svg class="google-g-svg" viewBox="0 0 24 24" width="20" height="20">
+              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+              <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 12.3s.6 3.3 1.6 5.3l3.7-2.8z"/>
+              <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 19.9 7.4 23 12 23z"/>
+            </svg>
+            เข้าสู่ระบบด้วย Gmail เพื่อดูรีวิวนักเรียน
+          </button>
+        </form>
+      </div>
+
+      <!-- TAB 2: ADMIN LOGIN (ID: Toon / Pass: 141826) -->
+      <div id="panel-admin-auth" class="auth-panel hidden">
+        <div class="auth-notice admin-notice">
+          <span class="notice-icon">👑</span>
+          <div>
+            <strong>สำหรับแอดมิน / ครูผู้สอน:</strong>
+            <p>เข้าสู่ระบบด้วยรหัสแอดมินเพื่อเพิ่มรายชื่อนักเรียน บันทึกคะแนนทักษะ และเขียนรีวิวพัฒนาการรายบุคคล</p>
+          </div>
+        </div>
+
+        <form id="admin-login-form" class="auth-form">
+          <div class="form-group">
+            <label for="admin-id-input">Admin ID (ชื่อผู้ใช้แอดมิน)</label>
+            <input
+              type="text"
+              id="admin-id-input"
+              placeholder="กรอก Admin ID"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="admin-pass-input">Password (รหัสผ่านแอดมิน)</label>
+            <input
+              type="password"
+              id="admin-pass-input"
+              placeholder="กรอกรหัสผ่าน"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <div id="admin-auth-error" class="auth-error hidden"></div>
+
+          <button type="submit" id="admin-login-submit" class="btn-primary btn-admin">
+            👑 เข้าสู่ระบบจัดการและเขียนรีวิว (Admin)
+          </button>
+        </form>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(148,163,184,0.16); text-align: center;">
+        <a href="./index.html" style="color: #94a3b8; font-size: 13.5px; text-decoration: none;">
+          ⬅️ กลับไปหน้าเมนูเกมหลัก (Jade Ascent)
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN DASHBOARD VIEW (SHOWN AFTER LOGIN) ================= -->
+  <div id="dashboard-app" class="dashboard-container hidden">
+    <!-- Top Navigation Header -->
+    <header class="dash-header">
+      <div class="dash-header-left">
+        <div class="brand-emblem small">玉</div>
+        <div>
+          <div class="dash-header-eyebrow">JADE ASCENT STUDENT PROGRESS PORTAL</div>
+          <h1 class="dash-header-title">แดชบอร์ดรีวิวพัฒนาการนักเรียนภาษาจีน</h1>
+        </div>
+      </div>
+
+      <div class="dash-header-right">
+        <div id="session-badge" class="session-badge">
+          <!-- Populated by JS -->
+        </div>
+        <a href="./index.html" class="btn-outline" style="text-decoration: none;">
+          🎮 หน้าเกมหลัก
+        </a>
+        <button id="refresh-data-btn" class="btn-outline" type="button" title="รีเฟรชข้อมูลล่าสุด">
+          🔄 รีเฟรชข้อมูล
+        </button>
+        <button id="logout-btn" class="btn-danger-outline" type="button">
+          🚪 ออกจากระบบ
+        </button>
+      </div>
+    </header>
+
+    <!-- Summary KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">👨‍🎓</div>
+        <div class="kpi-info">
+          <span class="kpi-label">นักเรียนทั้งหมดในระบบ</span>
+          <strong id="kpi-total-students" class="kpi-value">0 คน</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📝</div>
+        <div class="kpi-info">
+          <span class="kpi-label">มีรีวิวพัฒนาการแล้ว</span>
+          <strong id="kpi-reviewed-students" class="kpi-value">0 คน</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📚</div>
+        <div class="kpi-info">
+          <span class="kpi-label">คำศัพท์ภาษาจีนที่เชี่ยวชาญรวม</span>
+          <strong id="kpi-total-vocab" class="kpi-value">0 คำ</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⭐</div>
+        <div class="kpi-info">
+          <span class="kpi-label">คะแนนพัฒนาการเฉลี่ย</span>
+          <strong id="kpi-avg-score" class="kpi-value">-</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Layout: Left Sidebar (Student Directory) + Right Detail & Review Area -->
+    <div class="dash-main-grid">
+      <!-- LEFT: Student Directory -->
+      <aside class="student-sidebar">
+        <div class="sidebar-header">
+          <h2>📋 รายชื่อนักเรียน</h2>
+          <button id="admin-add-student-btn" class="btn-small-gold hidden" type="button">
+            + เพิ่มนักเรียน
+          </button>
+        </div>
+
+        <div class="search-box">
+          <input
+            type="text"
+            id="student-search-input"
+            placeholder="🔍 ค้นหาชื่อนักเรียน..."
+          />
+        </div>
+
+        <div class="filter-pills">
+          <button class="filter-pill active" data-filter="all" type="button">ทั้งหมด</button>
+          <button class="filter-pill" data-filter="reviewed" type="button">มีรีวิวแล้ว</button>
+          <button class="filter-pill" data-filter="pending" type="button">รอรีวิว</button>
+        </div>
+
+        <div id="student-list" class="student-list">
+          <!-- Populated dynamically -->
+        </div>
+      </aside>
+
+      <!-- RIGHT: Selected Student Review & Progress Detail -->
+      <main class="student-detail-area">
+        <div id="empty-student-state" class="empty-state hidden">
+          <div class="empty-icon">🐼</div>
+          <h3>เลือกรายชื่อนักเรียนทางด้านซ้าย</h3>
+          <p>เพื่อดูรายงานพัฒนาการเรียนภาษาจีน คะแนนทักษะ และความคิดเห็นจากครูผู้สอน</p>
+        </div>
+
+        <div id="student-detail-content" class="student-detail-content">
+          <!-- 1. Student Profile Banner -->
+          <div class="student-profile-banner">
+            <div class="student-banner-left">
+              <div id="detail-avatar" class="detail-avatar">🐼</div>
+              <div>
+                <div class="detail-name-row">
+                  <h2 id="detail-name">ชื่อนักเรียน</h2>
+                  <span id="detail-level-badge" class="level-badge">กำลังพัฒนา</span>
+                </div>
+                <p id="detail-last-active" class="detail-meta">อัปเดตล่าสุด: -</p>
+              </div>
+            </div>
+
+            <div class="student-banner-right">
+              <div class="rating-display">
+                <span class="rating-label">ผลการประเมินภาพรวม</span>
+                <div id="detail-stars" class="stars-row">⭐⭐⭐⭐⭐</div>
+              </div>
+              <button id="admin-scroll-to-editor-btn" class="btn-gold hidden" type="button">
+                ✏️ เขียน / แก้ไขรีวิวนักเรียนคนนี้
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Teacher Developmental Review Card (Highlight for Parents) -->
+          <section class="review-showcase-card">
+            <div class="review-card-header">
+              <div class="review-title-group">
+                <span class="review-icon">👩‍🏫</span>
+                <div>
+                  <h3>รีวิวพัฒนาการนักเรียนจากครูผู้สอน</h3>
+                  <p id="detail-reviewer-meta">ประเมินโดย: ครูตูน (Admin Toon)</p>
+                </div>
+              </div>
+              <span id="detail-review-status-pill" class="status-pill">ประเมินแล้ว</span>
+            </div>
+
+            <!-- Skill Progress Bars (4 Dimensions) -->
+            <div class="skills-assessment-grid">
+              <div class="skill-item">
+                <div class="skill-top">
+                  <span>📖 การจำคำศัพท์และตัวอักษรจีน (Hanzi & Vocab)</span>
+                  <strong id="skill-val-vocab">85%</strong>
+                </div>
+                <div class="skill-bar-bg">
+                  <div id="skill-bar-vocab" class="skill-bar-fill fill-emerald" style="width: 85%"></div>
+                </div>
+              </div>
+
+              <div class="skill-item">
+                <div class="skill-top">
+                  <span>🗣️ การออกเสียงพินอินและวรรณยุกต์ (Pinyin & Tone)</span>
+                  <strong id="skill-val-pinyin">80%</strong>
+                </div>
+                <div class="skill-bar-bg">
+                  <div id="skill-bar-pinyin" class="skill-bar-fill fill-gold" style="width: 80%"></div>
+                </div>
+              </div>
+
+              <div class="skill-item">
+                <div class="skill-top">
+                  <span>🏮 การนำคำศัพท์ไปใช้สนทนาจริง (Practical Application)</span>
+                  <strong id="skill-val-conversation">80%</strong>
+                </div>
+                <div class="skill-bar-bg">
+                  <div id="skill-bar-conversation" class="skill-bar-fill fill-blue" style="width: 80%"></div>
+                </div>
+              </div>
+
+              <div class="skill-item">
+                <div class="skill-top">
+                  <span>🔥 ความตั้งใจและความสม่ำเสมอ (Effort & Focus)</span>
+                  <strong id="skill-val-effort">90%</strong>
+                </div>
+                <div class="skill-bar-bg">
+                  <div id="skill-bar-effort" class="skill-bar-fill fill-purple" style="width: 90%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Teacher Written Feedback -->
+            <div class="teacher-feedback-box">
+              <h4>💬 ความคิดเห็นและผลการพัฒนาการ (Teacher's Review)</h4>
+              <div id="detail-comment-text" class="feedback-paragraph">
+                ยังไม่มีบันทึกคำรีวิวสำหรับนักเรียนคนนี้
+              </div>
+
+              <div class="feedback-highlights-grid">
+                <div class="highlight-box strength-box">
+                  <h5>🌟 จุดเด่นของนักเรียน (Strengths)</h5>
+                  <p id="detail-strengths-text">-</p>
+                </div>
+                <div class="highlight-box nextstep-box">
+                  <h5>🎯 สิ่งที่กำลังฝึกเพิ่มเติม / เป้าหมายถัดไป (Next Steps)</h5>
+                  <p id="detail-nextsteps-text">-</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Vocabulary Mastery & In-Game Learning Progress -->
+          <div class="stats-and-vocab-grid">
+            <!-- Learned Vocabulary Card -->
+            <section class="sub-card">
+              <div class="sub-card-header">
+                <h3>📚 คำศัพท์ภาษาจีนที่นักเรียนจำได้และผ่านด่านแล้ว</h3>
+                <span id="detail-vocab-count" class="badge-count">0 คำ</span>
+              </div>
+              <div id="detail-vocab-list" class="vocab-chips-container">
+                <!-- Populated dynamically -->
+              </div>
+            </section>
+
+            <!-- Game Mode Activity Stats -->
+            <section class="sub-card">
+              <div class="sub-card-header">
+                <h3>🎮 สถิติการฝึกฝนผ่านระบบเกม</h3>
+              </div>
+              <div class="game-stats-list">
+                <div class="game-stat-row">
+                  <span class="gs-label">💎 หยกสะสมจากการตอบคำถาม</span>
+                  <strong id="stat-jade" class="gs-val">0 หยก</strong>
+                </div>
+                <div class="game-stat-row">
+                  <span class="gs-label">🏮 ระดับโรงเตี๊ยมเต๋า (หมวดสนทนาโรงแรม)</span>
+                  <strong id="stat-inn-level" class="gs-val">ระดับ 1</strong>
+                </div>
+                <div class="game-stat-row">
+                  <span class="gs-label">🏔️ ด่านสูงสุดโหมดไต่หอคอย (Tower Climb)</span>
+                  <strong id="stat-tower-level" class="gs-val">ด่าน 1</strong>
+                </div>
+                <div class="game-stat-row">
+                  <span class="gs-label">🏃 คะแนนสูงสุดวิ่งเก็บหยก (Jade Runner)</span>
+                  <strong id="stat-runner-score" class="gs-val">0 คะแนน</strong>
+                </div>
+                <div class="game-stat-row">
+                  <span class="gs-label">⚔️ ชัยชนะโหมดประลองยุทธ์ (Jade Arena)</span>
+                  <strong id="stat-arena-wins" class="gs-val">0 ครั้ง</strong>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- 4. ADMIN ONLY: TEACHER REVIEW EDITOR FORM -->
+          <section id="admin-editor-section" class="admin-editor-card hidden">
+            <div class="admin-editor-header">
+              <div>
+                <span class="admin-tag">👑 ADMIN MODE (ID: Toon)</span>
+                <h3>เขียน / อัปเดตรีวิวพัฒนาการสำหรับ: <span id="editor-student-name">-</span></h3>
+              </div>
+            </div>
+
+            <form id="admin-review-form" class="admin-review-form">
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label for="review-badge-select">ระดับพัฒนาการภาพรวม (Level Badge)</label>
+                  <select id="review-badge-select">
+                    <option value="กำลังปูพื้นฐานอย่างตั้งใจ 🌱">กำลังปูพื้นฐานอย่างตั้งใจ 🌱</option>
+                    <option value="พัฒนาต่อเนื่องดีมาก 📈" selected>พัฒนาต่อเนื่องดีมาก 📈</option>
+                    <option value="เก่งมาก จดจำคำศัพท์ได้ไว 🌟">เก่งมาก จดจำคำศัพท์ได้ไว 🌟</option>
+                    <option value="ยอดเยี่ยม ระดับเซียนภาษาจีน 🏆">ยอดเยี่ยม ระดับเซียนภาษาจีน 🏆</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="review-stars-select">คะแนนดาวประเมินผล (1 - 5 ดาว)</label>
+                  <select id="review-stars-select">
+                    <option value="5">⭐⭐⭐⭐⭐ (5 ดาว - ดีเยี่ยม)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 ดาว - ดีมาก)</option>
+                    <option value="3">⭐⭐⭐ (3 ดาว - กำลังพัฒนา)</option>
+                    <option value="2">⭐⭐ (2 ดาว - ต้องเสริมพื้นฐาน)</option>
+                    <option value="1">⭐ (1 ดาว - เริ่มต้น)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 4 Skill Sliders -->
+              <div class="sliders-box">
+                <h4>📊 ประเมินทักษะทั้ง 4 ด้าน (0% - 100%)</h4>
+                <div class="form-row-2col">
+                  <div class="slider-group">
+                    <label>
+                      <span>📖 การจำคำศัพท์และตัวอักษรจีน</span>
+                      <strong id="slider-vocab-label">85%</strong>
+                    </label>
+                    <input type="range" id="slider-vocab" min="10" max="100" step="5" value="85" />
+                  </div>
+
+                  <div class="slider-group">
+                    <label>
+                      <span>🗣️ การออกเสียงพินอินและวรรณยุกต์</span>
+                      <strong id="slider-pinyin-label">80%</strong>
+                    </label>
+                    <input type="range" id="slider-pinyin" min="10" max="100" step="5" value="80" />
+                  </div>
+
+                  <div class="slider-group">
+                    <label>
+                      <span>🏮 การนำไปใช้สนทนาจริง (เช่น หมวดโรงเตี๊ยม)</span>
+                      <strong id="slider-conv-label">85%</strong>
+                    </label>
+                    <input type="range" id="slider-conv" min="10" max="100" step="5" value="85" />
+                  </div>
+
+                  <div class="slider-group">
+                    <label>
+                      <span>🔥 ความตั้งใจและความสม่ำเสมอในการเรียน</span>
+                      <strong id="slider-effort-label">90%</strong>
+                    </label>
+                    <input type="range" id="slider-effort" min="10" max="100" step="5" value="90" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Vocab Mastery Checkboxes -->
+              <div class="vocab-check-box">
+                <h4>✅ ติ๊กเลือกคำศัพท์ที่นักเรียนคนนี้จำได้แม่นยำแล้ว (แสดงให้ผู้ปกครองเห็น)</h4>
+                <div id="editor-vocab-checkboxes" class="vocab-checkbox-grid">
+                  <!-- Populated dynamically by JS -->
+                </div>
+              </div>
+
+              <div class="form-row-2col">
+                <div class="form-group">
+                  <label for="review-strengths-input">🌟 จุดเด่นของนักเรียน (Strengths)</label>
+                  <input
+                    type="text"
+                    id="review-strengths-input"
+                    placeholder="เช่น จำคำศัพท์หมวดโรงเตี๊ยม (酒店, 入住, 房卡) ได้แม่นมาก ออกเสียงพินอินชัดเจน"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="review-nextsteps-input">🎯 สิ่งที่กำลังฝึกเพิ่มเติม / เป้าหมายถัดไป</label>
+                  <input
+                    type="text"
+                    id="review-nextsteps-input"
+                    placeholder="เช่น ฝึกแต่งประโยคสนทนายาวขึ้น และทบทวนวรรณยุกต์เสียง 3"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="review-comment-input">💬 รายละเอียดรีวิวพัฒนาการสำหรับผู้ปกครอง (เขียนโดย Admin Toon)</label>
+                <textarea
+                  id="review-comment-input"
+                  rows="4"
+                  placeholder="เขียนสรุปพัฒนาการของนักเรียนให้ผู้ปกครองทราบว่าน้องพัฒนาไปถึงขั้นไหนแล้ว..."
+                  required
+                ></textarea>
+              </div>
+
+              <div class="editor-actions">
+                <button type="submit" class="btn-primary btn-save-review">
+                  💾 บันทึกรีวิวพัฒนาการนักเรียน
+                </button>
+                <button type="button" id="delete-review-btn" class="btn-danger-outline">
+                  🗑️ ลบรีวิวนี้
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD NEW STUDENT (ADMIN ONLY) ================= -->
+  <div id="add-student-modal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>➕ เพิ่มรายชื่อนักเรียนใหม่ (สำหรับแอดมิน)</h3>
+        <button id="close-add-student-btn" class="modal-close" type="button">✕</button>
+      </div>
+      <form id="add-student-form" class="auth-form">
+        <div class="form-group">
+          <label for="new-student-name">ชื่อนักเรียน / ชื่อเล่น</label>
+          <input type="text" id="new-student-name" placeholder="เช่น น้องภูมิ / น้องมินนี่" required />
+        </div>
+        <div class="form-group">
+          <label>เลือกไอคอนประจำตัวนักเรียน</label>
+          <div id="new-student-avatars" class="avatar-picker-grid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label for="new-student-jade">หยกสะสมเริ่มต้น</label>
+            <input type="number" id="new-student-jade" value="500" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="new-student-inn">ระดับโรงเตี๊ยม (1-10)</label>
+            <input type="number" id="new-student-inn" value="2" min="1" max="10" />
+          </div>
+        </div>
+        <button type="submit" class="btn-primary btn-admin">
+          ✅ สร้างโปรไฟล์นักเรียนและเริ่มเขียนรีวิว
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="dash-toast" class="dash-toast hidden"></div>
+
+  <script type="module" src="./dashboard.js"></script>
+</body>
+</html>

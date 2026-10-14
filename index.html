@@ -21,6 +21,9 @@
 
   <!-- Top User Profile Bar -->
   <div id="user-profile-bar" class="user-profile-bar">
+    <a href="./dashboard.html" class="dashboard-link-pill" title="เปิดหน้า Dashboard รีวิวพัฒนาการนักเรียน (URL แยกสำหรับผู้ปกครอง & แอดมิน)">
+      <span>📊 Dashboard รีวิวผู้ปกครอง / แอดมิน</span>
+    </a>
     <div class="user-profile-pill" id="btn-open-profile" title="คลิกเพื่อสลับโปรไฟล์ / แก้ไขข้อมูลนักเรียน">
       <div class="user-avatar-wrap" id="user-avatar-display">
         <span class="avatar-emoji">🐼</span>
@@ -919,10 +922,13 @@
         </div>
       </div>
 
-      <!-- Section 3: Save Backup & Restore -->
+      <!-- Section 3: Save Backup & Restore + Parent/Admin Dashboard Link -->
       <div class="profile-section" style="border-bottom: none; margin-bottom: 0;">
-        <h3>💾 จัดการข้อมูลสำรอง (Backup & Restore)</h3>
+        <h3>📊 ระบบติดตามพัฒนาการ & จัดการข้อมูลสำรอง</h3>
         <div style="display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap;">
+          <a href="./dashboard.html" class="btn btn-primary" style="font-size: 0.88rem; padding: 8px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a; font-weight: 800;">
+            📊 เปิดหน้า Dashboard รีวิวผู้ปกครอง & แอดมิน ➔
+          </a>
           <button id="btn-import-save" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 14px;">
             📤 กู้คืนไฟล์เซฟ (Import JSON)
           </button>
