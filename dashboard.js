@@ -1,8 +1,9 @@
 /**
  * dashboard.js
- * Standalone Student Progress & Parent/Admin Review Dashboard
+ * Hand-Drawn Sketchbook Student Progress Review & Classroom Teaching Logbook
  * - Parent Login Gate: Requires Gmail (@gmail.com or Google Sign-In)
  * - Admin Login Gate: ID: Toon | Pass: 141826
+ * - Includes: Overall Developmental Review + Session-by-Session Teaching Logs (สมุดจดบันทึกการสอน)
  * - Cross-device sync with ./api.php + localStorage fallback
  */
 
@@ -38,7 +39,7 @@ const VOCAB_CATALOG = [
 const state = {
   session: null, // { role: 'parent' | 'admin', name: string, email?: string, adminId?: string, adminPass?: string }
   profiles: {},  // { [userId]: profileObj }
-  reviews: {},   // { [userId]: reviewObj }
+  reviews: {},   // { [userId]: reviewObj (contains .teachingLogs array) }
   selectedStudentId: null,
   filterMode: 'all', // 'all' | 'reviewed' | 'pending'
   searchQuery: '',
@@ -49,6 +50,12 @@ const state = {
 // INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', async () => {
+  // Set default date in teaching log form to today
+  const dateInput = document.getElementById('log-date-input');
+  if (dateInput) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
+
   bindAuthEvents();
   bindDashboardEvents();
   initGoogleSignInForParents();
@@ -185,7 +192,7 @@ function initGoogleSignInForParents() {
       const btnContainer = document.getElementById('dashboard-google-btn');
       if (btnContainer) {
         window.google.accounts.id.renderButton(btnContainer, {
-          theme: 'filled_black',
+          theme: 'outline',
           size: 'large',
           shape: 'pill',
           text: 'signin_with',
@@ -223,14 +230,13 @@ function decodeJwtPayload(jwt) {
 // DATA SYNC & STORAGE (SERVER API + LOCALSTORAGE FALLBACK)
 // ============================================================================
 async function loadAllDashboardData() {
-  // 1. Load local profiles and reviews first
   const localProfiles = loadLocalProfiles();
   const localReviews = loadLocalReviews();
 
   state.profiles = { ...localProfiles };
   state.reviews = { ...localReviews };
 
-  // 2. Fetch cross-device profiles & reviews from ./api.php
+  // Fetch cross-device profiles & reviews from ./api.php
   try {
     const res = await fetch('./api.php?action=list', { cache: 'no-store' });
     if (res.ok) {
@@ -252,14 +258,9 @@ async function loadAllDashboardData() {
         }
       }
     }
-  } catch (_) {
-    // Offline or Vite local dev server without PHP — localStorage handles it seamlessly
-  }
+  } catch (_) {}
 
-  // 3. Ensure at least one default student & sample review exist so dashboard is never empty
   ensureDefaultDemoData();
-
-  // Save merged state back to local cache
   saveLocalReviews(state.reviews);
 }
 
@@ -311,28 +312,53 @@ function ensureDefaultDemoData() {
     state.profiles[demoStudent.userId] = demoStudent;
   }
 
-  // Ensure default student has an initial teacher review if no reviews exist yet
-  if (Object.keys(state.reviews).length === 0) {
-    const firstId = Object.keys(state.profiles)[0];
-    const firstStudent = state.profiles[firstId];
-    if (firstStudent) {
-      state.reviews[firstId] = {
-        studentId: firstId,
-        badge: 'เก่งมาก จดจำคำศัพท์ได้ไว 🌟',
-        stars: 5,
-        skills: {
-          vocab: 90,
-          pinyin: 85,
-          conversation: 85,
-          effort: 95
-        },
-        strengths: 'จดจำคำศัพท์หมวดโรงเตี๊ยม (酒店, 入住, 预订, 护照, 房间, 房卡) ได้แม่นยำและตอบคำถามในสถานการณ์จำลองได้รวดเร็วมาก',
-        nextSteps: 'ฝึกออกเสียงพินอินที่มีวรรณยุกต์เสียง 3 ติดกัน และลองแต่งประโยคสนทนาสั้นๆ เพิ่มเติม',
-        comment: 'น้องมีความตั้งใจเรียนดีเยี่ยมครับ สามารถจำตัวอักษรจีนและพินอินในหมวดโรงเตี๊ยมเต๋าได้ครบทั้ง 6 คำหลัก และนำไปใช้ตอบคำถามแขกในโรงเตี๊ยมได้อย่างถูกต้อง พัฒนาการก้าวหน้าขึ้นชัดเจนครับ',
-        reviewer: 'ครูตูน (Admin Toon)',
-        updatedAt: Date.now()
-      };
-    }
+  const firstId = Object.keys(state.profiles)[0];
+  const firstStudent = state.profiles[firstId];
+
+  if (firstStudent && !state.reviews[firstId]) {
+    state.reviews[firstId] = {
+      studentId: firstId,
+      badge: 'เก่งมาก จดจำคำศัพท์ได้ไว 🌟',
+      stars: 5,
+      skills: {
+        vocab: 90,
+        pinyin: 85,
+        conversation: 85,
+        effort: 95
+      },
+      strengths: 'จดจำคำศัพท์หมวดโรงเตี๊ยม (酒店, 入住, 预订, 护照, 房间, 房卡) ได้แม่นยำและตอบคำถามในสถานการณ์จำลองได้รวดเร็วมาก',
+      nextSteps: 'ฝึกออกเสียงพินอินที่มีวรรณยุกต์เสียง 3 ติดกัน และลองแต่งประโยคสนทนาสั้นๆ เพิ่มเติม',
+      comment: 'น้องมีความตั้งใจเรียนดีเยี่ยมครับ สามารถจำตัวอักษรจีนและพินอินในหมวดโรงเตี๊ยมเต๋าได้ครบทั้ง 6 คำหลัก และนำไปใช้ตอบคำถามแขกในโรงเตี๊ยมได้อย่างถูกต้อง พัฒนาการก้าวหน้าขึ้นชัดเจนครับ',
+      reviewer: 'ครูตูน (Admin Toon)',
+      updatedAt: Date.now(),
+      teachingLogs: [
+        {
+          id: 'log_sample_1',
+          date: new Date().toISOString().split('T')[0],
+          topic: 'คาบเรียนสนทนาหมวดโรงแรม & การเช็คอินโรงเตี๊ยม',
+          stamp: 'ดีเยี่ยมมาก! 💯',
+          words: '酒店 (jiǔdiàn), 入住 (rùzhù), 预订 (yùdìng), 护照 (hùzhào), 房间 (fángjiān), 房卡 (fángkǎ)',
+          note: 'วันนี้น้องตั้งใจฟังและมีส่วนร่วมดีมากครับ สามารถแยกแยะตัวอักษรจีนคำว่า 房间 (ห้องพัก) กับ 房卡 (คีย์การ์ด) ได้แม่นยำ และออกเสียงพินอิน rùzhù (เช็คอิน) ได้ชัดเจนถูกต้อง',
+          homework: 'ทบทวนคำศัพท์ทั้ง 6 คำในโหมดโรงเตี๊ยมเต๋า 2.5D และฝึกอ่านออกเสียงให้ผู้ปกครองฟังวันละ 1 รอบครับ',
+          author: 'ครูตูน (Admin Toon)',
+          createdAt: Date.now()
+        }
+      ]
+    };
+  } else if (firstStudent && state.reviews[firstId] && !Array.isArray(state.reviews[firstId].teachingLogs)) {
+    state.reviews[firstId].teachingLogs = [
+      {
+        id: 'log_sample_1',
+        date: new Date().toISOString().split('T')[0],
+        topic: 'คาบเรียนสนทนาหมวดโรงแรม & การเช็คอินโรงเตี๊ยม',
+        stamp: 'ดีเยี่ยมมาก! 💯',
+        words: '酒店 (jiǔdiàn), 入住 (rùzhù), 预订 (yùdìng), 护照 (hùzhào), 房间 (fángjiān), 房卡 (fángkǎ)',
+        note: 'วันนี้น้องตั้งใจฟังและมีส่วนร่วมดีมากครับ สามารถแยกแยะตัวอักษรจีนคำว่า 房间 (ห้องพัก) กับ 房卡 (คีย์การ์ด) ได้แม่นยำ และออกเสียงพินอิน rùzhù (เช็คอิน) ได้ชัดเจนถูกต้อง',
+        homework: 'ทบทวนคำศัพท์ทั้ง 6 คำในโหมดโรงเตี๊ยมเต๋า 2.5D และฝึกอ่านออกเสียงให้ผู้ปกครองฟังวันละ 1 รอบครับ',
+        author: 'ครูตูน (Admin Toon)',
+        createdAt: Date.now()
+      }
+    ];
   }
 }
 
@@ -349,20 +375,23 @@ async function enterDashboard() {
   const badgeEl = document.getElementById('session-badge');
 
   if (isAdmin) {
-    badgeEl.className = 'session-badge admin-mode';
-    badgeEl.innerHTML = `👑 แอดมิน: <strong>${escapeHtml(state.session.name)}</strong> (โหมดเขียนรีวิว)`;
+    badgeEl.className = 'sketch-badge admin-mode';
+    badgeEl.innerHTML = `👑 แอดมิน: <strong>${escapeHtml(state.session.name)}</strong>`;
     document.getElementById('admin-add-student-btn').classList.remove('hidden');
     document.getElementById('admin-scroll-to-editor-btn').classList.remove('hidden');
+    document.getElementById('admin-scroll-to-log-btn').classList.remove('hidden');
     document.getElementById('admin-editor-section').classList.remove('hidden');
+    document.getElementById('admin-log-form-wrapper').classList.remove('hidden');
   } else {
-    badgeEl.className = 'session-badge parent-mode';
+    badgeEl.className = 'sketch-badge';
     badgeEl.innerHTML = `👨‍👩‍👧 ผู้ปกครอง: <strong>${escapeHtml(state.session.name)}</strong> (${escapeHtml(state.session.email || '')})`;
     document.getElementById('admin-add-student-btn').classList.add('hidden');
     document.getElementById('admin-scroll-to-editor-btn').classList.add('hidden');
+    document.getElementById('admin-scroll-to-log-btn').classList.add('hidden');
     document.getElementById('admin-editor-section').classList.add('hidden');
+    document.getElementById('admin-log-form-wrapper').classList.add('hidden');
   }
 
-  // Select first student by default if none selected
   const allIds = Object.keys(state.profiles);
   if (!state.selectedStudentId || !state.profiles[state.selectedStudentId]) {
     state.selectedStudentId = allIds[0] || null;
@@ -381,16 +410,16 @@ function renderKpiSummary() {
   const studentList = Object.values(state.profiles);
   const totalStudents = studentList.length;
   let reviewedCount = 0;
-  let totalVocabCount = 0;
+  let totalLogsCount = 0;
   let scoreSum = 0;
 
   studentList.forEach((st) => {
-    const vocabArr = (st.sanctuary && Array.isArray(st.sanctuary.learnedVocab)) ? st.sanctuary.learnedVocab : [];
-    totalVocabCount += vocabArr.length;
-
     const rev = state.reviews[st.userId];
     if (rev) {
-      reviewedCount++;
+      if (rev.comment) reviewedCount++;
+      if (Array.isArray(rev.teachingLogs)) {
+        totalLogsCount += rev.teachingLogs.length;
+      }
       const sk = rev.skills || { vocab: 80, pinyin: 80, conversation: 80, effort: 80 };
       const avg = Math.round((Number(sk.vocab) + Number(sk.pinyin) + Number(sk.conversation) + Number(sk.effort)) / 4);
       scoreSum += avg;
@@ -401,7 +430,7 @@ function renderKpiSummary() {
 
   document.getElementById('kpi-total-students').textContent = `${totalStudents} คน`;
   document.getElementById('kpi-reviewed-students').textContent = `${reviewedCount} / ${totalStudents} คน`;
-  document.getElementById('kpi-total-vocab').textContent = `${totalVocabCount} คำ`;
+  document.getElementById('kpi-total-logs').textContent = `${totalLogsCount} คาบ`;
   document.getElementById('kpi-avg-score').textContent = overallAvg;
 }
 
@@ -413,19 +442,21 @@ function renderStudentSidebar() {
   const students = Object.values(state.profiles).filter((st) => {
     const matchesName = (st.name || '').toLowerCase().includes(query);
     if (!matchesName) return false;
-    const hasReview = Boolean(state.reviews[st.userId]);
+    const rev = state.reviews[st.userId];
+    const hasReview = Boolean(rev && (rev.comment || (rev.teachingLogs && rev.teachingLogs.length > 0)));
     if (state.filterMode === 'reviewed') return hasReview;
     if (state.filterMode === 'pending') return !hasReview;
     return true;
   });
 
   if (students.length === 0) {
-    listEl.innerHTML = `<div style="text-align:center; padding: 24px 10px; color: var(--text-muted); font-size: 13.5px;">ไม่พบรายชื่อนักเรียนที่ค้นหา</div>`;
+    listEl.innerHTML = `<div style="text-align:center; padding: 24px 10px; opacity: 0.7;">ไม่พบรายชื่อนักเรียนที่ค้นหา</div>`;
     return;
   }
 
   students.forEach((st) => {
     const rev = state.reviews[st.userId];
+    const logCount = (rev && Array.isArray(rev.teachingLogs)) ? rev.teachingLogs.length : 0;
     const isSelected = st.userId === state.selectedStudentId;
     const item = document.createElement('div');
     item.className = `student-item ${isSelected ? 'active' : ''}`;
@@ -434,7 +465,7 @@ function renderStudentSidebar() {
         <div class="st-avatar">${st.avatar || '🐼'}</div>
         <div style="min-width:0;">
           <div class="st-name">${escapeHtml(st.name || 'นักเรียน')}</div>
-          <div class="st-sub">💎 ${st.jade || 0} หยก • 🏮 โรงเตี๊ยม Lv.${(st.sanctuary && st.sanctuary.innLevel) || 1}</div>
+          <div class="st-sub">📓 บันทึก ${logCount} คาบ • 💎 ${st.jade || 0} หยก</div>
         </div>
       </div>
       <span class="st-status-dot ${rev ? 'reviewed' : 'pending'}">
@@ -443,6 +474,7 @@ function renderStudentSidebar() {
     `;
     item.addEventListener('click', () => {
       state.selectedStudentId = st.userId;
+      resetLogForm();
       renderAll();
     });
     listEl.appendChild(item);
@@ -468,13 +500,13 @@ function renderSelectedStudentDetail() {
   // 1. Banner
   document.getElementById('detail-avatar').textContent = student.avatar || '🐼';
   document.getElementById('detail-name').textContent = student.name || 'นักเรียน';
-  document.getElementById('detail-level-badge').textContent = review
+  document.getElementById('detail-level-badge').textContent = (review && review.badge)
     ? review.badge
-    : 'รอครูผู้สอนบันทึกผลการประเมิน ⏳';
+    : 'รอครูตูนบันทึกผลการประเมิน ⏳';
 
   const lastTime = (review && review.updatedAt) || student.lastLogin || Date.now();
   document.getElementById('detail-last-active').textContent =
-    `อัปเดตข้อมูลล่าสุด: ${formatThaiDate(lastTime)}`;
+    `อัปเดตสมุดล่าสุด: ${formatThaiDate(lastTime)}`;
 
   const starsCount = review ? Number(review.stars || 5) : 0;
   document.getElementById('detail-stars').textContent =
@@ -483,15 +515,11 @@ function renderSelectedStudentDetail() {
   // 2. Teacher Review Card
   const statusPill = document.getElementById('detail-review-status-pill');
   const reviewerMeta = document.getElementById('detail-reviewer-meta');
-  if (review) {
-    statusPill.textContent = '✅ ประเมินพัฒนาการแล้ว';
-    statusPill.style.background = 'rgba(16, 185, 129, 0.2)';
-    statusPill.style.color = '#6ee7b7';
-    reviewerMeta.textContent = `ประเมินโดย: ${review.reviewer || 'ครูตูน (Admin Toon)'} • เมื่อ ${formatThaiDate(review.updatedAt)}`;
+  if (review && review.comment) {
+    statusPill.textContent = '✅ เขียนรีวิวแล้ว';
+    reviewerMeta.textContent = `เขียนโดย: ${review.reviewer || 'ครูตูน (Admin Toon)'} • เมื่อ ${formatThaiDate(review.updatedAt)}`;
   } else {
     statusPill.textContent = '⏳ รอแอดมินเขียนรีวิว';
-    statusPill.style.background = 'rgba(245, 158, 11, 0.2)';
-    statusPill.style.color = '#fde68a';
     reviewerMeta.textContent = 'กำลังรวบรวมสถิติการเรียนเพื่อประเมินผลโดย ครูตูน (Admin Toon)';
   }
 
@@ -507,23 +535,25 @@ function renderSelectedStudentDetail() {
   setSkillBar('conversation', skills.conversation);
   setSkillBar('effort', skills.effort);
 
-  document.getElementById('detail-comment-text').textContent = review
+  document.getElementById('detail-comment-text').textContent = (review && review.comment)
     ? review.comment
-    : 'คุณครูตูนกำลังติดตามผลการเล่นและพัฒนาการของนักเรียนคนนี้อยู่ครับ ผู้ปกครองสามารถดูสถิติการจำคำศัพท์และระดับด่านที่น้องผ่านได้จากตารางด้านล่างครับ';
+    : 'คุณครูตูนกำลังติดตามผลการเรียนของน้องอยู่ครับ ผู้ปกครองสามารถดูบันทึกการสอนรายคาบและคำศัพท์ที่น้องจำได้จากด้านล่างครับ';
 
   document.getElementById('detail-strengths-text').textContent =
     (review && review.strengths) || 'มีความกระตือรือร้นในการเรียนรู้คำศัพท์ภาษาจีนผ่านเกม';
   document.getElementById('detail-nextsteps-text').textContent =
     (review && review.nextSteps) || 'ฝึกฝนคำศัพท์หมวดโรงเตี๊ยมและทบทวนการออกเสียงพินอินอย่างสม่ำเสมอ';
 
-  // 3. Learned Vocabulary Chips
+  // 3. Render Classroom Teaching Logbook (สมุดจดบันทึกการสอนรายคาบ)
+  renderTeachingLogs(student, review);
+
+  // 4. Learned Vocabulary Chips
   const learnedSet = new Set(
     (student.sanctuary && Array.isArray(student.sanctuary.learnedVocab))
       ? student.sanctuary.learnedVocab
       : []
   );
 
-  // If student has hotel inn level >= 1 and empty vocab list, show default learned words or allow admin to toggle
   const vocabContainer = document.getElementById('detail-vocab-list');
   vocabContainer.innerHTML = '';
 
@@ -531,7 +561,7 @@ function renderSelectedStudentDetail() {
   document.getElementById('detail-vocab-count').textContent = `${matchedWords.length} คำ`;
 
   if (matchedWords.length === 0) {
-    vocabContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 13.5px;">กำลังเริ่มสะสมคำศัพท์จากในเกม...</span>`;
+    vocabContainer.innerHTML = `<span style="opacity: 0.7;">กำลังเริ่มสะสมคำศัพท์จากในคาบเรียนและในเกม...</span>`;
   } else {
     matchedWords.forEach((word) => {
       const chip = document.createElement('div');
@@ -547,17 +577,83 @@ function renderSelectedStudentDetail() {
     });
   }
 
-  // 4. Game Stats
+  // 5. Game Stats
   document.getElementById('stat-jade').textContent = `${student.jade || 0} หยก`;
   document.getElementById('stat-inn-level').textContent = `ระดับ ${(student.sanctuary && student.sanctuary.innLevel) || 1}`;
   document.getElementById('stat-tower-level').textContent = `ด่าน ${(student.levelProgress && student.levelProgress.unlockedLevel) || 1}`;
   document.getElementById('stat-runner-score').textContent = `${(student.runnerStats && student.runnerStats.highScore) || 0} คะแนน`;
   document.getElementById('stat-arena-wins').textContent = `${(student.arenaStats && student.arenaStats.wins) || 0} ครั้ง`;
 
-  // 5. Populate Admin Editor Form if logged in as Admin
+  // 6. Populate Admin Editor Form if logged in as Admin
   if (state.session && state.session.role === 'admin') {
     populateAdminEditor(student, review);
   }
+}
+
+function renderTeachingLogs(student, review) {
+  const logsContainer = document.getElementById('teaching-logs-list');
+  const countBadge = document.getElementById('detail-log-count');
+  const logs = (review && Array.isArray(review.teachingLogs)) ? review.teachingLogs : [];
+
+  countBadge.textContent = `${logs.length} คาบเรียน`;
+  logsContainer.innerHTML = '';
+
+  if (logs.length === 0) {
+    logsContainer.innerHTML = `
+      <div class="notebook-log-entry">
+        <p style="opacity: 0.75;">📓 ยังไม่มีบันทึกการสอนรายคาบสำหรับนักเรียนคนนี้ (แอดมินสามารถกดเพิ่มบันทึกการสอนด้านบนได้เลยครับ)</p>
+      </div>
+    `;
+    return;
+  }
+
+  const isAdmin = state.session && state.session.role === 'admin';
+
+  logs.forEach((log, idx) => {
+    const entry = document.createElement('article');
+    entry.className = 'notebook-log-entry';
+    entry.innerHTML = `
+      <div class="log-entry-top">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span class="log-date-tag">📅 ${escapeHtml(log.date || '-')} (คาบที่ ${logs.length - idx})</span>
+          <h4 class="log-topic-title">${escapeHtml(log.topic || 'บันทึกการเรียนภาษาจีน')}</h4>
+        </div>
+        <span class="log-stamp-badge">${escapeHtml(log.stamp || 'ดีเยี่ยมมาก! 💯')}</span>
+      </div>
+
+      ${log.words ? `<div class="log-words-pill">🔤 คำศัพท์ที่เรียน: ${escapeHtml(log.words)}</div>` : ''}
+
+      <div class="log-body-note">${escapeHtml(log.note || '')}</div>
+
+      ${log.homework ? `<div class="log-homework-row"><strong>🎒 การบ้าน / สิ่งที่ฝากทบทวน:</strong> ${escapeHtml(log.homework)}</div>` : ''}
+
+      ${isAdmin ? `
+        <div class="log-admin-controls">
+          <button type="button" class="sketch-btn btn-secondary-sketch btn-xs btn-edit-log" data-id="${escapeHtml(log.id)}">
+            ✏️ แก้ไขบันทึกนี้
+          </button>
+          <button type="button" class="sketch-btn btn-xs btn-delete-log" data-id="${escapeHtml(log.id)}">
+            🗑️ ลบ
+          </button>
+        </div>
+      ` : ''}
+    `;
+
+    if (isAdmin) {
+      const editBtn = entry.querySelector('.btn-edit-log');
+      const delBtn = entry.querySelector('.btn-delete-log');
+
+      editBtn.addEventListener('click', () => {
+        startEditTeachingLog(log);
+      });
+
+      delBtn.addEventListener('click', async () => {
+        await deleteTeachingLog(student.userId, log.id);
+      });
+    }
+
+    logsContainer.appendChild(entry);
+  });
 }
 
 function setSkillBar(key, val) {
@@ -567,8 +663,66 @@ function setSkillBar(key, val) {
 }
 
 // ============================================================================
-// ADMIN EDITOR & STUDENT MANAGEMENT (ID: Toon / Pass: 141826)
+// ADMIN TEACHING LOGBOOK CRUD & OVERALL REVIEW EDITOR
 // ============================================================================
+function startEditTeachingLog(log) {
+  document.getElementById('log-edit-id').value = log.id;
+  document.getElementById('log-date-input').value = log.date || new Date().toISOString().split('T')[0];
+  document.getElementById('log-topic-input').value = log.topic || '';
+  document.getElementById('log-stamp-select').value = log.stamp || 'ดีเยี่ยมมาก! 💯';
+  document.getElementById('log-words-input').value = log.words || '';
+  document.getElementById('log-note-input').value = log.note || '';
+  document.getElementById('log-homework-input').value = log.homework || '';
+
+  document.getElementById('log-submit-btn').textContent = '💾 บันทึกการแก้ไขคาบเรียนนี้';
+  document.getElementById('log-cancel-edit-btn').classList.remove('hidden');
+
+  const wrapper = document.getElementById('admin-log-form-wrapper');
+  wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('log-note-input').focus();
+}
+
+function resetLogForm() {
+  const editIdEl = document.getElementById('log-edit-id');
+  if (!editIdEl) return;
+  editIdEl.value = '';
+  document.getElementById('log-date-input').value = new Date().toISOString().split('T')[0];
+  document.getElementById('log-topic-input').value = '';
+  document.getElementById('log-stamp-select').value = 'ดีเยี่ยมมาก! 💯';
+  document.getElementById('log-words-input').value = '';
+  document.getElementById('log-note-input').value = '';
+  document.getElementById('log-homework-input').value = '';
+  document.getElementById('log-submit-btn').textContent = '📌 บันทึกลงสมุดการสอน';
+  document.getElementById('log-cancel-edit-btn').classList.add('hidden');
+}
+
+async function deleteTeachingLog(studentId, logId) {
+  const rev = state.reviews[studentId];
+  if (!rev || !Array.isArray(rev.teachingLogs)) return;
+
+  rev.teachingLogs = rev.teachingLogs.filter((l) => l.id !== logId);
+  rev.updatedAt = Date.now();
+  saveLocalReviews(state.reviews);
+  await syncReviewToServer(rev, state.profiles[studentId]);
+  renderAll();
+  showToast('🗑️ ลบบันทึกการสอนคาบนี้แล้ว');
+}
+
+async function syncReviewToServer(reviewObj, studentProfile) {
+  try {
+    await fetch('./api.php?action=save_review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminId: ADMIN_ID,
+        adminPass: ADMIN_PASS,
+        review: reviewObj,
+        profile: studentProfile
+      })
+    });
+  } catch (_) {}
+}
+
 function populateAdminEditor(student, review) {
   document.getElementById('editor-student-name').textContent = student.name || 'นักเรียน';
 
@@ -640,9 +794,9 @@ function bindDashboardEvents() {
     renderStudentSidebar();
   });
 
-  document.querySelectorAll('.filter-pill').forEach((btn) => {
+  document.querySelectorAll('.sketch-pill').forEach((btn) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-pill').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.sketch-pill').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       state.filterMode = btn.dataset.filter;
       renderStudentSidebar();
@@ -653,7 +807,7 @@ function bindDashboardEvents() {
   document.getElementById('refresh-data-btn').addEventListener('click', async () => {
     await loadAllDashboardData();
     renderAll();
-    showToast('🔄 อัปเดตข้อมูลนักเรียนและรีวิวล่าสุดเรียบร้อยแล้ว');
+    showToast('🔄 อัปเดตสมุดรีวิวและบันทึกการสอนล่าสุดแล้ว!');
   });
 
   // Logout Button
@@ -664,11 +818,84 @@ function bindDashboardEvents() {
     document.getElementById('auth-gate').classList.remove('hidden');
   });
 
-  // Scroll to Editor Button (Admin)
+  // Quick Scroll Buttons (Admin)
   document.getElementById('admin-scroll-to-editor-btn').addEventListener('click', () => {
     const editor = document.getElementById('admin-editor-section');
     editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
     document.getElementById('review-comment-input').focus();
+  });
+
+  document.getElementById('admin-scroll-to-log-btn').addEventListener('click', () => {
+    const logBox = document.getElementById('admin-log-form-wrapper');
+    logBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('log-topic-input').focus();
+  });
+
+  // Cancel Edit Log Button
+  document.getElementById('log-cancel-edit-btn').addEventListener('click', () => {
+    resetLogForm();
+  });
+
+  // Submit Teaching Log Form (Admin)
+  document.getElementById('admin-teaching-log-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!state.session || state.session.role !== 'admin') return;
+
+    const student = state.profiles[state.selectedStudentId];
+    if (!student) return;
+
+    const editId = document.getElementById('log-edit-id').value.trim();
+    const logItem = {
+      id: editId || ('log_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
+      date: document.getElementById('log-date-input').value,
+      topic: document.getElementById('log-topic-input').value.trim(),
+      stamp: document.getElementById('log-stamp-select').value,
+      words: document.getElementById('log-words-input').value.trim(),
+      note: document.getElementById('log-note-input').value.trim(),
+      homework: document.getElementById('log-homework-input').value.trim(),
+      author: 'ครูตูน (Admin Toon)',
+      createdAt: Date.now()
+    };
+
+    if (!state.reviews[student.userId]) {
+      state.reviews[student.userId] = {
+        studentId: student.userId,
+        studentName: student.name,
+        badge: 'พัฒนาต่อเนื่องดีมาก 📈',
+        stars: 5,
+        skills: { vocab: 85, pinyin: 80, conversation: 85, effort: 90 },
+        strengths: 'ตั้งใจเรียนและมีส่วนร่วมในคาบเรียนดีมาก',
+        nextSteps: 'ทบทวนคำศัพท์ที่เรียนในแต่ละคาบอย่างสม่ำเสมอ',
+        comment: logItem.note,
+        reviewer: 'ครูตูน (Admin Toon)',
+        updatedAt: Date.now(),
+        teachingLogs: []
+      };
+    }
+
+    const rev = state.reviews[student.userId];
+    if (!Array.isArray(rev.teachingLogs)) {
+      rev.teachingLogs = [];
+    }
+
+    if (editId) {
+      const idx = rev.teachingLogs.findIndex((l) => l.id === editId);
+      if (idx >= 0) {
+        rev.teachingLogs[idx] = logItem;
+      } else {
+        rev.teachingLogs.unshift(logItem);
+      }
+    } else {
+      rev.teachingLogs.unshift(logItem);
+    }
+
+    rev.updatedAt = Date.now();
+    saveLocalReviews(state.reviews);
+    await syncReviewToServer(rev, student);
+
+    resetLogForm();
+    renderAll();
+    showToast(`📓 บันทึกการสอนของ "${student.name}" ลงในสมุดเรียบร้อยแล้ว!`);
   });
 
   // Skill Sliders Live Label Update
@@ -676,7 +903,7 @@ function bindDashboardEvents() {
     document.getElementById(id).addEventListener('input', updateSliderLabels);
   });
 
-  // Save Review Form (Admin)
+  // Save Overall Review Form (Admin)
   document.getElementById('admin-review-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!state.session || state.session.role !== 'admin') return;
@@ -684,7 +911,6 @@ function bindDashboardEvents() {
     const student = state.profiles[state.selectedStudentId];
     if (!student) return;
 
-    // Collect mastered vocab checkboxes
     const checkedWords = Array.from(
       document.querySelectorAll('input[name="vocab-mastered"]:checked')
     ).map((el) => el.value);
@@ -693,7 +919,11 @@ function bindDashboardEvents() {
     student.sanctuary.learnedVocab = checkedWords;
     student.lastLogin = Date.now();
 
-    // Build review payload
+    const existingLogs =
+      (state.reviews[student.userId] && Array.isArray(state.reviews[student.userId].teachingLogs))
+        ? state.reviews[student.userId].teachingLogs
+        : [];
+
     const reviewObj = {
       studentId: student.userId,
       studentName: student.name,
@@ -709,31 +939,19 @@ function bindDashboardEvents() {
       nextSteps: document.getElementById('review-nextsteps-input').value.trim(),
       comment: document.getElementById('review-comment-input').value.trim(),
       reviewer: 'ครูตูน (Admin Toon)',
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      teachingLogs: existingLogs
     };
 
-    // Save locally
     state.reviews[student.userId] = reviewObj;
     state.profiles[student.userId] = student;
     saveLocalReviews(state.reviews);
     saveProfileToLocal(student);
 
-    // Save to Server API (./api.php?action=save_review)
-    try {
-      await fetch('./api.php?action=save_review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          adminId: ADMIN_ID,
-          adminPass: ADMIN_PASS,
-          review: reviewObj,
-          profile: student
-        })
-      });
-    } catch (_) {}
+    await syncReviewToServer(reviewObj, student);
 
     renderAll();
-    showToast(`✅ บันทึกรีวิวพัฒนาการของ "${student.name}" เรียบร้อยแล้ว!`);
+    showToast(`✅ บันทึกสรุปรีวิวพัฒนาการของ "${student.name}" เรียบร้อยแล้ว!`);
   });
 
   // Delete Review Button (Admin)

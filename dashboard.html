@@ -3,51 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jade Ascent — ระบบรีวิวพัฒนาการนักเรียน (สำหรับผู้ปกครอง & แอดมิน)</title>
+  <title>สมุดสเก็ตช์รีวิวพัฒนาการ & บันทึกการสอน — Jade Ascent</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Kanit:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Handwritten & Marker Typography: Kalam (Headings), Patrick Hand (Body), Mali (Thai Handwritten), Noto Serif SC (Hanzi) -->
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@700&family=Mali:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+SC:wght@600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="./dashboard.css" />
 </head>
 <body>
-  <!-- Background Ambience -->
-  <div class="bg-decoration">
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
+  <!-- Decorative Floating Sketch Elements (Desktop) -->
+  <div class="sketch-bg-decor" aria-hidden="true">
+    <div class="sketch-bouncing-circle"></div>
+    <svg class="sketch-corner-doodle" viewBox="0 0 120 120" fill="none">
+      <path d="M12 60 C 30 20, 80 20, 105 55 C 85 95, 35 95, 12 60 Z" stroke="#2d2d2d" stroke-width="2.5" stroke-dasharray="6 6"/>
+    </svg>
   </div>
 
-  <!-- ================= AUTHENTICATION GATE (REQUIRED BEFORE VIEWING DASHBOARD) ================= -->
+  <!-- ================= AUTHENTICATION GATE (SKETCHBOOK COVER) ================= -->
   <div id="auth-gate" class="auth-gate-wrapper">
-    <div class="auth-card">
+    <div class="sketch-card auth-sketch-card rotate-neg-1">
+      <!-- Red Thumbtack Pin Decoration -->
+      <div class="deco-tack" aria-hidden="true"></div>
+
+      <!-- Sticky Note Tag -->
+      <div class="sticky-tag rotate-pos-2">
+        ✏️ สมุดบันทึกพัฒนาการ & รีวิวการสอน!
+      </div>
+
       <div class="auth-brand">
-        <div class="brand-emblem">玉</div>
-        <div>
-          <span class="brand-sub">JADE ASCENT ACADEMY</span>
-          <h1 class="brand-title">ระบบรายงานและรีวิวพัฒนาการนักเรียน</h1>
-          <p class="brand-desc">สำหรับผู้ปกครองเพื่อติดตามผลการเรียนภาษาจีน และสำหรับครูแอดมินเพื่อบันทึกพัฒนาการ</p>
+        <div class="brand-sketch-circle">
+          <span>玉</span>
         </div>
+        <div>
+          <span class="brand-sub">JADE ASCENT SKETCHBOOK</span>
+          <h1 class="brand-title">
+            สมุดรีวิวผู้ปกครอง & บันทึกการสอน
+            <span class="bang-tilt">!</span>
+          </h1>
+          <p class="brand-desc">พื้นที่สำหรับผู้ปกครองติดตามพัฒนาการเรียนภาษาจีน และสำหรับครูตูนจดบันทึกการสอนรายคาบ</p>
+        </div>
+      </div>
+
+      <!-- Hand-drawn SVG arrow pointing to Role Tabs -->
+      <div class="auth-arrow-hint">
+        <svg width="46" height="32" viewBox="0 0 46 32" fill="none">
+          <path d="M4 6 C 18 2, 28 10, 38 24" stroke="#ff4d4d" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="4 4"/>
+          <path d="M30 24 L 39 25 L 38 16" stroke="#ff4d4d" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>เลือกสถานะเพื่อเปิดสมุดบันทึก</span>
       </div>
 
       <!-- Role Switch Tabs -->
       <div class="auth-tabs" role="tablist">
-        <button id="tab-parent-btn" class="auth-tab active" data-tab="parent" type="button">
-          👨‍👩‍👧 สำหรับผู้ปกครอง (Gmail)
+        <button id="tab-parent-btn" class="sketch-btn auth-tab active" data-tab="parent" type="button">
+          👨‍👩‍👧 ผู้ปกครอง (ล็อกอิน Gmail)
         </button>
-        <button id="tab-admin-btn" class="auth-tab" data-tab="admin" type="button">
-          👑 สำหรับแอดมิน (ครูผู้สอน)
+        <button id="tab-admin-btn" class="sketch-btn auth-tab" data-tab="admin" type="button">
+          👑 แอดมินครูผู้สอน (เขียนรีวิว)
         </button>
       </div>
 
       <!-- TAB 1: PARENT GMAIL LOGIN -->
       <div id="panel-parent-auth" class="auth-panel">
-        <div class="auth-notice">
-          <span class="notice-icon">🔒</span>
-          <div>
-            <strong>สำหรับผู้ปกครองนักเรียน:</strong>
-            <p>กรุณาเข้าสู่ระบบด้วยบัญชี <strong>Gmail (@gmail.com)</strong> ก่อนเข้าชมผลการประเมินและรีวิวพัฒนาการของบุตรหลาน</p>
-          </div>
+        <div class="postit-note rotate-pos-1">
+          <div class="deco-tape" aria-hidden="true"></div>
+          <strong>📌 สำหรับผู้ปกครองนักเรียน:</strong>
+          <p>กรุณาลงชื่อด้วย <strong>Gmail (@gmail.com)</strong> ก่อนเปิดอ่านสมุดรีวิวและบันทึกการสอนของน้องๆ ครับ</p>
         </div>
 
         <!-- Google Official Sign-In Button Container -->
@@ -55,64 +77,56 @@
           <div id="dashboard-google-btn"></div>
         </div>
 
-        <div class="auth-divider">
-          <span>ยืนยันเข้าสู่ระบบด้วย Gmail ของผู้ปกครอง</span>
+        <div class="sketch-divider">
+          <span>หรือกรอก Gmail ผู้ปกครองด้านล่าง</span>
         </div>
 
-        <form id="parent-gmail-form" class="auth-form">
+        <form id="parent-gmail-form" class="sketch-form">
           <div class="form-group">
-            <label for="parent-name-input">ชื่อผู้ปกครอง (หรือระบุว่าเป็นผู้ปกครองของน้อง...)</label>
+            <label for="parent-name-input">✏️ ชื่อผู้ปกครอง (เช่น คุณแม่น้องแพนด้า)</label>
             <input
               type="text"
               id="parent-name-input"
-              placeholder="เช่น คุณแม่น้องแพนด้า / ผู้ปกครองน้องภูมิ"
+              class="sketch-input"
+              placeholder="พิมพ์ชื่อผู้ปกครอง..."
               required
             />
           </div>
 
           <div class="form-group">
-            <label for="parent-gmail-input">อีเมล Gmail ของผู้ปกครอง <span class="req">*ต้องเป็น @gmail.com</span></label>
-            <div class="gmail-input-wrap">
-              <span class="gmail-icon">✉️</span>
-              <input
-                type="email"
-                id="parent-gmail-input"
-                placeholder="yourname@gmail.com"
-                required
-              />
-            </div>
+            <label for="parent-gmail-input">✉️ อีเมล Gmail ของผู้ปกครอง <span class="marker-red">*ต้องเป็น @gmail.com</span></label>
+            <input
+              type="email"
+              id="parent-gmail-input"
+              class="sketch-input"
+              placeholder="yourname@gmail.com"
+              required
+            />
           </div>
 
-          <div id="parent-auth-error" class="auth-error hidden"></div>
+          <div id="parent-auth-error" class="sketch-error hidden"></div>
 
-          <button type="submit" id="parent-login-submit" class="btn-primary btn-gmail">
-            <svg class="google-g-svg" viewBox="0 0 24 24" width="20" height="20">
-              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
-              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
-              <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 12.3s.6 3.3 1.6 5.3l3.7-2.8z"/>
-              <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 19.9 7.4 23 12 23z"/>
-            </svg>
-            เข้าสู่ระบบด้วย Gmail เพื่อดูรีวิวนักเรียน
+          <button type="submit" id="parent-login-submit" class="sketch-btn btn-primary-sketch">
+            📖 เปิดสมุดรีวิวด้วย Gmail
           </button>
         </form>
       </div>
 
       <!-- TAB 2: ADMIN LOGIN (ID: Toon / Pass: 141826) -->
       <div id="panel-admin-auth" class="auth-panel hidden">
-        <div class="auth-notice admin-notice">
-          <span class="notice-icon">👑</span>
-          <div>
-            <strong>สำหรับแอดมิน / ครูผู้สอน:</strong>
-            <p>เข้าสู่ระบบด้วยรหัสแอดมินเพื่อเพิ่มรายชื่อนักเรียน บันทึกคะแนนทักษะ และเขียนรีวิวพัฒนาการรายบุคคล</p>
-          </div>
+        <div class="postit-note rotate-neg-1">
+          <div class="deco-tape" aria-hidden="true"></div>
+          <strong>👑 สำหรับแอดมิน / ครูตูน:</strong>
+          <p>เข้าสู่ระบบด้วยรหัสแอดมิน เพื่อเขียนรีวิวพัฒนาการ และจดบันทึกการสอนรายคาบด้วยตัวเอง</p>
         </div>
 
-        <form id="admin-login-form" class="auth-form">
+        <form id="admin-login-form" class="sketch-form">
           <div class="form-group">
-            <label for="admin-id-input">Admin ID (ชื่อผู้ใช้แอดมิน)</label>
+            <label for="admin-id-input">🔑 Admin ID (ชื่อผู้ใช้แอดมิน)</label>
             <input
               type="text"
               id="admin-id-input"
+              class="sketch-input"
               placeholder="กรอก Admin ID"
               autocomplete="username"
               required
@@ -120,99 +134,114 @@
           </div>
 
           <div class="form-group">
-            <label for="admin-pass-input">Password (รหัสผ่านแอดมิน)</label>
+            <label for="admin-pass-input">🔒 Password (รหัสผ่านแอดมิน)</label>
             <input
               type="password"
               id="admin-pass-input"
+              class="sketch-input"
               placeholder="กรอกรหัสผ่าน"
               autocomplete="current-password"
               required
             />
           </div>
 
-          <div id="admin-auth-error" class="auth-error hidden"></div>
+          <div id="admin-auth-error" class="sketch-error hidden"></div>
 
-          <button type="submit" id="admin-login-submit" class="btn-primary btn-admin">
-            👑 เข้าสู่ระบบจัดการและเขียนรีวิว (Admin)
+          <button type="submit" id="admin-login-submit" class="sketch-btn btn-primary-sketch">
+            ✍️ เข้าสู่โหมดครูแอดมิน (เขียนรีวิว & บันทึกการสอน)
           </button>
         </form>
       </div>
 
-      <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(148,163,184,0.16); text-align: center;">
-        <a href="./index.html" style="color: #94a3b8; font-size: 13.5px; text-decoration: none;">
+      <div class="auth-footer-back">
+        <a href="./index.html" class="wavy-link">
           ⬅️ กลับไปหน้าเมนูเกมหลัก (Jade Ascent)
         </a>
       </div>
     </div>
   </div>
 
-  <!-- ================= MAIN DASHBOARD VIEW (SHOWN AFTER LOGIN) ================= -->
-  <div id="dashboard-app" class="dashboard-container hidden">
-    <!-- Top Navigation Header -->
-    <header class="dash-header">
+  <!-- ================= MAIN SKETCHBOOK DASHBOARD (SHOWN AFTER LOGIN) ================= -->
+  <div id="dashboard-app" class="sketchbook-container hidden">
+    <!-- Top Sketchbook Header -->
+    <header class="sketch-card dash-header rotate-neg-half">
+      <div class="deco-tape" aria-hidden="true"></div>
       <div class="dash-header-left">
-        <div class="brand-emblem small">玉</div>
+        <div class="brand-sketch-circle small">
+          <span>玉</span>
+        </div>
         <div>
-          <div class="dash-header-eyebrow">JADE ASCENT STUDENT PROGRESS PORTAL</div>
-          <h1 class="dash-header-title">แดชบอร์ดรีวิวพัฒนาการนักเรียนภาษาจีน</h1>
+          <span class="brand-sub">TEACHER & PARENT NOTEBOOK</span>
+          <h1 class="dash-header-title">
+            สมุดสเก็ตช์รีวิวพัฒนาการ & บันทึกการสอนภาษาจีน
+          </h1>
         </div>
       </div>
 
       <div class="dash-header-right">
-        <div id="session-badge" class="session-badge">
+        <div id="session-badge" class="sketch-badge">
           <!-- Populated by JS -->
         </div>
-        <a href="./index.html" class="btn-outline" style="text-decoration: none;">
+        <a href="./index.html" class="sketch-btn btn-secondary-sketch btn-sm">
           🎮 หน้าเกมหลัก
         </a>
-        <button id="refresh-data-btn" class="btn-outline" type="button" title="รีเฟรชข้อมูลล่าสุด">
-          🔄 รีเฟรชข้อมูล
+        <button id="refresh-data-btn" class="sketch-btn btn-secondary-sketch btn-sm" type="button">
+          🔄 รีเฟรช
         </button>
-        <button id="logout-btn" class="btn-danger-outline" type="button">
+        <button id="logout-btn" class="sketch-btn btn-sm" type="button">
           🚪 ออกจากระบบ
         </button>
       </div>
     </header>
 
-    <!-- Summary KPI Cards -->
-    <section class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-icon">👨‍🎓</div>
-        <div class="kpi-info">
-          <span class="kpi-label">นักเรียนทั้งหมดในระบบ</span>
-          <strong id="kpi-total-students" class="kpi-value">0 คน</strong>
+    <!-- Organic Hand-Drawn Stats Row -->
+    <section class="kpi-sketch-grid">
+      <div class="sketch-stat-card rotate-neg-1">
+        <div class="deco-tack" aria-hidden="true"></div>
+        <div class="stat-icon-circle">👨‍🎓</div>
+        <div class="stat-text">
+          <span class="stat-label">นักเรียนทั้งหมด</span>
+          <strong id="kpi-total-students" class="stat-value">0 คน</strong>
         </div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">📝</div>
-        <div class="kpi-info">
-          <span class="kpi-label">มีรีวิวพัฒนาการแล้ว</span>
-          <strong id="kpi-reviewed-students" class="kpi-value">0 คน</strong>
+
+      <div class="sketch-stat-card postit-bg rotate-pos-1">
+        <div class="deco-tape" aria-hidden="true"></div>
+        <div class="stat-icon-circle">📝</div>
+        <div class="stat-text">
+          <span class="stat-label">เขียนรีวิวแล้ว</span>
+          <strong id="kpi-reviewed-students" class="stat-value">0 คน</strong>
         </div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">📚</div>
-        <div class="kpi-info">
-          <span class="kpi-label">คำศัพท์ภาษาจีนที่เชี่ยวชาญรวม</span>
-          <strong id="kpi-total-vocab" class="kpi-value">0 คำ</strong>
+
+      <div class="sketch-stat-card rotate-neg-1">
+        <div class="deco-tack" aria-hidden="true"></div>
+        <div class="stat-icon-circle">📓</div>
+        <div class="stat-text">
+          <span class="stat-label">บันทึกการสอนสะสม</span>
+          <strong id="kpi-total-logs" class="stat-value">0 คาบ</strong>
         </div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-icon">⭐</div>
-        <div class="kpi-info">
-          <span class="kpi-label">คะแนนพัฒนาการเฉลี่ย</span>
-          <strong id="kpi-avg-score" class="kpi-value">-</strong>
+
+      <div class="sketch-stat-card postit-bg rotate-pos-1">
+        <div class="deco-tape" aria-hidden="true"></div>
+        <div class="stat-icon-circle">⭐</div>
+        <div class="stat-text">
+          <span class="stat-label">พัฒนาการเฉลี่ย</span>
+          <strong id="kpi-avg-score" class="stat-value">-</strong>
         </div>
       </div>
     </section>
 
-    <!-- Main Content Layout: Left Sidebar (Student Directory) + Right Detail & Review Area -->
+    <!-- Main 2-Column Sketchbook Layout -->
     <div class="dash-main-grid">
-      <!-- LEFT: Student Directory -->
-      <aside class="student-sidebar">
+      <!-- LEFT SIDEBAR: Student Roster Sticky Pad -->
+      <aside class="sketch-card student-sidebar rotate-neg-half">
+        <div class="deco-tape" aria-hidden="true"></div>
+
         <div class="sidebar-header">
           <h2>📋 รายชื่อนักเรียน</h2>
-          <button id="admin-add-student-btn" class="btn-small-gold hidden" type="button">
+          <button id="admin-add-student-btn" class="sketch-btn btn-primary-sketch btn-xs hidden" type="button">
             + เพิ่มนักเรียน
           </button>
         </div>
@@ -221,14 +250,15 @@
           <input
             type="text"
             id="student-search-input"
+            class="sketch-input"
             placeholder="🔍 ค้นหาชื่อนักเรียน..."
           />
         </div>
 
         <div class="filter-pills">
-          <button class="filter-pill active" data-filter="all" type="button">ทั้งหมด</button>
-          <button class="filter-pill" data-filter="reviewed" type="button">มีรีวิวแล้ว</button>
-          <button class="filter-pill" data-filter="pending" type="button">รอรีวิว</button>
+          <button class="sketch-pill active" data-filter="all" type="button">ทั้งหมด</button>
+          <button class="sketch-pill" data-filter="reviewed" type="button">มีรีวิวแล้ว</button>
+          <button class="sketch-pill" data-filter="pending" type="button">รอรีวิว</button>
         </div>
 
         <div id="student-list" class="student-list">
@@ -236,23 +266,25 @@
         </div>
       </aside>
 
-      <!-- RIGHT: Selected Student Review & Progress Detail -->
+      <!-- RIGHT AREA: Selected Student Sketchbook Pages -->
       <main class="student-detail-area">
-        <div id="empty-student-state" class="empty-state hidden">
+        <div id="empty-student-state" class="sketch-card empty-state hidden">
           <div class="empty-icon">🐼</div>
-          <h3>เลือกรายชื่อนักเรียนทางด้านซ้าย</h3>
-          <p>เพื่อดูรายงานพัฒนาการเรียนภาษาจีน คะแนนทักษะ และความคิดเห็นจากครูผู้สอน</p>
+          <h3>เลือกรายชื่อนักเรียนจากแถบด้านซ้าย</h3>
+          <p>เพื่อเปิดอ่านสมุดรีวิวพัฒนาการ และบันทึกการสอนรายคาบ</p>
         </div>
 
         <div id="student-detail-content" class="student-detail-content">
-          <!-- 1. Student Profile Banner -->
-          <div class="student-profile-banner">
+          <!-- 1. Student Header Card with Thumbtack & Post-it Badge -->
+          <div class="sketch-card student-profile-banner rotate-pos-half">
+            <div class="deco-tack" aria-hidden="true"></div>
+
             <div class="student-banner-left">
               <div id="detail-avatar" class="detail-avatar">🐼</div>
               <div>
                 <div class="detail-name-row">
                   <h2 id="detail-name">ชื่อนักเรียน</h2>
-                  <span id="detail-level-badge" class="level-badge">กำลังพัฒนา</span>
+                  <span id="detail-level-badge" class="sticky-badge rotate-neg-1">กำลังพัฒนา</span>
                 </div>
                 <p id="detail-last-active" class="detail-meta">อัปเดตล่าสุด: -</p>
               </div>
@@ -260,98 +292,207 @@
 
             <div class="student-banner-right">
               <div class="rating-display">
-                <span class="rating-label">ผลการประเมินภาพรวม</span>
+                <span class="rating-label">ประเมินภาพรวม</span>
                 <div id="detail-stars" class="stars-row">⭐⭐⭐⭐⭐</div>
               </div>
-              <button id="admin-scroll-to-editor-btn" class="btn-gold hidden" type="button">
-                ✏️ เขียน / แก้ไขรีวิวนักเรียนคนนี้
-              </button>
+              <div class="admin-quick-buttons">
+                <button id="admin-scroll-to-log-btn" class="sketch-btn btn-secondary-sketch btn-sm hidden" type="button">
+                  📓 + จดบันทึกการสอน
+                </button>
+                <button id="admin-scroll-to-editor-btn" class="sketch-btn btn-primary-sketch btn-sm hidden" type="button">
+                  ✏️ เขียน/แก้ไขรีวิว
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- 2. Teacher Developmental Review Card (Highlight for Parents) -->
-          <section class="review-showcase-card">
+          <!-- 2. Teacher's Overall Review Card (Speech Bubble + Sketch Progress Bars) -->
+          <section class="sketch-card review-showcase-card rotate-neg-half">
+            <div class="deco-tape" aria-hidden="true"></div>
+
             <div class="review-card-header">
               <div class="review-title-group">
-                <span class="review-icon">👩‍🏫</span>
+                <div class="stat-icon-circle">👩‍🏫</div>
                 <div>
-                  <h3>รีวิวพัฒนาการนักเรียนจากครูผู้สอน</h3>
-                  <p id="detail-reviewer-meta">ประเมินโดย: ครูตูน (Admin Toon)</p>
+                  <h3>สรุปรีวิวพัฒนาการภาพรวม (Overall Assessment)</h3>
+                  <p id="detail-reviewer-meta">เขียนรีวิวโดย: ครูตูน (Admin Toon)</p>
                 </div>
               </div>
-              <span id="detail-review-status-pill" class="status-pill">ประเมินแล้ว</span>
+              <span id="detail-review-status-pill" class="sketch-status-pill">ประเมินแล้ว</span>
             </div>
 
-            <!-- Skill Progress Bars (4 Dimensions) -->
-            <div class="skills-assessment-grid">
-              <div class="skill-item">
-                <div class="skill-top">
-                  <span>📖 การจำคำศัพท์และตัวอักษรจีน (Hanzi & Vocab)</span>
-                  <strong id="skill-val-vocab">85%</strong>
-                </div>
-                <div class="skill-bar-bg">
-                  <div id="skill-bar-vocab" class="skill-bar-fill fill-emerald" style="width: 85%"></div>
-                </div>
+            <!-- Speech Bubble for Teacher's Written Review -->
+            <div class="speech-bubble-review">
+              <div class="speech-bubble-header">
+                <span>💬 ความคิดเห็นจากครูผู้สอนถึงผู้ปกครอง:</span>
               </div>
-
-              <div class="skill-item">
-                <div class="skill-top">
-                  <span>🗣️ การออกเสียงพินอินและวรรณยุกต์ (Pinyin & Tone)</span>
-                  <strong id="skill-val-pinyin">80%</strong>
-                </div>
-                <div class="skill-bar-bg">
-                  <div id="skill-bar-pinyin" class="skill-bar-fill fill-gold" style="width: 80%"></div>
-                </div>
-              </div>
-
-              <div class="skill-item">
-                <div class="skill-top">
-                  <span>🏮 การนำคำศัพท์ไปใช้สนทนาจริง (Practical Application)</span>
-                  <strong id="skill-val-conversation">80%</strong>
-                </div>
-                <div class="skill-bar-bg">
-                  <div id="skill-bar-conversation" class="skill-bar-fill fill-blue" style="width: 80%"></div>
-                </div>
-              </div>
-
-              <div class="skill-item">
-                <div class="skill-top">
-                  <span>🔥 ความตั้งใจและความสม่ำเสมอ (Effort & Focus)</span>
-                  <strong id="skill-val-effort">90%</strong>
-                </div>
-                <div class="skill-bar-bg">
-                  <div id="skill-bar-effort" class="skill-bar-fill fill-purple" style="width: 90%"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Teacher Written Feedback -->
-            <div class="teacher-feedback-box">
-              <h4>💬 ความคิดเห็นและผลการพัฒนาการ (Teacher's Review)</h4>
-              <div id="detail-comment-text" class="feedback-paragraph">
+              <div id="detail-comment-text" class="feedback-dropcap">
                 ยังไม่มีบันทึกคำรีวิวสำหรับนักเรียนคนนี้
               </div>
+            </div>
 
-              <div class="feedback-highlights-grid">
-                <div class="highlight-box strength-box">
-                  <h5>🌟 จุดเด่นของนักเรียน (Strengths)</h5>
-                  <p id="detail-strengths-text">-</p>
+            <!-- Post-it Yellow Notes for Strengths & Next Steps -->
+            <div class="feedback-highlights-grid">
+              <div class="postit-card rotate-neg-1">
+                <div class="deco-tape" aria-hidden="true"></div>
+                <h5>🌟 จุดเด่นของนักเรียน (Strengths)</h5>
+                <p id="detail-strengths-text">-</p>
+              </div>
+
+              <div class="postit-card blue-ink-note rotate-pos-1">
+                <div class="deco-tack" aria-hidden="true"></div>
+                <h5>🎯 สิ่งที่กำลังฝึกเพิ่มเติม / เป้าหมายถัดไป (Next Steps)</h5>
+                <p id="detail-nextsteps-text">-</p>
+              </div>
+            </div>
+
+            <!-- 4 Hand-Drawn Skill Progress Bars -->
+            <div class="skills-sketch-title">📊 กราฟประเมินทักษะภาษาจีน 4 ด้าน:</div>
+            <div class="skills-assessment-grid">
+              <div class="skill-sketch-item">
+                <div class="skill-top">
+                  <span>📖 การจำคำศัพท์และตัวอักษรจีน (Hanzi)</span>
+                  <strong id="skill-val-vocab">85%</strong>
                 </div>
-                <div class="highlight-box nextstep-box">
-                  <h5>🎯 สิ่งที่กำลังฝึกเพิ่มเติม / เป้าหมายถัดไป (Next Steps)</h5>
-                  <p id="detail-nextsteps-text">-</p>
+                <div class="skill-bar-sketch">
+                  <div id="skill-bar-vocab" class="skill-bar-fill fill-red" style="width: 85%"></div>
+                </div>
+              </div>
+
+              <div class="skill-sketch-item">
+                <div class="skill-top">
+                  <span>🗣️ การออกเสียงพินอินและวรรณยุกต์ (Pinyin)</span>
+                  <strong id="skill-val-pinyin">80%</strong>
+                </div>
+                <div class="skill-bar-sketch">
+                  <div id="skill-bar-pinyin" class="skill-bar-fill fill-blue" style="width: 80%"></div>
+                </div>
+              </div>
+
+              <div class="skill-sketch-item">
+                <div class="skill-top">
+                  <span>🏮 การนำไปใช้สนทนาจริง (หมวดโรงเตี๊ยม/ชีวิตประจำวัน)</span>
+                  <strong id="skill-val-conversation">80%</strong>
+                </div>
+                <div class="skill-bar-sketch">
+                  <div id="skill-bar-conversation" class="skill-bar-fill fill-red" style="width: 80%"></div>
+                </div>
+              </div>
+
+              <div class="skill-sketch-item">
+                <div class="skill-top">
+                  <span>🔥 ความตั้งใจและความสม่ำเสมอในการเรียน</span>
+                  <strong id="skill-val-effort">90%</strong>
+                </div>
+                <div class="skill-bar-sketch">
+                  <div id="skill-bar-effort" class="skill-bar-fill fill-blue" style="width: 90%"></div>
                 </div>
               </div>
             </div>
           </section>
 
-          <!-- 3. Vocabulary Mastery & In-Game Learning Progress -->
+          <!-- 3. TEACHING LOGBOOK (สมุดจดบันทึกการสอนรายคาบ - Lined Notebook Paper) -->
+          <section id="teaching-log-section" class="sketch-card notebook-log-card">
+            <div class="deco-tack" aria-hidden="true"></div>
+
+            <div class="notebook-header">
+              <div>
+                <span class="sticky-tag-inline">📓 CLASSROOM JOURNAL</span>
+                <h3>สมุดจดบันทึกการสอนรายคาบ (Teaching Logs & Class Notes)</h3>
+                <p>บันทึกเนื้อหาที่เรียน พัฒนาการในแต่ละคาบ และสิ่งที่ครูตูนฝากให้ทบทวน</p>
+              </div>
+              <span id="detail-log-count" class="sketch-status-pill">0 คาบเรียน</span>
+            </div>
+
+            <!-- Admin Only: Add New Teaching Log Form -->
+            <div id="admin-log-form-wrapper" class="admin-log-composer hidden">
+              <div class="composer-title">
+                <span>✍️ จดบันทึกการสอนคาบใหม่ (เขียนโดย Admin Toon)</span>
+              </div>
+              <form id="admin-teaching-log-form" class="sketch-form">
+                <input type="hidden" id="log-edit-id" value="" />
+                <div class="form-row-3col">
+                  <div class="form-group">
+                    <label for="log-date-input">📅 วันที่สอน / คาบเรียน</label>
+                    <input type="date" id="log-date-input" class="sketch-input" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="log-topic-input">📚 หัวข้อ / บทเรียนที่สอนในคาบนี้</label>
+                    <input
+                      type="text"
+                      id="log-topic-input"
+                      class="sketch-input"
+                      placeholder="เช่น สนทนาการเช็คอินโรงเตี๊ยม (酒店 & 入住)"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="log-stamp-select">💮 ตราปั๊มประเมินท้ายคาบ</label>
+                    <select id="log-stamp-select" class="sketch-input">
+                      <option value="ดีเยี่ยมมาก! 💯">ดีเยี่ยมมาก! 💯</option>
+                      <option value="พัฒนาขึ้นชัดเจน 🌟">พัฒนาขึ้นชัดเจน 🌟</option>
+                      <option value="ตั้งใจเรียนดีมาก 👍">ตั้งใจเรียนดีมาก 👍</option>
+                      <option value="ควรทบทวนคำศัพท์เพิ่ม 📌">ควรทบทวนคำศัพท์เพิ่ม 📌</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="log-words-input">🔤 คำศัพท์ / รูปประโยคที่เรียนในคาบนี้</label>
+                  <input
+                    type="text"
+                    id="log-words-input"
+                    class="sketch-input"
+                    placeholder="เช่น 酒店 (โรงแรม), 入住 (เช็คอิน), 预订 (จอง), 护照 (พาสปอร์ต), 房间 (ห้องพัก), 房卡 (คีย์การ์ด)"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="log-note-input">📝 บันทึกหลังสอน & รีวิวพัฒนาการในคาบนี้ (แอดมินเขียนรีวิวเอง)</label>
+                  <textarea
+                    id="log-note-input"
+                    class="sketch-input"
+                    rows="3"
+                    placeholder="จดบันทึกว่าวันนี้น้องเรียนเป็นอย่างไร ตอบคำถามได้ไหม ออกเสียงพินอินคำไหนได้ดี หรือมีคำไหนต้องทบทวนต่อ..."
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="log-homework-input">🎒 การบ้าน / สิ่งที่ฝากผู้ปกครองช่วยทบทวน</label>
+                  <input
+                    type="text"
+                    id="log-homework-input"
+                    class="sketch-input"
+                    placeholder="เช่น ฝึกออกเสียง 6 คำศัพท์หมวดโรงเตี๊ยม และลองเล่นโหมดโรงเตี๊ยมเต๋าวันละ 10 นาที"
+                  />
+                </div>
+
+                <div class="composer-actions">
+                  <button type="submit" id="log-submit-btn" class="sketch-btn btn-primary-sketch">
+                    📌 บันทึกลงสมุดการสอน
+                  </button>
+                  <button type="button" id="log-cancel-edit-btn" class="sketch-btn btn-secondary-sketch hidden">
+                    ยกเลิกการแก้ไข
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Lined Notebook Timeline of Teaching Logs -->
+            <div id="teaching-logs-list" class="notebook-lines-container">
+              <!-- Populated dynamically by JS -->
+            </div>
+          </section>
+
+          <!-- 4. Vocabulary Stickers & In-Game Stats -->
           <div class="stats-and-vocab-grid">
             <!-- Learned Vocabulary Card -->
-            <section class="sub-card">
+            <section class="sketch-card sub-card rotate-neg-half">
+              <div class="deco-tape" aria-hidden="true"></div>
               <div class="sub-card-header">
-                <h3>📚 คำศัพท์ภาษาจีนที่นักเรียนจำได้และผ่านด่านแล้ว</h3>
-                <span id="detail-vocab-count" class="badge-count">0 คำ</span>
+                <h3>📚 สติ๊กเกอร์คำศัพท์ภาษาจีนที่จำได้แล้ว</h3>
+                <span id="detail-vocab-count" class="sketch-status-pill">0 คำ</span>
               </div>
               <div id="detail-vocab-list" class="vocab-chips-container">
                 <!-- Populated dynamically -->
@@ -359,9 +500,10 @@
             </section>
 
             <!-- Game Mode Activity Stats -->
-            <section class="sub-card">
+            <section class="sketch-card sub-card postit-bg rotate-pos-half">
+              <div class="deco-tack" aria-hidden="true"></div>
               <div class="sub-card-header">
-                <h3>🎮 สถิติการฝึกฝนผ่านระบบเกม</h3>
+                <h3>🎮 บันทึกสถิติจากในเกม</h3>
               </div>
               <div class="game-stats-list">
                 <div class="game-stat-row">
@@ -369,39 +511,39 @@
                   <strong id="stat-jade" class="gs-val">0 หยก</strong>
                 </div>
                 <div class="game-stat-row">
-                  <span class="gs-label">🏮 ระดับโรงเตี๊ยมเต๋า (หมวดสนทนาโรงแรม)</span>
+                  <span class="gs-label">🏮 ระดับโรงเตี๊ยมเต๋า (หมวดโรงแรม)</span>
                   <strong id="stat-inn-level" class="gs-val">ระดับ 1</strong>
                 </div>
                 <div class="game-stat-row">
-                  <span class="gs-label">🏔️ ด่านสูงสุดโหมดไต่หอคอย (Tower Climb)</span>
+                  <span class="gs-label">🏔️ ด่านสูงสุดโหมดไต่หอคอย</span>
                   <strong id="stat-tower-level" class="gs-val">ด่าน 1</strong>
                 </div>
                 <div class="game-stat-row">
-                  <span class="gs-label">🏃 คะแนนสูงสุดวิ่งเก็บหยก (Jade Runner)</span>
+                  <span class="gs-label">🏃 คะแนนสูงสุดวิ่งเก็บหยก</span>
                   <strong id="stat-runner-score" class="gs-val">0 คะแนน</strong>
                 </div>
                 <div class="game-stat-row">
-                  <span class="gs-label">⚔️ ชัยชนะโหมดประลองยุทธ์ (Jade Arena)</span>
+                  <span class="gs-label">⚔️ ชัยชนะโหมดประลองยุทธ์</span>
                   <strong id="stat-arena-wins" class="gs-val">0 ครั้ง</strong>
                 </div>
               </div>
             </section>
           </div>
 
-          <!-- 4. ADMIN ONLY: TEACHER REVIEW EDITOR FORM -->
-          <section id="admin-editor-section" class="admin-editor-card hidden">
+          <!-- 5. ADMIN ONLY: OVERALL REVIEW EDITOR FORM -->
+          <section id="admin-editor-section" class="sketch-card admin-editor-card hidden">
+            <div class="deco-tape" aria-hidden="true"></div>
             <div class="admin-editor-header">
-              <div>
-                <span class="admin-tag">👑 ADMIN MODE (ID: Toon)</span>
-                <h3>เขียน / อัปเดตรีวิวพัฒนาการสำหรับ: <span id="editor-student-name">-</span></h3>
-              </div>
+              <span class="sticky-tag-inline">👑 ADMIN REVIEW EDITOR (ID: Toon)</span>
+              <h3>เขียน / แก้ไขสรุปรีวิวพัฒนาการภาพรวมของ: <span id="editor-student-name" class="marker-red">-</span></h3>
+              <p>ข้อมูลส่วนนี้จะแสดงในการ์ดสรุปผลด้านบนสุดเพื่อให้ผู้ปกครองเห็นภาพรวมของน้องทันที</p>
             </div>
 
-            <form id="admin-review-form" class="admin-review-form">
+            <form id="admin-review-form" class="sketch-form">
               <div class="form-row-2col">
                 <div class="form-group">
-                  <label for="review-badge-select">ระดับพัฒนาการภาพรวม (Level Badge)</label>
-                  <select id="review-badge-select">
+                  <label for="review-badge-select">🏷️ ป้ายระดับพัฒนาการ (Level Sticker)</label>
+                  <select id="review-badge-select" class="sketch-input">
                     <option value="กำลังปูพื้นฐานอย่างตั้งใจ 🌱">กำลังปูพื้นฐานอย่างตั้งใจ 🌱</option>
                     <option value="พัฒนาต่อเนื่องดีมาก 📈" selected>พัฒนาต่อเนื่องดีมาก 📈</option>
                     <option value="เก่งมาก จดจำคำศัพท์ได้ไว 🌟">เก่งมาก จดจำคำศัพท์ได้ไว 🌟</option>
@@ -410,8 +552,8 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="review-stars-select">คะแนนดาวประเมินผล (1 - 5 ดาว)</label>
-                  <select id="review-stars-select">
+                  <label for="review-stars-select">⭐ คะแนนดาวภาพรวม (1 - 5 ดาว)</label>
+                  <select id="review-stars-select" class="sketch-input">
                     <option value="5">⭐⭐⭐⭐⭐ (5 ดาว - ดีเยี่ยม)</option>
                     <option value="4">⭐⭐⭐⭐ (4 ดาว - ดีมาก)</option>
                     <option value="3">⭐⭐⭐ (3 ดาว - กำลังพัฒนา)</option>
@@ -422,8 +564,8 @@
               </div>
 
               <!-- 4 Skill Sliders -->
-              <div class="sliders-box">
-                <h4>📊 ประเมินทักษะทั้ง 4 ด้าน (0% - 100%)</h4>
+              <div class="sketch-dashed-box">
+                <h4>📊 ประเมินทักษะภาษาจีนทั้ง 4 ด้าน (0% - 100%)</h4>
                 <div class="form-row-2col">
                   <div class="slider-group">
                     <label>
@@ -443,7 +585,7 @@
 
                   <div class="slider-group">
                     <label>
-                      <span>🏮 การนำไปใช้สนทนาจริง (เช่น หมวดโรงเตี๊ยม)</span>
+                      <span>🏮 การนำไปใช้สนทนาจริง (หมวดโรงเตี๊ยม)</span>
                       <strong id="slider-conv-label">85%</strong>
                     </label>
                     <input type="range" id="slider-conv" min="10" max="100" step="5" value="85" />
@@ -451,7 +593,7 @@
 
                   <div class="slider-group">
                     <label>
-                      <span>🔥 ความตั้งใจและความสม่ำเสมอในการเรียน</span>
+                      <span>🔥 ความตั้งใจและความสม่ำเสมอ</span>
                       <strong id="slider-effort-label">90%</strong>
                     </label>
                     <input type="range" id="slider-effort" min="10" max="100" step="5" value="90" />
@@ -460,8 +602,8 @@
               </div>
 
               <!-- Quick Vocab Mastery Checkboxes -->
-              <div class="vocab-check-box">
-                <h4>✅ ติ๊กเลือกคำศัพท์ที่นักเรียนคนนี้จำได้แม่นยำแล้ว (แสดงให้ผู้ปกครองเห็น)</h4>
+              <div class="sketch-dashed-box">
+                <h4>✅ ติ๊กเลือกสติ๊กเกอร์คำศัพท์ที่นักเรียนจำได้แม่นยำแล้ว</h4>
                 <div id="editor-vocab-checkboxes" class="vocab-checkbox-grid">
                   <!-- Populated dynamically by JS -->
                 </div>
@@ -473,6 +615,7 @@
                   <input
                     type="text"
                     id="review-strengths-input"
+                    class="sketch-input"
                     placeholder="เช่น จำคำศัพท์หมวดโรงเตี๊ยม (酒店, 入住, 房卡) ได้แม่นมาก ออกเสียงพินอินชัดเจน"
                   />
                 </div>
@@ -482,15 +625,17 @@
                   <input
                     type="text"
                     id="review-nextsteps-input"
+                    class="sketch-input"
                     placeholder="เช่น ฝึกแต่งประโยคสนทนายาวขึ้น และทบทวนวรรณยุกต์เสียง 3"
                   />
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="review-comment-input">💬 รายละเอียดรีวิวพัฒนาการสำหรับผู้ปกครอง (เขียนโดย Admin Toon)</label>
+                <label for="review-comment-input">💬 สรุปรีวิวพัฒนาการภาพรวมสำหรับผู้ปกครอง (เขียนโดย Admin Toon)</label>
                 <textarea
                   id="review-comment-input"
+                  class="sketch-input"
                   rows="4"
                   placeholder="เขียนสรุปพัฒนาการของนักเรียนให้ผู้ปกครองทราบว่าน้องพัฒนาไปถึงขั้นไหนแล้ว..."
                   required
@@ -498,10 +643,10 @@
               </div>
 
               <div class="editor-actions">
-                <button type="submit" class="btn-primary btn-save-review">
-                  💾 บันทึกรีวิวพัฒนาการนักเรียน
+                <button type="submit" class="sketch-btn btn-primary-sketch">
+                  💾 บันทึกสรุปรีวิวพัฒนาการ
                 </button>
-                <button type="button" id="delete-review-btn" class="btn-danger-outline">
+                <button type="button" id="delete-review-btn" class="sketch-btn btn-secondary-sketch">
                   🗑️ ลบรีวิวนี้
                 </button>
               </div>
@@ -514,41 +659,42 @@
 
   <!-- ================= MODAL: ADD NEW STUDENT (ADMIN ONLY) ================= -->
   <div id="add-student-modal" class="modal-backdrop hidden">
-    <div class="modal-box">
+    <div class="sketch-card modal-box rotate-neg-1">
+      <div class="deco-tack" aria-hidden="true"></div>
       <div class="modal-header">
-        <h3>➕ เพิ่มรายชื่อนักเรียนใหม่ (สำหรับแอดมิน)</h3>
-        <button id="close-add-student-btn" class="modal-close" type="button">✕</button>
+        <h3>➕ เพิ่มรายชื่อนักเรียนใหม่ในสมุดรีวิว</h3>
+        <button id="close-add-student-btn" class="sketch-btn btn-xs" type="button">✕</button>
       </div>
-      <form id="add-student-form" class="auth-form">
+      <form id="add-student-form" class="sketch-form">
         <div class="form-group">
-          <label for="new-student-name">ชื่อนักเรียน / ชื่อเล่น</label>
-          <input type="text" id="new-student-name" placeholder="เช่น น้องภูมิ / น้องมินนี่" required />
+          <label for="new-student-name">✏️ ชื่อนักเรียน / ชื่อเล่น</label>
+          <input type="text" id="new-student-name" class="sketch-input" placeholder="เช่น น้องภูมิ / น้องมินนี่" required />
         </div>
         <div class="form-group">
-          <label>เลือกไอคอนประจำตัวนักเรียน</label>
+          <label>🎨 เลือกไอคอนประจำตัวนักเรียน</label>
           <div id="new-student-avatars" class="avatar-picker-grid">
             <!-- Populated by JS -->
           </div>
         </div>
         <div class="form-row-2col">
           <div class="form-group">
-            <label for="new-student-jade">หยกสะสมเริ่มต้น</label>
-            <input type="number" id="new-student-jade" value="500" min="0" />
+            <label for="new-student-jade">💎 หยกสะสมเริ่มต้น</label>
+            <input type="number" id="new-student-jade" class="sketch-input" value="500" min="0" />
           </div>
           <div class="form-group">
-            <label for="new-student-inn">ระดับโรงเตี๊ยม (1-10)</label>
-            <input type="number" id="new-student-inn" value="2" min="1" max="10" />
+            <label for="new-student-inn">🏮 ระดับโรงเตี๊ยม (1-10)</label>
+            <input type="number" id="new-student-inn" class="sketch-input" value="2" min="1" max="10" />
           </div>
         </div>
-        <button type="submit" class="btn-primary btn-admin">
-          ✅ สร้างโปรไฟล์นักเรียนและเริ่มเขียนรีวิว
+        <button type="submit" class="sketch-btn btn-primary-sketch">
+          ✅ สร้างหน้าสมุดนักเรียนและเริ่มเขียนรีวิว
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div id="dash-toast" class="dash-toast hidden"></div>
+  <!-- Sketch Toast Notification -->
+  <div id="dash-toast" class="sketch-toast hidden"></div>
 
   <script type="module" src="./dashboard.js"></script>
 </body>
