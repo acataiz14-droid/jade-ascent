@@ -22,10 +22,11 @@ const ADMIN_PASS = '141826';
 // Vocabulary Catalog for tracking & display (Includes Hotel/Inn set + Core HSK)
 const VOCAB_CATALOG = [
   { hanzi: '酒店', pinyin: 'jiǔdiàn', meaning: 'โรงแรม (Hotel)' },
-  { hanzi: '入住', pinyin: 'rùzhù', meaning: 'เช็คอินเข้าพัก (Check in)' },
-  { hanzi: '预订', pinyin: 'yùdìng', meaning: 'จองล่วงหน้า (Reservation)' },
-  { hanzi: '护照', pinyin: 'hùzhào', meaning: 'หนังสือเดินทาง (Passport)' },
   { hanzi: '房间', pinyin: 'fángjiān', meaning: 'ห้องพัก (Room)' },
+  { hanzi: '预订', pinyin: 'yùdìng', meaning: 'จองล่วงหน้า (Reservation / Book)' },
+  { hanzi: '入住', pinyin: 'rùzhù', meaning: 'เช็คอิน (Check in)' },
+  { hanzi: '退房', pinyin: 'tuìfáng', meaning: 'เช็คเอาท์ (Check out)' },
+  { hanzi: '护照', pinyin: 'hùzhào', meaning: 'หนังสือเดินทาง (Passport)' },
   { hanzi: '房卡', pinyin: 'fángkǎ', meaning: 'คีย์การ์ดห้องพัก (Room key card)' },
   { hanzi: '你好', pinyin: 'nǐ hǎo', meaning: 'สวัสดี (Hello)' },
   { hanzi: '谢谢', pinyin: 'xièxie', meaning: 'ขอบคุณ (Thank you)' },

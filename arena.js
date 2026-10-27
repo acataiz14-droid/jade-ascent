@@ -297,17 +297,30 @@ export const ARENA_TOPICS = {
       { char: '杯子', pinyin: 'bēizi', english: 'cup', thai: 'ถ้วย / แก้ว' }
     ]
   },
-  hotel_inn: {
-    id: 'hotel_inn',
-    name: 'โรงแรม & โรงเตี๊ยม 🏨🛎️',
+  hotel: {
+    id: 'hotel',
+    name: 'โรงแรม (Hotel) 🏨🛎️',
     floorColors: ['#b45309', '#d97706', '#78350f'],
     words: [
-      { char: '酒店', pinyin: 'jiǔdiàn', english: 'Hotel', thai: 'โรงแรม / โรงเตี๊ยม' },
-      { char: '入住', pinyin: 'rùzhù', english: 'Check in / Check into a hotel', thai: 'เช็คอิน / เข้าพักโรงแรม' },
-      { char: '预订', pinyin: 'yùdìng', english: 'Reservation / Book', thai: 'การจอง / จองล่วงหน้า' },
-      { char: '护照', pinyin: 'hùzhào', english: 'Passport', thai: 'หนังสือเดินทาง / พาสปอร์ต' },
+      { char: '酒店', pinyin: 'jiǔdiàn', english: 'Hotel', thai: 'โรงแรม' },
       { char: '房间', pinyin: 'fángjiān', english: 'Room', thai: 'ห้องพัก / ห้อง' },
-      { char: '房卡', pinyin: 'fángkǎ', english: 'Room key card', thai: 'คีย์การ์ดห้องพัก' }
+      { char: '预订', pinyin: 'yùdìng', english: 'Reservation / Book', thai: 'การจอง / จองล่วงหน้า' },
+      { char: '入住', pinyin: 'rùzhù', english: 'Check in', thai: 'เช็คอิน / เข้าพัก' },
+      { char: '退房', pinyin: 'tuìfáng', english: 'Check out', thai: 'เช็คเอาท์ / คืนห้องพัก' },
+      { char: '护照', pinyin: 'hùzhào', english: 'Passport', thai: 'หนังสือเดินทาง / พาสปอร์ต' }
+    ]
+  },
+  hotel_inn: {
+    id: 'hotel_inn',
+    name: 'โรงแรม (Hotel) 🏨🛎️',
+    floorColors: ['#b45309', '#d97706', '#78350f'],
+    words: [
+      { char: '酒店', pinyin: 'jiǔdiàn', english: 'Hotel', thai: 'โรงแรม' },
+      { char: '房间', pinyin: 'fángjiān', english: 'Room', thai: 'ห้องพัก / ห้อง' },
+      { char: '预订', pinyin: 'yùdìng', english: 'Reservation / Book', thai: 'การจอง / จองล่วงหน้า' },
+      { char: '入住', pinyin: 'rùzhù', english: 'Check in', thai: 'เช็คอิน / เข้าพัก' },
+      { char: '退房', pinyin: 'tuìfáng', english: 'Check out', thai: 'เช็คเอาท์ / คืนห้องพัก' },
+      { char: '护照', pinyin: 'hùzhào', english: 'Passport', thai: 'หนังสือเดินทาง / พาสปอร์ต' }
     ]
   }
 };

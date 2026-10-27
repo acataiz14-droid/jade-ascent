@@ -305,6 +305,19 @@
           </div>
           <button class="btn btn-secondary btn-select-level" style="background: rgba(245, 158, 11, 0.2); border-color: #fbbf24;" data-level="16">เริ่มด่านนี้</button>
         </div>
+
+        <!-- Level 17: Hotel (โรงแรม) -->
+        <div class="level-card" style="border-color: rgba(16, 185, 129, 0.55);" data-level="17">
+          <div class="level-emoji">🏨</div>
+          <h3>โรงแรม 🏨🛎️</h3>
+          <p class="level-name">คำศัพท์โรงแรม (มีบอสอาจารย์ใหญ่)</p>
+          <p class="level-name-en">Hotel Special</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 800m (酒店, 房间, 预订, 入住, 退房, 护照)</span>
+            <span class="level-difficulty diff-4" style="color: #34d399;">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" style="background: rgba(16, 185, 129, 0.22); border-color: #34d399;" data-level="17">เริ่มด่านนี้</button>
+        </div>
       </div>
 
       <!-- Bottom Back Action -->
@@ -643,11 +656,12 @@
     <div class="runner-hud-center">
       <div class="fever-words-container">
         <span class="fever-title">FEVER:</span>
-        <span class="fever-letter" id="runner-letter-0">风</span>
-        <span class="fever-letter" id="runner-letter-1">火</span>
-        <span class="fever-letter" id="runner-letter-2">雷</span>
-        <span class="fever-letter" id="runner-letter-3">龙</span>
-        <span class="fever-letter" id="runner-letter-4">玉</span>
+        <span class="fever-letter" id="runner-letter-0">酒店</span>
+        <span class="fever-letter" id="runner-letter-1">房间</span>
+        <span class="fever-letter" id="runner-letter-2">预订</span>
+        <span class="fever-letter" id="runner-letter-3">入住</span>
+        <span class="fever-letter" id="runner-letter-4">退房</span>
+        <span class="fever-letter" id="runner-letter-5">护照</span>
       </div>
     </div>
 
@@ -656,6 +670,53 @@
       <button id="btn-runner-exit" class="btn-hud-small" title="Exit to Menu">🏠</button>
     </div>
   </header>
+
+  <!-- Runner Stage Selection Modal -->
+  <div id="runner-stage-modal" class="overlay hidden">
+    <div class="menu-content glass-panel" style="max-width: 520px;">
+      <h1 class="congrats-title gold-text">🏃💨 JADE RUNNER</h1>
+      <h2 class="congrats-subtitle">เลือกด่านวิ่งตะลุยเก็บคำศัพท์ภาษาจีน</h2>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; width: 100%; margin: 16px 0;">
+        <!-- Hotel Stage -->
+        <div class="level-card" style="width: 100%; max-width: 100%; border-color: rgba(16, 185, 129, 0.6); text-align: left; padding: 16px 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+              <h3 style="font-size: 1.25rem; color: #10b981;">🏨 ด่าน: โรงแรม (Hotel Stage)</h3>
+              <p style="font-size: 0.9rem; color: #334155; margin-top: 4px;">
+                วิ่งเก็บเหรียญคำศัพท์หมวดโรงแรมครบทั้ง 6 คำเพื่อพุ่งทะยานสู่โหมด FEVER!
+              </p>
+              <p style="font-size: 0.85rem; font-weight: 700; color: #0f766e; margin-top: 6px;">
+                📚 คำศัพท์: 酒店 (Hotel) • 房间 (Room) • 预订 (Book) • 入住 (Check in) • 退房 (Check out) • 护照 (Passport)
+              </p>
+            </div>
+            <button class="btn btn-primary btn-start-runner-stage" data-stage="hotel" style="white-space: nowrap; padding: 10px 18px;">
+              <span>เริ่มวิ่ง ➔</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Classic Stage -->
+        <div class="level-card" style="width: 100%; max-width: 100%; border-color: rgba(245, 158, 11, 0.5); text-align: left; padding: 16px 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+              <h3 style="font-size: 1.2rem; color: #d97706;">🐉 ด่าน: หุบเขาหยกคลาสสิก (Classic Stage)</h3>
+              <p style="font-size: 0.88rem; color: #475569; margin-top: 4px;">
+                วิ่งเก็บอักษรธาตุทั้ง 5 (风 • 火 • 雷 • 龙 • 玉) ตะลุยด่านความเร็วสูง
+              </p>
+            </div>
+            <button class="btn btn-secondary btn-start-runner-stage" data-stage="classic" style="white-space: nowrap; padding: 10px 18px;">
+              <span>เริ่มวิ่ง ➔</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button id="btn-runner-stage-cancel" class="btn btn-secondary" style="width: 100%; margin-top: 6px;">
+        <span>⬅️ ย้อนกลับเมนูหลัก</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Runner Damage Flash -->
   <div id="runner-damage-flash" class="runner-damage-flash"></div>
@@ -752,7 +813,11 @@
       <div class="arena-setting-group">
         <label class="arena-setting-label">📚 เลือกด่าน / หมวดคำศัพท์ (Topic Selection):</label>
         <div class="arena-topic-container" id="arena-topic-options">
-          <button class="arena-topic-btn active" data-topic="hsk1_4">
+          <button class="arena-topic-btn active" data-topic="hotel">
+            <span class="arena-topic-btn-title">🏨 ด่าน: โรงแรม (Hotel)</span>
+            <span class="arena-topic-btn-desc">酒店, 房间, 预订, 入住, 退房, 护照</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="hsk1_4">
             <span class="arena-topic-btn-title">👨‍👩‍👧 HSK 1 - บท 4 (ครอบครัว)</span>
             <span class="arena-topic-btn-desc">家, 口, 人, 有, 女儿, 几, 岁, 了, 今年, 多大</span>
           </button>

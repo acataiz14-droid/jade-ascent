@@ -148,42 +148,12 @@ export const FURNITURE_CATALOG = [
 export const HOTEL_INN_QUESTS = [
   {
     id: 'hotel_jiudian',
-    word: { char: '酒店', pinyin: 'jiǔdiàn', english: 'Hotel', thai: 'โรงแรม / โรงเตี๊ยม' },
-    question: 'คำว่า "โรงแรม / โรงเตี๊ยม (Hotel)" ในภาษาจีนคือคำใด?',
+    word: { char: '酒店', pinyin: 'jiǔdiàn', english: 'Hotel', thai: 'โรงแรม' },
+    question: 'คำว่า "โรงแรม (Hotel)" ในภาษาจีนคือคำใด?',
     options: [
       { text: '酒店 (jiǔdiàn)', correct: true },
       { text: '商店 (shāngdiàn)', correct: false },
       { text: '书店 (shūdiàn)', correct: false }
-    ]
-  },
-  {
-    id: 'hotel_ruzhu',
-    word: { char: '入住', pinyin: 'rùzhù', english: 'Check in / Check into a hotel', thai: 'เช็คอิน / เข้าพักโรงแรม' },
-    question: 'เมื่อนักเดินทางมาถึงและต้องการ "เช็คอิน / เข้าพัก (Check in)" ในภาษาจีนคือคำใด?',
-    options: [
-      { text: '入住 (rùzhù)', correct: true },
-      { text: '退房 (tuìfáng)', correct: false },
-      { text: '出发 (chūfā)', correct: false }
-    ]
-  },
-  {
-    id: 'hotel_yuding',
-    word: { char: '预订', pinyin: 'yùdìng', english: 'Reservation / Book', thai: 'การจอง / จองล่วงหน้า' },
-    question: 'การติดต่อล่วงหน้าเพื่อ "จองห้องพัก / การจอง (Reservation / Book)" ในภาษาจีนคือคำใด?',
-    options: [
-      { text: '预订 (yùdìng)', correct: true },
-      { text: '准备 (zhǔnbèi)', correct: false },
-      { text: '约定 (yuēdìng)', correct: false }
-    ]
-  },
-  {
-    id: 'hotel_huzhao',
-    word: { char: '护照', pinyin: 'hùzhào', english: 'Passport', thai: 'หนังสือเดินทาง / พาสปอร์ต' },
-    question: 'เอกสารสำคัญใช้ยืนยันตัวตนตอนเข้าพัก "หนังสือเดินทาง / พาสปอร์ต (Passport)" ภาษาจีนคือคำใด?',
-    options: [
-      { text: '护照 (hùzhào)', correct: true },
-      { text: '照片 (zhàopiàn)', correct: false },
-      { text: '学生证 (xuéshēngzhèng)', correct: false }
     ]
   },
   {
@@ -197,13 +167,43 @@ export const HOTEL_INN_QUESTS = [
     ]
   },
   {
-    id: 'hotel_fangka',
-    word: { char: '房卡', pinyin: 'fángkǎ', english: 'Room key card', thai: 'คีย์การ์ดห้องพัก' },
-    question: 'การ์ดสำหรับแตะเปิดประตูห้องพัก "คีย์การ์ด (Room key card)" ในภาษาจีนคือคำใด?',
+    id: 'hotel_yuding',
+    word: { char: '预订', pinyin: 'yùdìng', english: 'Reservation / Book', thai: 'การจอง / จองล่วงหน้า' },
+    question: 'การติดต่อล่วงหน้าเพื่อ "จองห้องพัก / การจอง (Reservation / Book)" ในภาษาจีนคือคำใด?',
     options: [
-      { text: '房卡 (fángkǎ)', correct: true },
-      { text: '银行卡 (yínhángkǎ)', correct: false },
-      { text: '门票 (ménpiào)', correct: false }
+      { text: '预订 (yùdìng)', correct: true },
+      { text: '准备 (zhǔnbèi)', correct: false },
+      { text: '约定 (yuēdìng)', correct: false }
+    ]
+  },
+  {
+    id: 'hotel_ruzhu',
+    word: { char: '入住', pinyin: 'rùzhù', english: 'Check in', thai: 'เช็คอิน / เข้าพัก' },
+    question: 'เมื่อนักเดินทางมาถึงและต้องการ "เช็คอิน / เข้าพัก (Check in)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '入住 (rùzhù)', correct: true },
+      { text: '退房 (tuìfáng)', correct: false },
+      { text: '出发 (chūfā)', correct: false }
+    ]
+  },
+  {
+    id: 'hotel_tuifang',
+    word: { char: '退房', pinyin: 'tuìfáng', english: 'Check out', thai: 'เช็คเอาท์ / คืนห้องพัก' },
+    question: 'เมื่อพักผ่อนครบกำหนดและต้องการ "เช็คเอาท์ / คืนห้องพัก (Check out)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '退房 (tuìfáng)', correct: true },
+      { text: '入住 (rùzhù)', correct: false },
+      { text: '回家 (huí jiā)', correct: false }
+    ]
+  },
+  {
+    id: 'hotel_huzhao',
+    word: { char: '护照', pinyin: 'hùzhào', english: 'Passport', thai: 'หนังสือเดินทาง / พาสปอร์ต' },
+    question: 'เอกสารสำคัญใช้ยืนยันตัวตนตอนเข้าพัก "หนังสือเดินทาง / พาสปอร์ต (Passport)" ภาษาจีนคือคำใด?',
+    options: [
+      { text: '护照 (hùzhào)', correct: true },
+      { text: '照片 (zhàopiàn)', correct: false },
+      { text: '学生证 (xuéshēngzhèng)', correct: false }
     ]
   }
 ];
@@ -339,18 +339,18 @@ export const TAOIST_GUESTS = [
     favoriteFurniture: 'lantern',
     floor: 3,
     quotes: [
-      { zh: '这是您的房卡。', py: 'zhè shì nín de fángkǎ', th: 'นี่คือคีย์การ์ดห้องพักของท่าน' },
-      { zh: '请拿好房卡。', py: 'qǐng ná hǎo fángkǎ', th: 'โปรดถือคีย์การ์ดไว้ให้ดีนะคะ' },
-      { zh: '刷房卡就能开门。', py: 'shuā fángkǎ jiù néng kāi mén', th: 'แตะคีย์การ์ดก็เปิดประตูได้เลย' },
+      { zh: '我想办理退房。', py: 'wǒ xiǎng bànlǐ tuìfáng', th: 'ฉันต้องการทำเรื่องเช็คเอาท์คืนห้องพัก' },
+      { zh: '请问几点退房？', py: 'qǐngwèn jǐ diǎn tuìfáng', th: 'ขอสอบถามว่าต้องเช็คเอาท์กี่โมงคะ?' },
+      { zh: '退房手续办好了。', py: 'tuìfáng shǒuxù bàn hǎo le', th: 'ทำเรื่องเช็คเอาท์เรียบร้อยแล้วค่ะ' },
       { zh: '今天真开心！', py: 'jīntiān zhēn kāixīn', th: 'วันนี้มีความสุขจัง!' }
     ],
     quest: {
-      question: 'จิ้งจอกน้อยยื่นสิ่งนี้ให้แขกสำหรับแตะเปิดประตูห้อง ... คำว่า "คีย์การ์ดห้องพัก (Room key card)" ภาษาจีนคือคำใด?',
-      word: { char: '房卡', pinyin: 'fángkǎ', thai: 'คีย์การ์ดห้องพัก (Room key card)' },
+      question: 'จิ้งจอกน้อยพักผ่อนครบกำหนดแล้วและต้องการแจ้ง "เช็คเอาท์ / คืนห้องพัก (Check out)" ... คำนี้ภาษาจีนคือคำใด?',
+      word: { char: '退房', pinyin: 'tuìfáng', thai: 'เช็คเอาท์ / คืนห้องพัก (Check out)' },
       options: [
-        { text: '房卡 (fángkǎ)', correct: true },
-        { text: '银行卡 (yínhángkǎ)', correct: false },
-        { text: '门票 (ménpiào)', correct: false }
+        { text: '退房 (tuìfáng)', correct: true },
+        { text: '入住 (rùzhù)', correct: false },
+        { text: '回家 (huí jiā)', correct: false }
       ]
     }
   }
