@@ -26,16 +26,33 @@ export class RunnerEngine {
     this.jadeCollected = 0;
     this.score = 0;
 
-    // Chinese Word Fever system: Default to Hotel Stage (โรงแรม: 酒店, 房间, 预订, 入住, 退房, 护照)
-    this.stageId = 'hotel';
-    this.feverWords = ['酒店', '房间', '预订', '入住', '退房', '护照'];
+    // Chinese Word Fever system: Default to Modifiers Stage (คำขยายความ) or Hotel Stage (โรงแรม)
+    this.stageId = 'modifiers';
+    this.modifiersWave = 0;
+    this.modifiersWaves = [
+      ['重', '轻', '满', '空', '新', '旧'],
+      ['大', '小', '长', '短', '高', '矮']
+    ];
+    this.feverWords = [...this.modifiersWaves[0]];
     this.feverMeanings = {
       '酒店': 'jiǔdiàn • Hotel (โรงแรม)',
       '房间': 'fángjiān • Room (ห้องพัก)',
       '预订': 'yùdìng • Reservation / Book (จอง)',
       '入住': 'rùzhù • Check in (เช็คอิน)',
       '退房': 'tuìfáng • Check out (เช็คเอาท์)',
-      '护照': 'hùzhào • Passport (พาสปอร์ต)'
+      '护照': 'hùzhào • Passport (พาสปอร์ต)',
+      '重': 'zhòng • Heavy (หนัก)',
+      '轻': 'qīng • Light (เบา)',
+      '满': 'mǎn • Full (เต็ม)',
+      '空': 'kōng • Empty (ว่างเปล่า)',
+      '新': 'xīn • New (ใหม่)',
+      '旧': 'jiù • Old (เก่า)',
+      '大': 'dà • Big (ใหญ่)',
+      '小': 'xiǎo • Small (เล็ก)',
+      '长': 'cháng • Long (ยาว)',
+      '短': 'duǎn • Short (สั้น)',
+      '高': 'gāo • Tall / High (สูง)',
+      '矮': 'ǎi • Short (height) (เตี้ย)'
     };
     this.feverCollected = this.feverWords.map(() => false);
     this.feverActive = false;
@@ -210,10 +227,13 @@ export class RunnerEngine {
     if (gameOverScreen) gameOverScreen.classList.add('hidden');
   }
 
-  setStage(stageId = 'hotel') {
+  setStage(stageId = 'modifiers') {
     this.stageId = stageId;
+    this.modifiersWave = 0;
     if (stageId === 'classic') {
       this.feverWords = ['风', '火', '雷', '龙', '玉'];
+    } else if (stageId === 'modifiers') {
+      this.feverWords = [...this.modifiersWaves[0]];
     } else {
       this.feverWords = ['酒店', '房间', '预订', '入住', '退房', '护照'];
     }
@@ -452,6 +472,10 @@ export class RunnerEngine {
       this.speed = this.baseSpeed * 1.35;
       if (this.feverTimer <= 0) {
         this.feverActive = false;
+        if (this.stageId === 'modifiers' && this.modifiersWaves) {
+          this.modifiersWave = (this.modifiersWave + 1) % this.modifiersWaves.length;
+          this.feverWords = [...this.modifiersWaves[this.modifiersWave]];
+        }
         this.feverCollected = this.feverWords.map(() => false);
         this.speed = this.baseSpeed + Math.min(this.distance * 0.15, this.maxSpeed - this.baseSpeed);
         this.updateHUD();

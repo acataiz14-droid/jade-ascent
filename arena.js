@@ -322,6 +322,25 @@ export const ARENA_TOPICS = {
       { char: '退房', pinyin: 'tuìfáng', english: 'Check out', thai: 'เช็คเอาท์ / คืนห้องพัก' },
       { char: '护照', pinyin: 'hùzhào', english: 'Passport', thai: 'หนังสือเดินทาง / พาสปอร์ต' }
     ]
+  },
+  modifiers: {
+    id: 'modifiers',
+    name: 'คำขยายความ (Modifiers) ⚖️📏',
+    floorColors: ['#0f766e', '#0d9488', '#115e59'],
+    words: [
+      { char: '重', pinyin: 'zhòng', english: 'Heavy', thai: 'หนัก' },
+      { char: '轻', pinyin: 'qīng', english: 'Light', thai: 'เบา' },
+      { char: '满', pinyin: 'mǎn', english: 'Full', thai: 'เต็ม' },
+      { char: '空', pinyin: 'kōng', english: 'Empty', thai: 'ว่างเปล่า' },
+      { char: '新', pinyin: 'xīn', english: 'New', thai: 'ใหม่' },
+      { char: '旧', pinyin: 'jiù', english: 'Old', thai: 'เก่า' },
+      { char: '大', pinyin: 'dà', english: 'Big', thai: 'ใหญ่' },
+      { char: '小', pinyin: 'xiǎo', english: 'Small', thai: 'เล็ก' },
+      { char: '长', pinyin: 'cháng', english: 'Long', thai: 'ยาว' },
+      { char: '短', pinyin: 'duǎn', english: 'Short', thai: 'สั้น' },
+      { char: '高', pinyin: 'gāo', english: 'Tall / High', thai: 'สูง' },
+      { char: '矮', pinyin: 'ǎi', english: 'Short (height)', thai: 'เตี้ย' }
+    ]
   }
 };
 

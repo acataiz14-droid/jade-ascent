@@ -318,6 +318,19 @@
           </div>
           <button class="btn btn-secondary btn-select-level" style="background: rgba(16, 185, 129, 0.22); border-color: #34d399;" data-level="17">เริ่มด่านนี้</button>
         </div>
+
+        <!-- Level 18: Modifiers (คำขยายความ) -->
+        <div class="level-card" style="border-color: rgba(20, 184, 166, 0.6);" data-level="18">
+          <div class="level-emoji">⚖️</div>
+          <h3>คำขยายความ ⚖️📏</h3>
+          <p class="level-name">คำศัพท์คำคุณศัพท์ขยายความ 12 คำ (มีบอสอาจารย์ใหญ่)</p>
+          <p class="level-name-en">Modifiers Special</p>
+          <div class="level-info">
+            <span class="level-height">🏔️ 800m (重, 轻, 满, 空, 新, 旧, 大, 小, 长, 短, 高, 矮)</span>
+            <span class="level-difficulty diff-4" style="color: #2dd4bf;">★★★★☆</span>
+          </div>
+          <button class="btn btn-secondary btn-select-level" style="background: rgba(20, 184, 166, 0.25); border-color: #2dd4bf;" data-level="18">เริ่มด่านนี้</button>
+        </div>
       </div>
 
       <!-- Bottom Back Action -->
@@ -678,6 +691,24 @@
       <h2 class="congrats-subtitle">เลือกด่านวิ่งตะลุยเก็บคำศัพท์ภาษาจีน</h2>
 
       <div style="display: flex; flex-direction: column; gap: 14px; width: 100%; margin: 16px 0;">
+        <!-- Modifiers Stage (คำขยายความ) -->
+        <div class="level-card" style="width: 100%; max-width: 100%; border-color: rgba(20, 184, 166, 0.7); text-align: left; padding: 16px 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+              <h3 style="font-size: 1.25rem; color: #0d9488;">⚖️ ด่าน: คำขยายความ (Modifiers Stage)</h3>
+              <p style="font-size: 0.9rem; color: #334155; margin-top: 4px;">
+                วิ่งเก็บเหรียญคำศัพท์คำขยายความทั้ง 12 คำ (2 ระลอก) เพื่อพุ่งทะยานสู่โหมด FEVER!
+              </p>
+              <p style="font-size: 0.84rem; font-weight: 700; color: #0f766e; margin-top: 6px; line-height: 1.45;">
+                📚 คำศัพท์: 重 (Heavy) • 轻 (Light) • 满 (Full) • 空 (Empty) • 新 (New) • 旧 (Old) • 大 (Big) • 小 (Small) • 长 (Long) • 短 (Short) • 高 (Tall/High) • 矮 (Short height)
+              </p>
+            </div>
+            <button class="btn btn-primary btn-start-runner-stage" data-stage="modifiers" style="white-space: nowrap; padding: 10px 18px;">
+              <span>เริ่มวิ่ง ➔</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Hotel Stage -->
         <div class="level-card" style="width: 100%; max-width: 100%; border-color: rgba(16, 185, 129, 0.6); text-align: left; padding: 16px 20px;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
@@ -813,7 +844,11 @@
       <div class="arena-setting-group">
         <label class="arena-setting-label">📚 เลือกด่าน / หมวดคำศัพท์ (Topic Selection):</label>
         <div class="arena-topic-container" id="arena-topic-options">
-          <button class="arena-topic-btn active" data-topic="hotel">
+          <button class="arena-topic-btn active" data-topic="modifiers">
+            <span class="arena-topic-btn-title">⚖️ ด่าน: คำขยายความ (Modifiers)</span>
+            <span class="arena-topic-btn-desc">重, 轻, 满, 空, 新, 旧, 大, 小, 长, 短, 高, 矮</span>
+          </button>
+          <button class="arena-topic-btn" data-topic="hotel">
             <span class="arena-topic-btn-title">🏨 ด่าน: โรงแรม (Hotel)</span>
             <span class="arena-topic-btn-desc">酒店, 房间, 预订, 入住, 退房, 护照</span>
           </button>

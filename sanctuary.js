@@ -208,6 +208,129 @@ export const HOTEL_INN_QUESTS = [
   }
 ];
 
+const MODIFIERS_INN_QUESTS = [
+  {
+    id: 'mod_zhong',
+    word: { char: '重', pinyin: 'zhòng', english: 'Heavy', thai: 'หนัก' },
+    question: 'กระเป๋าเดินทางใบนี้หนักมาก! คำว่า "Heavy (หนัก)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '重 (zhòng)', correct: true },
+      { text: '轻 (qīng)', correct: false },
+      { text: '满 (mǎn)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_qing',
+    word: { char: '轻', pinyin: 'qīng', english: 'Light', thai: 'เบา' },
+    question: 'ขนนกเซียนชิ้นนี้เบามาก! คำว่า "Light (เบา)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '轻 (qīng)', correct: true },
+      { text: '重 (zhòng)', correct: false },
+      { text: '空 (kōng)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_man',
+    word: { char: '满', pinyin: 'mǎn', english: 'Full', thai: 'เต็ม' },
+    question: 'รินน้ำชาจนเต็มถ้วยแล้ว! คำว่า "Full (เต็ม)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '满 (mǎn)', correct: true },
+      { text: '空 (kōng)', correct: false },
+      { text: '大 (dà)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_kong',
+    word: { char: '空', pinyin: 'kōng', english: 'Empty', thai: 'ว่างเปล่า' },
+    question: 'ห้องพักชั้นบนยังว่างอยู่! คำว่า "Empty (ว่างเปล่า)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '空 (kōng)', correct: true },
+      { text: '满 (mǎn)', correct: false },
+      { text: '旧 (jiù)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_xin',
+    word: { char: '新', pinyin: 'xīn', english: 'New', thai: 'ใหม่' },
+    question: 'ตำราเซียนเล่มใหม่เพิ่งมาถึง! คำว่า "New (ใหม่)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '新 (xīn)', correct: true },
+      { text: '旧 (jiù)', correct: false },
+      { text: '小 (xiǎo)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_jiu',
+    word: { char: '旧', pinyin: 'jiù', english: 'Old', thai: 'เก่า' },
+    question: 'คัมภีร์โบราณเล่มเก่าแก่! คำว่า "Old (เก่า)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '旧 (jiù)', correct: true },
+      { text: '新 (xīn)', correct: false },
+      { text: '长 (cháng)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_da',
+    word: { char: '大', pinyin: 'dà', english: 'Big', thai: 'ใหญ่' },
+    question: 'โถงโรงเตี๊ยมกว้างใหญ่ไพศาล! คำว่า "Big (ใหญ่)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '大 (dà)', correct: true },
+      { text: '小 (xiǎo)', correct: false },
+      { text: '高 (gāo)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_xiao',
+    word: { char: '小', pinyin: 'xiǎo', english: 'Small', thai: 'เล็ก' },
+    question: 'ถ้วยน้ำชาใบเล็กน่ารัก! คำว่า "Small (เล็ก)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '小 (xiǎo)', correct: true },
+      { text: '大 (dà)', correct: false },
+      { text: '短 (duǎn)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_chang',
+    word: { char: '长', pinyin: 'cháng', english: 'Long', thai: 'ยาว' },
+    question: 'สะพานไม้ไผ่ทอดยาวข้ามลำธาร! คำว่า "Long (ยาว)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '长 (cháng)', correct: true },
+      { text: '短 (duǎn)', correct: false },
+      { text: '高 (gāo)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_duan',
+    word: { char: '短', pinyin: 'duǎn', english: 'Short', thai: 'สั้น' },
+    question: 'พู่กันด้ามสั้นพกพาสะดวก! คำว่า "Short (สั้น)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '短 (duǎn)', correct: true },
+      { text: '长 (cháng)', correct: false },
+      { text: '矮 (ǎi)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_gao',
+    word: { char: '高', pinyin: 'gāo', english: 'Tall / High', thai: 'สูง' },
+    question: 'ยอดเขาเซียนสูงเสียดฟ้า! คำว่า "Tall / High (สูง)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '高 (gāo)', correct: true },
+      { text: '矮 (ǎi)', correct: false },
+      { text: '大 (dà)', correct: false }
+    ]
+  },
+  {
+    id: 'mod_ai',
+    word: { char: '矮', pinyin: 'ǎi', english: 'Short (height)', thai: 'เตี้ย' },
+    question: 'โต๊ะน้ำชาตัวเตี้ยสำหรับนั่งพื้น! คำว่า "Short (height) (เตี้ย)" ในภาษาจีนคือคำใด?',
+    options: [
+      { text: '矮 (ǎi)', correct: true },
+      { text: '高 (gāo)', correct: false },
+      { text: '短 (duǎn)', correct: false }
+    ]
+  }
+];
+
 // --- LIVING TAOIST GUESTS & RESIDENTS ---
 export const TAOIST_GUESTS = [
   {
@@ -411,6 +534,7 @@ export const GARDEN_DECORATIONS = [
 export class SanctuaryManager {
   constructor() {
     this.activeTab = 'inn'; // 'inn' | 'furnishing' | 'pets' | 'garden' | 'archive'
+    this.currentInnStage = 'modifiers'; // 'modifiers' | 'hotel'
     this.currentArchiveTopic = 'all';
     this.harvestTimer = null;
     this.questTimer = null;
@@ -604,16 +728,17 @@ export class SanctuaryManager {
     // Filter guests suitable for unlocked floors
     const candidates = TAOIST_GUESTS.filter(g => g.floor <= unlockedFloors);
     const chosen = candidates.slice(0, capacity);
+    const questPool = this.currentInnStage === 'modifiers' ? MODIFIERS_INN_QUESTS : HOTEL_INN_QUESTS;
 
     this.guestState = chosen.map((g, idx) => {
-      const defaultQuest = HOTEL_INN_QUESTS[idx % HOTEL_INN_QUESTS.length];
+      const stageQuest = questPool[idx % questPool.length];
       return {
         ...g,
         quoteIndex: idx % g.quotes.length,
-        quest: g.quest || {
-          question: `${g.name}: "${defaultQuest.question}"`,
-          word: defaultQuest.word,
-          options: defaultQuest.options
+        quest: {
+          question: `${g.name}: "${stageQuest.question}"`,
+          word: stageQuest.word,
+          options: stageQuest.options
         },
         hasQuest: idx === 0 // Start first guest with a friendly quest!
       };
@@ -623,9 +748,10 @@ export class SanctuaryManager {
   maybeSpawnQuest() {
     if (!this.guestState || this.guestState.length === 0) return;
     const available = this.guestState.filter(g => !g.hasQuest);
+    const questPool = this.currentInnStage === 'modifiers' ? MODIFIERS_INN_QUESTS : HOTEL_INN_QUESTS;
     if (available.length > 0) {
       const pick = available[Math.floor(Math.random() * available.length)];
-      const qConfig = HOTEL_INN_QUESTS[Math.floor(Math.random() * HOTEL_INN_QUESTS.length)];
+      const qConfig = questPool[Math.floor(Math.random() * questPool.length)];
       pick.quest = {
         question: `${pick.name}: "${qConfig.question}"`,
         word: qConfig.word,
@@ -867,6 +993,11 @@ export class SanctuaryManager {
               <div class="stat-value">+${ratePerMin.toFixed(1)} หยก / นาที</div>
             </div>
           </div>
+          <div class="inn-stat-pill" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:0.8rem; font-weight:700; color:#475569;">📚 ด่านคำถามโรงเตี๊ยม:</span>
+            <button type="button" class="inn-stage-switch-btn" data-inn-stage="modifiers" style="padding:4px 10px; border-radius:999px; border:2px solid ${this.currentInnStage === 'modifiers' ? '#0d9488' : '#cbd5e1'}; background:${this.currentInnStage === 'modifiers' ? '#ccfbf1' : '#ffffff'}; color:${this.currentInnStage === 'modifiers' ? '#0f766e' : '#475569'}; font-weight:800; font-size:0.8rem; cursor:pointer;">⚖️ คำขยายความ</button>
+            <button type="button" class="inn-stage-switch-btn" data-inn-stage="hotel" style="padding:4px 10px; border-radius:999px; border:2px solid ${this.currentInnStage === 'hotel' ? '#10b981' : '#cbd5e1'}; background:${this.currentInnStage === 'hotel' ? '#d1fae5' : '#ffffff'}; color:${this.currentInnStage === 'hotel' ? '#065f46' : '#475569'}; font-weight:800; font-size:0.8rem; cursor:pointer;">🏨 โรงแรม</button>
+          </div>
         </div>
 
         <!-- 2.5D Isometric Taoist Inn 3D Simulation Viewport -->
@@ -936,6 +1067,15 @@ export class SanctuaryManager {
     `;
 
     // Event Bindings for Harvest & Upgrade
+    container.querySelectorAll('.inn-stage-switch-btn').forEach(btn => {
+      btn.onclick = () => {
+        const st = btn.getAttribute('data-inn-stage') || 'modifiers';
+        this.currentInnStage = st;
+        this.refreshGuestRoster();
+        this.render();
+      };
+    });
+
     const harvestBtn = document.getElementById('btn-harvest-jade');
     if (harvestBtn) {
       harvestBtn.onclick = () => {
@@ -1223,6 +1363,7 @@ export class SanctuaryManager {
   renderArchiveTab(container, s) {
     const topics = [
       { id: 'all', title: 'ทั้งหมด' },
+      { id: 'modifiers', title: '⚖️ คำขยายความ' },
       { id: 'hotel_inn', title: '🏨 โรงแรม & โรงเตี๊ยม' },
       { id: 'hsk1_4', title: 'HSK1 บท 4' },
       { id: 'kitchen', title: 'สิ่งของในครัว' },

@@ -19,8 +19,20 @@ const GOOGLE_CLIENT_ID_KEY = 'jade_google_client_id';
 const ADMIN_ID = 'Toon';
 const ADMIN_PASS = '141826';
 
-// Vocabulary Catalog for tracking & display (Includes Hotel/Inn set + Core HSK)
+// Vocabulary Catalog for tracking & display (Includes Modifiers + Hotel/Inn set + Core HSK)
 const VOCAB_CATALOG = [
+  { hanzi: '重', pinyin: 'zhòng', meaning: 'หนัก (Heavy)' },
+  { hanzi: '轻', pinyin: 'qīng', meaning: 'เบา (Light)' },
+  { hanzi: '满', pinyin: 'mǎn', meaning: 'เต็ม (Full)' },
+  { hanzi: '空', pinyin: 'kōng', meaning: 'ว่างเปล่า (Empty)' },
+  { hanzi: '新', pinyin: 'xīn', meaning: 'ใหม่ (New)' },
+  { hanzi: '旧', pinyin: 'jiù', meaning: 'เก่า (Old)' },
+  { hanzi: '大', pinyin: 'dà', meaning: 'ใหญ่ (Big)' },
+  { hanzi: '小', pinyin: 'xiǎo', meaning: 'เล็ก (Small)' },
+  { hanzi: '长', pinyin: 'cháng', meaning: 'ยาว (Long)' },
+  { hanzi: '短', pinyin: 'duǎn', meaning: 'สั้น (Short)' },
+  { hanzi: '高', pinyin: 'gāo', meaning: 'สูง (Tall / High)' },
+  { hanzi: '矮', pinyin: 'ǎi', meaning: 'เตี้ย (Short height)' },
   { hanzi: '酒店', pinyin: 'jiǔdiàn', meaning: 'โรงแรม (Hotel)' },
   { hanzi: '房间', pinyin: 'fángjiān', meaning: 'ห้องพัก (Room)' },
   { hanzi: '预订', pinyin: 'yùdìng', meaning: 'จองล่วงหน้า (Reservation / Book)' },

@@ -28,7 +28,8 @@ const LEVELS_CONFIG = {
   14: { name: "ด่านพิเศษ: HSK1 - บท 3 📜👨‍🏫🇨🇳", heightMeters: 800, emoji: "📜", isSpecial: true },
   15: { name: "ด่านพิเศษ: คำศัพท์เฉพาะกิจ 📱🪑💻", heightMeters: 2000, emoji: "📱", isSpecial: true },
   16: { name: "ด่านพิเศษ: HSK1 - บท 4 👨‍👩‍👧🏠", heightMeters: 800, emoji: "👨‍👩‍👧", isSpecial: true },
-  17: { name: "ด่านพิเศษ: โรงแรม 🏨🛎️", heightMeters: 800, emoji: "🏨", isSpecial: true }
+  17: { name: "ด่านพิเศษ: โรงแรม 🏨🛎️", heightMeters: 800, emoji: "🏨", isSpecial: true },
+  18: { name: "ด่านพิเศษ: คำขยายความ ⚖️📏", heightMeters: 800, emoji: "⚖️", isSpecial: true }
 };
 
 let PEAK_HEIGHT = LEVELS_CONFIG[1].heightMeters * 14.5;
@@ -2301,7 +2302,7 @@ class BossProjectile {
       ctx.fillStyle = '#fde68a';
       ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
-    } else if (this.isScholarScroll || (game && (game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17))) {
+    } else if (this.isScholarScroll || (game && (game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18))) {
       // Ancient Calligraphy Scroll Projectile (Level 14 & 16)
       const cx = this.x + this.width / 2;
       const cy = this.y + this.height / 2;
@@ -2761,7 +2762,7 @@ class Boss {
       ctx.font = 'bold 11px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('👨‍👩‍👧 ผู้ปกครอง', cx, cy - 58);
-    } else if (this.bossType === 'hsk1_3' || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17) {
+    } else if (this.bossType === 'hsk1_3' || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) {
       // --- THEMED SCHOLAR BOSS: GRAND TEACHER (ท่านอาจารย์ใหญ่ 👨‍🏫📜) ---
       // 1. Robe / Torso (Imperial crimson scholar gown with gold lining)
       const robeGrad = ctx.createLinearGradient(cx - 40, cy - 25, cx + 40, cy + 45);
@@ -3208,7 +3209,7 @@ function generateLevel() {
     }
 
     // Level 14 (HSK1 - บท 3) & Level 16 (HSK1 - บท 4): Complex platforms with timed spikes, moving, slippery, crumbly, bouncy
-    if (game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17) {
+    if (game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) {
       pWidth = Math.max(54, pWidth * 0.86);
       const hskRoll = rand.next();
       if (zone === 1) {
@@ -3259,7 +3260,7 @@ function generateLevel() {
     
     // In Level 4, 10, 11, 12, 14, 16 (at 600m) and Level 5 (at 500m & 1000m), skip procedural platform generation if too close to boss platforms
     let skipProcedural = false;
-    if ((game.currentLevel === 4 || game.currentLevel === 10 || game.currentLevel === 11 || game.currentLevel === 12 || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17) && Math.abs(currentY - (-600 * 14.5)) < 120) {
+    if ((game.currentLevel === 4 || game.currentLevel === 10 || game.currentLevel === 11 || game.currentLevel === 12 || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) && Math.abs(currentY - (-600 * 14.5)) < 120) {
       skipProcedural = true;
     }
     if (game.currentLevel === 5 && (Math.abs(currentY - (-500 * 14.5)) < 120 || Math.abs(currentY - (-1000 * 14.5)) < 120)) {
@@ -3284,12 +3285,12 @@ function generateLevel() {
       {
         // Base spawn chance scales up with level
         let baseChance = [0, 0.40, 0.48, 0.55, 0.62, 0.68][game.currentLevel] || 0.48;
-        if (game.currentLevel === 13 || game.currentLevel === 14 || game.currentLevel === 15 || game.currentLevel === 16 || game.currentLevel === 17) baseChance = 0.58;
+        if (game.currentLevel === 13 || game.currentLevel === 14 || game.currentLevel === 15 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) baseChance = 0.58;
         // Zone 1: all levels. Zone 2: level 2+. Zone 3: level 3+
         const zoneAllowed = zone === 1 || (zone === 2 && game.currentLevel >= 2) || (zone === 3 && game.currentLevel >= 3);
         // Enemies only spawn on platforms wide enough (normal/moving/spikes) — not crumbly/slippery (in lvl 15, also allowed on bouncy)
-        const typeAllowed = pType === 'normal' || (pType === 'moving' && game.currentLevel >= 3) || (pType === 'spikes' && (game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17)) || (pType === 'bouncy' && game.currentLevel === 15);
-        const widthOk = pWidth >= (game.currentLevel === 13 || game.currentLevel === 14 || game.currentLevel === 15 || game.currentLevel === 16 || game.currentLevel === 17 ? 54 : 75);
+        const typeAllowed = pType === 'normal' || (pType === 'moving' && game.currentLevel >= 3) || (pType === 'spikes' && (game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18)) || (pType === 'bouncy' && game.currentLevel === 15);
+        const widthOk = pWidth >= (game.currentLevel === 13 || game.currentLevel === 14 || game.currentLevel === 15 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18 ? 54 : 75);
 
         if (game.currentLevel > 1 && game.currentLevel !== 9 && zoneAllowed && typeAllowed && widthOk) {
           const platMeters = Math.floor(Math.abs(platform.y) / 14.5);
@@ -3305,7 +3306,7 @@ function generateLevel() {
             const zoneBonus = zone === 2 ? 0.08 : zone === 3 ? 0.14 : 0;
             let spawnChance = (baseChance + zoneBonus) * 0.6;
             // +20% enemies in Level 13, 14, 16, +40% in Level 15
-            if (game.currentLevel === 13 || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17) {
+            if (game.currentLevel === 13 || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) {
               spawnChance *= 1.20;
             }
             if (game.currentLevel === 15) {
@@ -3329,7 +3330,7 @@ function generateLevel() {
               }
               enemySpeed *= 0.4; // Reduce speed by 60%
               const enemy = new Enemy(enemyX, enemyY, platform.x, platform.x + platform.width, enemySpeed, platform);
-              if ((game.currentLevel === 3 || game.currentLevel === 11 || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17) && platMeters >= 350) {
+              if ((game.currentLevel === 3 || game.currentLevel === 11 || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) && platMeters >= 350) {
                 if (rand.next() < 0.5) {
                   enemy.isFlying = true;
                   enemy.y = platform.y - 50;
@@ -3360,7 +3361,7 @@ function generateLevel() {
   game.bosses = [];
 
   // Spawn Boss in Level 4, 10, 11, 12, 14, 16 at 600m
-  if (game.currentLevel === 4 || game.currentLevel === 10 || game.currentLevel === 11 || game.currentLevel === 12 || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17) {
+  if (game.currentLevel === 4 || game.currentLevel === 10 || game.currentLevel === 11 || game.currentLevel === 12 || game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) {
     const bossY = -600 * 14.5;
     // Create a special boss platform
     const bossPlat = new Platform(V_WIDTH / 2 - 100, bossY, 200, 22, 'normal');
@@ -3370,7 +3371,7 @@ function generateLevel() {
     if (game.currentLevel === 10) bType = 'lvl10';
     if (game.currentLevel === 11) bType = 'appliances';
     if (game.currentLevel === 12) bType = 'dailylife';
-    if (game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17) bType = 'hsk1_3';
+    if (game.currentLevel === 14 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) bType = 'hsk1_3';
     const b = new Boss(bossPlat.x + bossPlat.width / 2 - 48, bossPlat.y - 96, bossPlat, bType);
     game.bosses.push(b);
     game.boss = b;
@@ -3820,6 +3821,13 @@ function winGame() {
       winDesc.innerText = "คุณสามารถปีนฝ่าแท่นกลไกและฝูงศัตรู พร้อมตอบคำถามคำศัพท์สิ่งของเฉพาะกิจได้อย่างยอดเยี่ยมและแม่นยำ 100%! ยอดเยี่ยมมากครับ!";
     }
     if (finalAltitude) finalAltitude.innerText = "2000m";
+  } else if (game.currentLevel === 18) {
+    if (winTitle) winTitle.innerText = "MODIFIERS MASTER CLEAR";
+    if (winSubtitle) winSubtitle.innerText = "ผ่านด่านพิเศษ: คำขยายความ สำเร็จ! ⚖️📏";
+    if (winDesc) {
+      winDesc.innerText = "คุณสามารถปีนฝ่าบันไดเมฆา ปราบท่านอาจารย์ใหญ่ และตอบคำถามคำศัพท์หมวดคำขยายความทั้ง 12 คำ (重, 轻, 满, 空, 新, 旧, 大, 小, 长, 短, 高, 矮) ได้ครบถ้วนแม่นยำ 100%! ยอดเยี่ยมมากครับ!";
+    }
+    if (finalAltitude) finalAltitude.innerText = "800m";
   } else if (game.currentLevel === 17) {
     if (winTitle) winTitle.innerText = "HOTEL MASTER CLEAR";
     if (winSubtitle) winSubtitle.innerText = "ผ่านด่านพิเศษ: โรงแรม สำเร็จ! 🏨🛎️";
@@ -3857,7 +3865,7 @@ function handleLevelCleared() {
     profileManager.saveUserData(prof);
   }
 
-  if (game.currentLevel === 5 || game.currentLevel === 9 || game.currentLevel === 10 || game.currentLevel === 11 || game.currentLevel === 12 || game.currentLevel === 13 || game.currentLevel === 14 || game.currentLevel === 15 || game.currentLevel === 16 || game.currentLevel === 17) {
+  if (game.currentLevel === 5 || game.currentLevel === 9 || game.currentLevel === 10 || game.currentLevel === 11 || game.currentLevel === 12 || game.currentLevel === 13 || game.currentLevel === 14 || game.currentLevel === 15 || game.currentLevel === 16 || game.currentLevel === 17 || game.currentLevel === 18) {
     // Reached peak of special standalone levels! Player wins the entire game!
     winGame();
   } else {
@@ -4209,6 +4217,34 @@ const CHINESE_QUESTIONS_BY_LEVEL = {
     { id: "17_16", q: "คำว่า 'เช็คอิน (Check in)' ตรงกับภาษาจีนและพินอินข้อใด?", o: ["退房 — tuìfáng", "入住 — rùzhù", "酒店 — jiǔdiàn", "房间 — fángjiān"], a: 1 },
     { id: "17_17", q: "คำว่า 'เช็คเอาท์ (Check out)' ตรงกับภาษาจีนและพินอินข้อใด?", o: ["入住 — rùzhù", "预订 — yùdìng", "退房 — tuìfáng", "护照 — hùzhào"], a: 2 },
     { id: "17_18", q: "คำว่า 'หนังสือเดินทาง / พาสปอร์ต (Passport)' ตรงกับข้อใด?", o: ["护照 — hùzhào", "房间 — fángjiān", "酒店 — jiǔdiàn", "退房 — tuìfáng"], a: 0 }
+  ],
+  18: [
+    // --- Chinese to English (12 words) ---
+    { id: "18_1", q: "What does the Chinese word '重' (zhòng) mean?", o: ["Heavy (หนัก)", "Light (เบา)", "Full (เต็ม)", "Empty (ว่างเปล่า)"], a: 0 },
+    { id: "18_2", q: "What does the Chinese word '轻' (qīng) mean?", o: ["Heavy (หนัก)", "Light (เบา)", "New (ใหม่)", "Old (เก่า)"], a: 1 },
+    { id: "18_3", q: "What does the Chinese word '满' (mǎn) mean?", o: ["Empty (ว่างเปล่า)", "Small (เล็ก)", "Full (เต็ม)", "Short (สั้น)"], a: 2 },
+    { id: "18_4", q: "What does the Chinese word '空' (kōng) mean?", o: ["Full (เต็ม)", "Big (ใหญ่)", "Long (ยาว)", "Empty (ว่างเปล่า)"], a: 3 },
+    { id: "18_5", q: "What does the Chinese word '新' (xīn) mean?", o: ["New (ใหม่)", "Old (เก่า)", "Tall / High (สูง)", "Short (height) (เตี้ย)"], a: 0 },
+    { id: "18_6", q: "What does the Chinese word '旧' (jiù) mean?", o: ["New (ใหม่)", "Old (เก่า)", "Heavy (หนัก)", "Light (เบา)"], a: 1 },
+    { id: "18_7", q: "What does the Chinese word '大' (dà) mean?", o: ["Small (เล็ก)", "Short (สั้น)", "Big (ใหญ่)", "Empty (ว่างเปล่า)"], a: 2 },
+    { id: "18_8", q: "What does the Chinese word '小' (xiǎo) mean?", o: ["Big (ใหญ่)", "Full (เต็ม)", "Long (ยาว)", "Small (เล็ก)"], a: 3 },
+    { id: "18_9", q: "What does the Chinese word '长' (cháng) mean?", o: ["Long (ยาว)", "Short (สั้น)", "Heavy (หนัก)", "Old (เก่า)"], a: 0 },
+    { id: "18_10", q: "What does the Chinese word '短' (duǎn) mean?", o: ["Long (ยาว)", "Short (สั้น)", "Tall / High (สูง)", "New (ใหม่)"], a: 1 },
+    { id: "18_11", q: "What does the Chinese word '高' (gāo) mean?", o: ["Short (height) (เตี้ย)", "Light (เบา)", "Tall / High (สูง)", "Small (เล็ก)"], a: 2 },
+    { id: "18_12", q: "What does the Chinese word '矮' (ǎi) mean?", o: ["Tall / High (สูง)", "Big (ใหญ่)", "Full (เต็ม)", "Short (height) (เตี้ย)"], a: 3 },
+    // --- English to Chinese & Pinyin (12 words) ---
+    { id: "18_13", q: "How do you say 'Heavy (หนัก)' in Chinese?", o: ["轻 — qīng", "重 — zhòng", "满 — mǎn", "空 — kōng"], a: 1 },
+    { id: "18_14", q: "How do you say 'Light (เบา)' in Chinese?", o: ["轻 — qīng", "重 — zhòng", "新 — xīn", "旧 — jiù"], a: 0 },
+    { id: "18_15", q: "How do you say 'Full (เต็ม)' in Chinese?", o: ["空 — kōng", "大 — dà", "满 — mǎn", "小 — xiǎo"], a: 2 },
+    { id: "18_16", q: "How do you say 'Empty (ว่างเปล่า)' in Chinese?", o: ["满 — mǎn", "空 — kōng", "长 — cháng", "短 — duǎn"], a: 1 },
+    { id: "18_17", q: "How do you say 'New (ใหม่)' in Chinese?", o: ["旧 — jiù", "高 — gāo", "矮 — ǎi", "新 — xīn"], a: 3 },
+    { id: "18_18", q: "How do you say 'Old (เก่า)' in Chinese?", o: ["旧 — jiù", "新 — xīn", "重 — zhòng", "轻 — qīng"], a: 0 },
+    { id: "18_19", q: "How do you say 'Big (ใหญ่)' in Chinese?", o: ["小 — xiǎo", "大 — dà", "高 — gāo", "长 — cháng"], a: 1 },
+    { id: "18_20", q: "How do you say 'Small (เล็ก)' in Chinese?", o: ["大 — dà", "短 — duǎn", "小 — xiǎo", "矮 — ǎi"], a: 2 },
+    { id: "18_21", q: "How do you say 'Long (ยาว)' in Chinese?", o: ["短 — duǎn", "高 — gāo", "满 — mǎn", "长 — cháng"], a: 3 },
+    { id: "18_22", q: "How do you say 'Short (สั้น)' in Chinese?", o: ["长 — cháng", "短 — duǎn", "小 — xiǎo", "空 — kōng"], a: 1 },
+    { id: "18_23", q: "How do you say 'Tall / High (สูง)' in Chinese?", o: ["高 — gāo", "矮 — ǎi", "大 — dà", "重 — zhòng"], a: 0 },
+    { id: "18_24", q: "How do you say 'Short (height) (เตี้ย)' in Chinese?", o: ["高 — gāo", "短 — duǎn", "矮 — ǎi", "轻 — qīng"], a: 2 }
   ]
 };
 
@@ -5978,7 +6014,7 @@ document.getElementById('btn-start').addEventListener('click', () => {
 });
 
 // --- RUNNER MODE INITIALIZATION & CONTROLS ---
-let selectedRunnerStage = 'hotel';
+let selectedRunnerStage = 'modifiers';
 function openRunnerStageModal() {
   document.getElementById('main-menu').classList.add('hidden');
   const stageModal = document.getElementById('runner-stage-modal');
@@ -6096,7 +6132,7 @@ let arenaSettings = {
   playerCount: 2,
   botCount: 1,
   duration: 60,
-  topic: 'hotel',
+  topic: 'modifiers',
   botDifficulty: 'hard',
   playerAssignments: []
 };
@@ -7134,7 +7170,7 @@ function drawParallaxBackgrounds() {
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
     }
-  } else if (lvl === 14 || lvl === 16 || lvl === 17) {
+  } else if (lvl === 14 || lvl === 16 || lvl === 17 || lvl === 18) {
     // Level 14: HSK1 - บท 3 (📜👨‍🏫🇨🇳) & Level 16: HSK1 - บท 4 (👨‍👩‍👧🏠)
     if (bgLoaded.hsk1_3) {
       const py = -camY * 0.12 % V_HEIGHT;
@@ -7171,7 +7207,7 @@ function drawParallaxBackgrounds() {
   
   // 1. Subtle Volumetric Sunbeams / Heavenly Light Shafts
   const rayGrad = ctx.createLinearGradient(0, 0, V_WIDTH * 0.75, V_HEIGHT);
-  if (lvl === 1 || lvl === 9 || lvl === 12 || lvl === 13 || lvl === 14 || lvl === 15 || lvl === 16 || lvl === 17) {
+  if (lvl === 1 || lvl === 9 || lvl === 12 || lvl === 13 || lvl === 14 || lvl === 15 || lvl === 16 || lvl === 17 || lvl === 18) {
     // Warm verdant & creative sunrise beams
     rayGrad.addColorStop(0, 'rgba(254, 240, 138, 0.09)');
     rayGrad.addColorStop(0.5, 'rgba(250, 204, 21, 0.03)');
